@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": ["ES2020"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "noEmit": false,
+    "verbatimModuleSyntax": true,
+    "declaration": true,
+    "rootDir": "src",
+    "declarationDir": "./distr/types",
+    "outDir": "./distr/src",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": [
+    "src/starters/AndroidStarter",
+    "src/starters/DockerArmStarter",
+    "src/starters/DockerX86Starter",
+    "src/starters/FirefoxStarter",
+    "src/starters/RpiStarter",
+    "distr",
+    "__old-composition",
+    "build",
+    "test",
+    "_testData",
+    "node_modules"
+  ]
+}
