@@ -1,0 +1,43 @@
+{
+  "name": "librnet",
+  "version": "0.0.1",
+  "description": "Personal and global network where all the files are own by user",
+  "author": "Ivan Kozyrin <ipkozyrin@gmail.com>",
+  "repository": "git@github.com:bozonx/librnet.git",
+  "license": "MIT",
+  "private": false,
+  "type": "module",
+  "types": "src/index.ts",
+  "engines": {
+    "node": ">=18.14.0"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./SquidletAppApiConnection.js": "./distr/src/uiApi/SquidletAppApiConnection.js"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./distr/src/index.js"
+    },
+    "types": "distr/types/index.d.ts"
+  },
+  "scripts": {
+    "dev": "ROOT_DIR=./_testData tsx ./src/starters/devLocal/index.ts",
+    "build": "tsc",
+    "test": "mocha"
+  },
+  "directories": {
+    "src": "./src"
+  },
+  "dependencies": {
+    "axios": "^1.9.0",
+    "squidlet-lib": "file:../squidlet-lib",
+    "ws": "^8.18.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
+  }
+}
