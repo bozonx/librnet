@@ -1,0 +1,5 @@
+name: BinaryInput
+main: BinaryInput.ts
+system: true
+
+props: props.yaml

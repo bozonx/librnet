@@ -1,0 +1,57 @@
+# ./squidletctl start ./test/test-esp32wrover.yaml
+
+id: testHost
+
+#consoleLogger:
+#  logLevel: debug
+
+#httpApi:
+#  host: 0.0.0.0
+#wsApi:
+#  host: 0.0.0.0
+#ioServer:
+#  host: 0.0.0.0
+
+automation:
+  rules:
+    - name: switch_led
+      trigger:
+        - type: status
+          id: bedroom.wall-light-toggle
+      action:
+        - type: action
+          id: bedroom.light2
+          action: turn
+          value:
+            - type: statusBoolean
+              id: bedroom.wall-light-toggle
+
+devices:
+  bedroom:
+#    people-count-sensor:
+#      device: FakePeopleCount
+#    light1:
+#      device: Relay
+#      pin: 1
+
+#    expander:
+#      device: Pcf8574
+#      address: 20
+#
+#    light1:
+#      device: Relay
+#      source: 'pcf8574'
+#      pin: 0
+#      expander: bedroom.expander
+
+    light2:
+      device: Switch
+      #device: Relay
+      pin: 2
+
+    wall-light-toggle:
+      #device: WallClickSensor
+      device: ClickSensor
+      pin: 3
+      pullup: true
+      publish: both

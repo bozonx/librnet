@@ -1,0 +1,11 @@
+name: I2cMaster
+main: I2cMaster.ts
+system: true
+
+ios:
+  - I2cMaster
+
+props:
+  # name or number of i2c bus
+  busNum:
+    type: number | string

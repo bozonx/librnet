@@ -1,0 +1,11 @@
+name: I2cSlave
+main: I2cSlave.ts
+system: true
+
+ios:
+  - I2cSlave
+
+props:
+  bus:
+    type: string | number
+    required: true

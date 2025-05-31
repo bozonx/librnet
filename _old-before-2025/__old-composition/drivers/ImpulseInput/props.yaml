@@ -1,0 +1,34 @@
+# duration of impulse in ms
+impulseLength:
+  type: number
+  # TODO: не может быть 0 или меньше
+  default: 20
+blockTime:
+  type: number
+# Fixed mode is just impulse which longs for impulseLength time
+# Increasing works like motion detect sensor - each change increase the impulse length.
+# In this mode impulse increases by "impulseLength" time.
+mode:
+  type: '"fixed" | "increasing"'
+  default: fixed
+invert:
+  type: boolean
+invertOnPullup:
+  type: boolean
+  default: true
+
+debounce:
+  type: number
+  default: 0
+pullup:
+  type: boolean
+pulldown:
+  type: boolean
+
+### DigitalPin base props
+pin:
+  type: number
+  required: true
+gpio:
+  type: string
+  default: 'gpio'

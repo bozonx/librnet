@@ -1,0 +1,15 @@
+{
+  "name": "squidlet-light",
+  "version": "${VERSION}",
+  "description": "Build of squidlet light",
+  "author": "Ivan Kozyrin <ipkozyrin@gmail.com>",
+  "repository": "git@github.com:bozonx/squidlet.git",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "*",
+    "mqtt": "*",
+    "mqtt-packet": "*",
+    "pigpio-client": "*",
+    "ws": "*"
+  }
+}

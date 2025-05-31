@@ -1,0 +1,20 @@
+name: IoSetPcf8574
+main: IoSetPcf8574.ts
+type: ioSet
+
+drivers:
+  - Pcf8574
+
+props:
+  $base: 'drivers.Pcf8574'
+
+  writeBufferMs:
+    type: number
+    default: 10
+
+  pollIntervalMs:
+    type: number
+    default: 100
+
+  interrupt:
+    type: object

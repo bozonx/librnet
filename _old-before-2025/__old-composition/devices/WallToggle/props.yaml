@@ -1,0 +1,18 @@
+$base: 'devices.Toggle'
+
+# timeout after received signal. At this time it doesn't receive any signals.
+blockTime:
+  default: 500
+
+debounce:
+  default: 25
+
+### BinaryClick driver
+# releaseTimeoutMs: {}
+# invert: {}
+# invertOnPullup: {}
+# debounce: {}
+# pullup: {}
+# pulldown: {}
+# pin: {}
+# gpio: {}

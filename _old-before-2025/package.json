@@ -1,0 +1,51 @@
+{
+  "name": "squidlet",
+  "version": "1.0.1",
+  "description": "Personal and distributed social network",
+  "author": "Ivan Kozyrin <ipkozyrin@gmail.com>",
+  "repository": "git@github.com:bozonx/squidlet.git",
+  "exports": {
+    ".": "./src/index.ts",
+    "./SquidletAppApiConnection.js": "./distr/src/uiApi/SquidletAppApiConnection.js"
+  },
+  "types": "src/index.ts",
+  "publishConfig": {
+    "exports": {
+      ".": "./distr/src/index.js"
+    },
+    "types": "distr/types/index.d.ts"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=18.14.0"
+  },
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "dev": "ROOT_DIR=./_testData ts-node-esm ./src/starters/devLocal/index.ts",
+    "build": "tsc",
+    "test": "mocha"
+  },
+  "directories": {
+    "src": "./src"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "nativescript": "^8.6.3",
+    "squidlet-lib": "file:../squidlet-lib",
+    "web-ext": "^7.9.0",
+    "ws": "^8.15.1",
+    "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.4",
+    "@types/ws": "^8.5.10",
+    "chai": "^4.3.10",
+    "chai-as-promised": "^7.1.1",
+    "mocha": "^10.2.0",
+    "sinon": "^17.0.1",
+    "sinon-chai": "^3.7.0",
+    "ts-node": "10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

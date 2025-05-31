@@ -1,0 +1,11 @@
+name: Toggle
+type: toggle
+main: Toggle.ts
+drivers:
+  - BinaryClick
+
+props: ./props.yaml
+
+status:
+  default:
+    type: boolean

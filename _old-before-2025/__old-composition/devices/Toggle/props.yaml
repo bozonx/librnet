@@ -1,0 +1,14 @@
+$base: 'drivers.BinaryClick'
+
+# Toggle's block time. Timeout after received signal. At this time it doesn't receive any signals.
+blockTime:
+  default: 50
+
+### BinaryInput driver
+# invert: {}
+# invertOnPullup: {}
+# debounce: {}
+# pullup: {}
+# pulldown: {}
+# pin: {}
+# gpio: {}

@@ -1,0 +1,11 @@
+$base: 'drivers.BinaryOutput'
+
+### BinaryOutput driver
+# blockTime: {}
+# blockMode: {}
+# initial: {}
+# invert: {}
+# invertOnOpenDrain: {}
+# openDrain: {}
+# pin: {}
+# gpio: {}

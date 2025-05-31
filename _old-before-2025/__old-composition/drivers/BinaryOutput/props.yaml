@@ -1,0 +1,29 @@
+blockTime:
+  type: number
+blockMode:
+  type: '"refuse" | "defer"'
+  default: refuse
+# Initial value of driver's state. It will be resolved to set to IO's pin state.
+# If you use invert or open drain mode then this value will be inverted to be sent to IO.
+initial:
+  type: '1 | 0 | "1" | "0" | "on" | "off" | "low" | "high" | "true" | "false" | true | false'
+  default: low
+# invert value that will be sent to IO
+invert:
+  type: boolean
+# In true case it inverts value if pullup resistor is on
+invertOnOpenDrain:
+  type: boolean
+  default: true
+
+# DigitalPinOutputProps props
+openDrain:
+  type: boolean
+
+### DigitalPin base props
+pin:
+  type: number
+  required: true
+gpio:
+  type: string
+  default: 'gpio'

@@ -1,0 +1,9 @@
+name: MqttApi
+main: MqttApi.ts
+system: true
+
+drivers:
+  - Mqtt
+
+props:
+  $base: 'drivers.Mqtt'

@@ -1,0 +1,12 @@
+name: WallToggle
+type: toggle
+main: WallToggle.ts
+
+devices:
+  - Toggle
+
+props: ./props.yaml
+
+status:
+  default:
+    type: boolean

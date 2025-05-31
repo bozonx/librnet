@@ -1,0 +1,13 @@
+name: Backdoor
+main: Backdoor.ts
+
+services:
+  - WsApi
+
+props:
+  host:
+    type: string
+    default: localhost
+  port:
+    type: number
+    default: 8089

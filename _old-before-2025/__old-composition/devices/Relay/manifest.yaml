@@ -1,0 +1,12 @@
+name: Relay
+type: relay
+main: Relay.ts
+
+devices:
+  - Switch
+
+props: ./props.yaml
+
+status:
+  default:
+    type: boolean

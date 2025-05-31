@@ -1,0 +1,12 @@
+name: WallClickSensor
+type: switch-sensor
+main: WallClickSensor.ts
+
+devices:
+  - ClickSensor
+
+props: ./props.yaml
+
+status:
+  default:
+    type: boolean

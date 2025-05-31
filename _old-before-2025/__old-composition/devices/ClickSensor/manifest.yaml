@@ -1,0 +1,12 @@
+name: ClickSensor
+type: click-sensor
+main: ClickSensor.ts
+
+drivers:
+  - BinaryClick
+
+props: ./props.yaml
+
+status:
+  default:
+    type: boolean

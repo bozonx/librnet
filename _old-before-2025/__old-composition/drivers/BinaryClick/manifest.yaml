@@ -1,0 +1,5 @@
+name: BinaryClick
+main: BinaryClick.ts
+system: true
+
+props: props.yaml

@@ -1,0 +1,11 @@
+name: Switch
+main: Switch.ts
+type: switch
+drivers:
+  - BinaryOutput
+
+props: ./props.yaml
+
+status:
+  default:
+    type: boolean

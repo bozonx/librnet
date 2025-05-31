@@ -1,0 +1,9 @@
+$base: 'drivers.PortExpander'
+
+digitalPinsCount:
+  default: 16
+analogPinsCount:
+  default: 4
+#connection:
+#  type: '"i2c" | "serial"'
+# ... connection props

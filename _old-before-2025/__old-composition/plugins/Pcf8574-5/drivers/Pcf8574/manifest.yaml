@@ -1,0 +1,8 @@
+name: Pcf8574
+main: Pcf8574.ts
+
+drivers:
+  - I2cMaster
+
+props:
+  $base: 'drivers.I2cMaster'

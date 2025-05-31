@@ -1,0 +1,16 @@
+$base: 'devices.BinarySensor'
+
+blockTime:
+  default: 300
+
+debounce:
+  default: 100
+
+### BinaryInput driver props
+# invert: {}
+# invertOnPullup: {}
+# edge: {}
+# pullup: {}
+# pulldown: {}
+# pin: {}
+# gpio: {}

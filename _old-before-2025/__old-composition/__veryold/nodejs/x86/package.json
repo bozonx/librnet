@@ -1,0 +1,14 @@
+{
+  "name": "squidlet-nodejs-x86",
+  "version": "2.3.0",
+  "description": "squidlet for nodejs on x86 architecture",
+  "author": "Ivan Kozyrin <ipkozyrin@gmail.com>",
+  "repository": "git@github.com:bozonx/squidlet.git",
+  "engines": {
+    "node": ">=10.9.0"
+  },
+  "dependencies": {
+    "mqtt": "^2.18.8",
+    "ws": "^7.0.0"
+  }
+}

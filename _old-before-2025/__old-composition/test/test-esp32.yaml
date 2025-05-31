@@ -1,0 +1,9 @@
+id: testHost
+platform: lowjs
+machine: esp32wrover
+config: {}
+
+devices:
+  bedroom:
+    people-count-sensor:
+      device: FakePeopleCount

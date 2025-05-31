@@ -1,0 +1,14 @@
+$base: 'drivers.ImpulseInput'
+
+# see ImpulseInput driver
+impulseLength:
+  default: 30000
+
+blockTime:
+  default: 50
+
+debounce:
+  default: 25
+
+mode:
+  default: increasing

@@ -1,0 +1,8 @@
+name: PortExpanderEsp32
+type: expander
+main: PortExpanderEsp32.ts
+
+drivers:
+  - PortExpander
+
+props: ./props.yaml

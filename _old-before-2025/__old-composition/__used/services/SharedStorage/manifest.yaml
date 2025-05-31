@@ -1,0 +1,8 @@
+name: SharedStorage
+main: SharedStorage.ts
+system: true
+
+ios:
+  - Storage
+
+#props: {}

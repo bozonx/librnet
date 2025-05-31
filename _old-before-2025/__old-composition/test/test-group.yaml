@@ -1,0 +1,33 @@
+# ./squidletctl start --name=testHost ./test/test-group.yaml
+
+plugins: []
+
+hostDefaults: {}
+
+hosts:
+  - id: testHost
+    platform: nodejs
+    machine: x86
+
+    httpApi:
+      host: 0.0.0.0
+    wsApi:
+      host: 0.0.0.0
+    ioServer:
+      host: 0.0.0.0
+
+    #platform: lowjs
+    #machine: esp32wrover
+    config:
+      someParam: 1
+      #storageDir: './masterStorage'
+
+    devices:
+      bedroom:
+        people-count-sensor:
+          device: FakePeopleCount
+
+#    ioSet:
+#      type: ws
+#      host: localhost
+#      port: 8889

@@ -1,0 +1,5 @@
+name: ImpulseOutput
+main: ImpulseOutput.ts
+system: true
+
+props: props.yaml

@@ -1,0 +1,28 @@
+# Maximum time of pressed button. It releases after reaching this timeout. Default is unlimited.
+releaseTimeoutMs:
+  type: number
+# Block time after keyUp. By default not block time
+blockTime:
+  type: number
+invert:
+  type: boolean
+# In true case it inverts value if pullup resistor is on
+invertOnPullup:
+  type: boolean
+  default: true
+
+debounce:
+  type: number
+  default: 10
+pullup:
+  type: boolean
+pulldown:
+  type: boolean
+
+### DigitalPin base props
+pin:
+  type: number
+  required: true
+gpio:
+  type: string
+  default: 'gpio'

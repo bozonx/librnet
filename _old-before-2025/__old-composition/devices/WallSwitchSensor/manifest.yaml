@@ -1,0 +1,12 @@
+name: WallSwitchSensor
+type: switch-sensor
+main: WallSwitchSensor.ts
+
+devices:
+  - BinarySensor
+
+props: ./props.yaml
+
+status:
+  default:
+    type: boolean

@@ -1,0 +1,17 @@
+{
+  "name": "squidlet-nodejs-rpi",
+  "version": "2.3.0",
+  "description": "squidlet for nodejs on raspberry pi",
+  "author": "Ivan Kozyrin <ipkozyrin@gmail.com>",
+  "repository": "git@github.com:bozonx/squidlet.git",
+  "engines": {
+    "node": ">=10.9.0"
+  },
+  "dependencies": {
+    "i2c-bus": "^4.0.9",
+    "pigpio": "^1.2.2",
+    "mqtt": "^2.18.8",
+    "serialport": "^7.1.4",
+    "ws": "^7.0.0"
+  }
+}

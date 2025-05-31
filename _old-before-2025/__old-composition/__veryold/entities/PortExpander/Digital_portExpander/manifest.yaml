@@ -1,0 +1,11 @@
+name: Digital_portExpander
+main: Digital_portExpander.ts
+system: true
+
+#devices:
+#  - PortExpanderEsp32
+
+props:
+  expander:
+    type: string
+    required: true

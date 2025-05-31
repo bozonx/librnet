@@ -1,0 +1,28 @@
+# timeout after received signal. At this time it doesn't receive any signals.
+blockTime:
+  type: number
+invert:
+  type: boolean
+# In true case it inverts value if pullup resistor is on
+invertOnPullup:
+  type: boolean
+  default: true
+
+edge:
+  type: '"rising" | "falling" | "both"'
+  default: both
+debounce:
+  type: number
+  default: 10
+pullup:
+  type: boolean
+pulldown:
+  type: boolean
+
+### DigitalPin base props
+pin:
+  type: number
+  required: true
+gpio:
+  type: string
+  default: 'gpio'

@@ -1,0 +1,17 @@
+$base: 'drivers.BinaryClick'
+
+# Which state will be published
+publish:
+  type: '"pushed" | "risen" | "both"'
+  default: both
+
+### BinaryClick driver
+# releaseTimeoutMs: {}
+# blockTime: {}
+# invert: {}
+# invertOnPullup: {}
+# debounce: {}
+# pullup: {}
+# pulldown: {}
+# pin: {}
+# gpio: {}

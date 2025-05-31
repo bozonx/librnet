@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    // "listEmittedFiles": true,
+    // "listFiles": true,
+
+    //"importHelpers": true,
+    //"noLib": true,
+    //"isolatedModules": false,
+
+    "allowSyntheticDefaultImports": true,
+    // if true adds helper __importDefault
+    "esModuleInterop": false,
+    "downlevelIteration": true,
+    "removeComments": true,
+    "declaration": false,
+    "sourceMap": false,
+    "noEmitOnError": false,
+    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true,
+    //"emitDecoratorMetadata": true,
+    "moduleResolution": "node",
+    "lib": ["ES2018"],
+    "target": "ES2018",
+    "module": "commonjs",
+    //"module": "esnext",
+
+    // this is for turning off "use strict"
+    "noImplicitUseStrict": true,
+    "alwaysStrict": false,
+    // turn off strict
+    "strict": false,
+    "noImplicitReturns": false
+  }
+}

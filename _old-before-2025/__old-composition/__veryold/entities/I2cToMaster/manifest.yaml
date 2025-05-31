@@ -1,0 +1,8 @@
+name: I2cToMaster
+main: I2cToMaster.ts
+system: true
+
+drivers:
+  - I2cSlave
+
+props: props.yaml

@@ -1,0 +1,28 @@
+impulseLength:
+  type: number
+  # TODO: не может быть 0 или меньше
+  default: 20
+blockTime:
+  type: number
+blockMode:
+  type: '"fixed" | "defer" | "increasing"'
+  default: refuse
+# invert value that will be sent to IO
+invert:
+  type: boolean
+# In true case it inverts value if pullup resistor is on
+invertOnOpenDrain:
+  type: boolean
+  default: true
+
+# DigitalPinOutputProps props
+openDrain:
+  type: boolean
+
+### DigitalPin base props
+pin:
+  type: number
+  required: true
+gpio:
+  type: string
+  default: 'gpio'

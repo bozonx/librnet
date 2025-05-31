@@ -1,0 +1,20 @@
+connection:
+  type: '"i2c" | "serial"'
+  required: true
+# ... connection props
+digitalPinsCount:
+  type: number
+  required: true
+analogPinsCount:
+  type: number
+  required: true
+
+# I2cNode driver (i2c, serial, etc)
+defaultPollIntervalMs:
+  default: 100
+
+### Connection params
+#bus: {}
+#address: {}
+#feedback: {}
+#int: {}

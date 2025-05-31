@@ -1,0 +1,15 @@
+$base: 'devices.Switch'
+
+# timeout after switching. At this time it doesn't receive any signals.
+# See BinaryOutput driver
+blockTime:
+  default: 100
+
+### BinaryOutput driver
+# blockMode: {}
+# initial: {}
+# invert: {}
+# invertOnOpenDrain: {}
+# openDrain: {}
+# pin: {}
+# gpio: {}

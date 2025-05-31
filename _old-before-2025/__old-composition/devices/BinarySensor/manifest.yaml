@@ -1,0 +1,12 @@
+name: BinarySensor
+type: binary-sensor
+main: BinarySensor.ts
+
+drivers:
+  - BinaryInput
+
+props: ./props.yaml
+
+status:
+  default:
+    type: boolean

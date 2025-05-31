@@ -1,0 +1,23 @@
+$base: 'devices.ClickSensor'
+
+# see ClickSensor
+publish:
+  default: up
+
+# see BinaryInput driver
+blockTime:
+  default: 300
+
+# see DigitalPinInput driver
+debounce:
+  default: 50
+
+### BinaryClick driver
+# releaseTimeoutMs: {}
+# invert: {}
+# invertOnPullup: {}
+# debounce: {}
+# pullup: {}
+# pulldown: {}
+# pin: {}
+# gpio: {}

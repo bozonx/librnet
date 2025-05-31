@@ -1,0 +1,7 @@
+name: PortExpander
+main: PortExpander.ts
+
+drivers:
+  - Digital_portExpander
+
+props: ./props.yaml

@@ -1,0 +1,45 @@
+{
+  "manifest_version": 2,
+  "name": "Squidlet",
+  "version": "0.1.0",
+  "description": "Squidlet UI",
+  "homepage_url": "https://github.com/bozonx/squidlet",
+  "icons": {
+    "48": "icons/squidlet-icon-48.png",
+    "96": "icons/squidlet-icon-96.png"
+  },
+
+  "permissions": ["storage", "tabs", "activeTab", "notifications"],
+
+  "applications": {
+    "gecko": {
+      "id": "squidlet@mozilla.org",
+      "strict_min_version": "45.0"
+    }
+  },
+
+  "browser_action": {
+    "default_icon": "icons/squidlet-icon-32.png",
+    "default_title": "Squidlet"
+  },
+
+  "background": {
+    "scripts": ["background/background.js"]
+  },
+
+  "sidebar_action": {
+    "default_icon": "icons/squidlet-icon-32.png",
+    "default_title" : "Sidebar",
+    "default_panel": "sidebar/sidebar.html",
+    "open_at_install": true
+  },
+
+  "commands": {
+    "_execute_sidebar_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Q"
+      }
+    }
+  }
+
+}
