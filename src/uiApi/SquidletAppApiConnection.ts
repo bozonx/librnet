@@ -9,7 +9,7 @@ import {makeRequestId} from '../helpers/helpers.js'
 import {DEFAULT_UI_WS_PORT} from '../types/constants.js'
 import type {ResponseMessage, RequestMessage} from '../types/Message.js'
 import type {AppBase} from '../base/AppBase.js'
-import {CTX_SUB_ITEMS} from '../system/context/AppContext.js'
+import { CTX_SUB_ITEMS } from '../services/AppsService/AppContext.js';
 import {NOT_ALLOWED_APP_PROPS} from '../base/AppBase.js'
 
 // it needs to export the port

@@ -1,0 +1,8 @@
+name: Fileman
+version: 0.0.1
+description: File manager
+author: Librnet
+license: MIT
+
+requires:
+  - NetworkService

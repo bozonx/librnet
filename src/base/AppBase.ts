@@ -13,33 +13,30 @@ export const NOT_ALLOWED_APP_PROPS = [
 // TODO: как зарегать приложение??? какой-то install script???
 // TODO: можно навешаться на событие init, destroy
 
-import type {AppContext} from '../system/context/AppContext.js'
+import type { AppContext } from '../services/AppsService/AppContext.js';
 
 export abstract class AppBase {
-  abstract myName: string
-  readonly requireDriver?: string[]
-  ctx!: AppContext
+  abstract myName: string;
+  readonly requireDriver?: string[];
+  ctx!: AppContext;
 
-
-  constructor() {
-  }
+  constructor() {}
 
   $setCtx(ctx: AppContext) {
-    this.ctx = ctx
+    this.ctx = ctx;
   }
-
 
   // async init() {
   //   // TODO: будет выполненно на init
   // }
 
-  init?(cfg?: Record<string, any>): Promise<void>
-  destroy?(): Promise<void>
+  start?(cfg?: Record<string, any>): Promise<void>;
+  stop?(): Promise<void>;
 
   /**
    * Public local api of app.
    * Put here only api which is accessible on local machine.
    * For api which is accessible on network use PublicApiService
    */
-  getApi?(): any
+  getApi?(): any;
 }

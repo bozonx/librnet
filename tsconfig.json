@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "commonjs",
+    "module": "es2020",
     "lib": ["ES2020"],
     "strict": true,
     "esModuleInterop": true,
@@ -16,7 +16,7 @@
     "declarationDir": "./distr/types",
     "outDir": "./distr/src",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src/**/*"],
