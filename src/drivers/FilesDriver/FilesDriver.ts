@@ -23,107 +23,107 @@ export const FilesDriverIndex: DriverIndex = (ctx: DriverContext) => {
  * Use relative paths
  */
 export class FilesDriver extends DriverBase implements FilesDriverType {
-  requireIo = [IO_NAMES.FilesIo]
+  requireIo = [IO_NAMES.FilesIo];
 
   private get io(): IoBase & FilesIoType {
-    return this.ctx.io.getIo(IO_NAMES.FilesIo)
+    return this.ctx.io.getIo(IO_NAMES.FilesIo);
   }
 
   //////// AS IN FILES IO
   async appendFile(pathTo: string, data: string | Uint8Array) {
-    this.checkPermissions(pathTo, 'w')
+    this.checkPermissions(pathTo, 'w');
 
-    return this.io.appendFile(pathTo, data)
+    return this.io.appendFile(pathTo, data);
   }
 
   async mkdir(pathTo: string) {
-    this.checkPermissions(pathTo, 'w')
+    this.checkPermissions(pathTo, 'w');
 
-    return this.io.mkdir(pathTo)
+    return this.io.mkdir(pathTo);
   }
 
   async readDir(pathTo: string): Promise<string[]> {
-    this.checkPermissions(pathTo, 'r')
+    this.checkPermissions(pathTo, 'r');
 
-    return this.io.readdir(pathTo)
+    return this.io.readdir(pathTo);
   }
 
   async readTextFile(pathTo: string): Promise<string> {
-    this.checkPermissions(pathTo, 'r')
+    this.checkPermissions(pathTo, 'r');
 
-    return this.io.readTextFile(pathTo)
+    return this.io.readTextFile(pathTo);
   }
 
   async readBinFile(pathTo: string): Promise<Uint8Array> {
-    this.checkPermissions(pathTo, 'r')
+    this.checkPermissions(pathTo, 'r');
 
-    return this.io.readBinFile(pathTo)
+    return this.io.readBinFile(pathTo);
   }
 
   async readlink(pathTo: string): Promise<string> {
-    this.checkPermissions(pathTo, 'r')
+    this.checkPermissions(pathTo, 'r');
 
-    return this.io.readlink(pathTo)
+    return this.io.readlink(pathTo);
   }
 
   async rmdir(pathTo: string) {
-    this.checkPermissions(pathTo, 'w')
+    this.checkPermissions(pathTo, 'w');
 
-    return this.io.rmdir(pathTo)
+    return this.io.rmdir(pathTo);
   }
 
   async unlink(pathTo: string) {
-    this.checkPermissions(pathTo, 'w')
+    this.checkPermissions(pathTo, 'w');
 
-    return this.io.unlink(pathTo)
+    return this.io.unlink(pathTo);
   }
 
   async writeFile(pathTo: string, data: string | Uint8Array) {
-    this.checkPermissions(pathTo, 'w')
+    this.checkPermissions(pathTo, 'w');
 
-    return this.io.writeFile(pathTo, data)
+    return this.io.writeFile(pathTo, data);
   }
 
   async stat(pathTo: string): Promise<StatsSimplified | undefined> {
-    this.checkPermissions(pathTo, 'r')
+    this.checkPermissions(pathTo, 'r');
 
-    return this.io.stat(pathTo)
+    return this.io.stat(pathTo);
   }
 
   async copyFiles(files: [string, string][]) {
     for (const item of files) {
-      this.checkPermissions(item[0], 'r')
-      this.checkPermissions(item[1], 'w')
+      this.checkPermissions(item[0], 'r');
+      this.checkPermissions(item[1], 'w');
     }
 
-    return this.io.copyFiles(files)
+    return this.io.copyFiles(files);
   }
 
   async renameFiles(files: [string, string][]) {
     for (const item of files) {
-      this.checkPermissions(item[0], 'r')
-      this.checkPermissions(item[1], 'w')
+      this.checkPermissions(item[0], 'r');
+      this.checkPermissions(item[1], 'w');
     }
 
-    return this.io.renameFiles(files)
+    return this.io.renameFiles(files);
   }
 
   /**
    * Remove dir recursively
    */
   async rmdirR(pathToDir: string): Promise<void> {
-    this.checkPermissions(pathToDir, 'w')
+    this.checkPermissions(pathToDir, 'w');
 
-    return this.io.rmdirR(pathToDir)
+    return this.io.rmdirR(pathToDir);
   }
 
   /**
    * Make dir even parent dir doesn't exist
    */
   async mkDirP(pathToDir: string): Promise<void> {
-    this.checkPermissions(pathToDir, 'w')
+    this.checkPermissions(pathToDir, 'w');
 
-    await this.io.mkDirP(pathToDir)
+    await this.io.mkDirP(pathToDir);
   }
 
   ////////// ADDITIONAL
@@ -133,16 +133,17 @@ export class FilesDriver extends DriverBase implements FilesDriverType {
    * It doesn't rise an error if file doesn't exists
    */
   async rm(pathToFileOrDir: string) {
-    this.checkPermissions(pathToFileOrDir, 'w')
+    this.checkPermissions(pathToFileOrDir, 'w');
 
-    const stats: StatsSimplified | undefined = await this.io.stat(pathToFileOrDir)
+    const stats: StatsSimplified | undefined = await this.io.stat(
+      pathToFileOrDir
+    );
 
-    if (!stats) return
+    if (!stats) return;
     else if (stats.dir) {
-      return this.io.rmdir(pathToFileOrDir)
-    }
-    else {
-      return this.io.unlink(pathToFileOrDir)
+      return this.io.rmdir(pathToFileOrDir);
+    } else {
+      return this.io.unlink(pathToFileOrDir);
     }
   }
 
@@ -150,35 +151,45 @@ export class FilesDriver extends DriverBase implements FilesDriverType {
    * Copy some file, several files or dir recursively to specified dest dir
    */
   async cp(src: string | string[], destDir: string): Promise<void> {
-    const prepared = await this.prepareBatchFileNames(src, destDir)
+    const prepared = await this.prepareBatchFileNames(src, destDir);
 
-    return this.io.copyFiles(prepared)
+    return this.io.copyFiles(prepared);
+  }
+
+  /**
+   * Copy only dir content (not the dir itself) recursively
+   * to inside of the specified dest dir
+   */
+  async copyDirContent(src: string, dest: string): Promise<void> {
+    // TODO: make it
+    // this.checkPermissions(src, 'r');
+    // this.checkPermissions(dest, 'w');
+    // return this.io.copyDir(src, dest);
   }
 
   /**
    * Move some file, several files or dir recursively to specified dest dir
    */
   async mv(src: string | string[], destDir: string): Promise<void> {
-    const prepared = await this.prepareBatchFileNames(src, destDir)
+    const prepared = await this.prepareBatchFileNames(src, destDir);
 
-    return this.io.renameFiles(prepared)
+    return this.io.renameFiles(prepared);
   }
 
   /**
    * Change name of file or dir
    */
   async rename(pathToFileOrDir: string, newName: string): Promise<void> {
-
     // TODO: проверить сработает ли с полной папкой
 
-    this.checkPermissions(pathToFileOrDir, 'r')
+    this.checkPermissions(pathToFileOrDir, 'r');
 
-    const fileDir: string = pathDirname(pathToFileOrDir)
-    const newPath: string = pathJoin(fileDir, newName)
+    const fileDir: string = pathDirname(pathToFileOrDir);
+    const newPath: string = pathJoin(fileDir, newName);
 
-    this.checkPermissions(newPath, 'w')
+    this.checkPermissions(newPath, 'w');
 
-    return this.io.renameFiles([[pathToFileOrDir, newPath]])
+    return this.io.renameFiles([[pathToFileOrDir, newPath]]);
   }
 
   /**
@@ -187,11 +198,11 @@ export class FilesDriver extends DriverBase implements FilesDriverType {
    * @param pathToDir
    */
   async isDir(pathToDir: string): Promise<boolean> {
-    this.checkPermissions(pathToDir, 'r')
+    this.checkPermissions(pathToDir, 'r');
 
-    const stats: StatsSimplified | undefined = await this.io.stat(pathToDir)
+    const stats: StatsSimplified | undefined = await this.io.stat(pathToDir);
 
-    return stats?.dir || false
+    return stats?.dir || false;
   }
 
   /**
@@ -200,11 +211,11 @@ export class FilesDriver extends DriverBase implements FilesDriverType {
    * @param pathToFile
    */
   async isFile(pathToFile: string): Promise<boolean> {
-    this.checkPermissions(pathToFile, 'r')
+    this.checkPermissions(pathToFile, 'r');
 
-    const stats: StatsSimplified | undefined = await this.io.stat(pathToFile)
+    const stats: StatsSimplified | undefined = await this.io.stat(pathToFile);
 
-    return (!stats?.dir && !stats?.symbolicLink) || false
+    return (!stats?.dir && !stats?.symbolicLink) || false;
   }
 
   /**
@@ -214,55 +225,55 @@ export class FilesDriver extends DriverBase implements FilesDriverType {
    * @param pathToFileOrDir
    */
   async isExists(pathToFileOrDir: string): Promise<boolean> {
-    this.checkPermissions(pathToFileOrDir, 'r')
+    this.checkPermissions(pathToFileOrDir, 'r');
 
     // TODO: проверить что stat вернет ошибку если файла нет
     // TODO: и какую именно ошибку
 
-    return Boolean(await this.io.stat(pathToFileOrDir))
+    return Boolean(await this.io.stat(pathToFileOrDir));
   }
 
   async isFileUtf8(pathTo: string): Promise<boolean> {
-    this.checkPermissions(pathTo, 'r')
+    this.checkPermissions(pathTo, 'r');
 
     // ещё есть пакет - isutf8
     // TODO: лучше считывать не весь файл, 1000 байт но кратно utf8 стандарту бит
-    const data: Uint8Array = await this.io.readBinFile(pathTo)
+    const data: Uint8Array = await this.io.readBinFile(pathTo);
 
     // TODO: поидее буфера может не быть - наверное лучше использвать в io
     //       или написать свой хэлпер
-    return isUtf8(data)
+    return isUtf8(data);
   }
-
 
   private checkPermissions(pathTo: string, perm: PermissionFileType) {
     // TODO: throw an error if path is not allowed
   }
 
-  private async prepareBatchFileNames(src: string | string[], destDir: string): Promise<[string, string][]> {
-    let resolvedSrc: string[]
-    const prepared: [string, string][] = []
+  private async prepareBatchFileNames(
+    src: string | string[],
+    destDir: string
+  ): Promise<[string, string][]> {
+    let resolvedSrc: string[];
+    const prepared: [string, string][] = [];
 
     if (typeof src === 'string') {
-      this.checkPermissions(src, 'r')
-      resolvedSrc = [src]
-    }
-    else {
-      for (const item of src) this.checkPermissions(item, 'r')
-      resolvedSrc = src
+      this.checkPermissions(src, 'r');
+      resolvedSrc = [src];
+    } else {
+      for (const item of src) this.checkPermissions(item, 'r');
+      resolvedSrc = src;
     }
 
-    this.checkPermissions(destDir, 'w')
+    this.checkPermissions(destDir, 'w');
 
     for (const item of resolvedSrc) {
-      const fileStats: StatsSimplified | undefined = await this.io.stat(item)
+      const fileStats: StatsSimplified | undefined = await this.io.stat(item);
 
-      if (!fileStats) throw new Error(`File "${item}" doesn't exist`)
+      if (!fileStats) throw new Error(`File "${item}" doesn't exist`);
       // the same for dir and file
-      prepared.push([item, pathJoin(destDir, pathBasename(item))])
+      prepared.push([item, pathJoin(destDir, pathBasename(item))]);
     }
 
-    return prepared
+    return prepared;
   }
-
 }

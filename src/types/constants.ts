@@ -77,6 +77,12 @@ export const HOME_SUB_DIRS = {
   Downloads: 'Downloads',
   Documents: 'Documents',
 };
+export const APP_SUB_DIRS = {
+  filesLocal: 'filesLocal',
+  filesSynced: 'filesSynced',
+  dbLocal: 'dbLocal',
+  dbSynced: 'dbSynced',
+};
 
 //// virtual local device root dir
 // export const DEVICE_ROOT_DIR = 'Device';

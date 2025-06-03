@@ -2,6 +2,18 @@ import type { System } from '../System.js';
 import { AppContext } from '../context/AppContext.js';
 import type { AppBase } from '../../base/AppBase.js';
 import type { AppIndex } from '../../types/types.js';
+import { pathJoin } from 'squidlet-lib';
+import {
+  APP_SUB_DIRS,
+  DRIVER_NAMES,
+  ROOT_DIRS,
+  SYSTEM_SUB_DIRS,
+} from '@/types/constants.js';
+import type {
+  FilesDriverType,
+  WriteFilesDriverType,
+} from '@/types/FilesDriverType.js';
+import type { DriverBase } from '@/base/DriverBase.js';
 
 export class AppManager {
   private readonly system: System;
@@ -72,11 +84,36 @@ export class AppManager {
     }
   }
 
-  installApp(appName: string) {
+  async installApp(appName: string, packagePath: string): Promise<void> {
     // TODO: add timeout
     // TODO: check if exists
     // TODO: copy code
     // TODO: make app dir structure
+
+    const appDestDir = pathJoin(
+      this.system.configs.systemCfg.rootDir,
+      ROOT_DIRS.system,
+      SYSTEM_SUB_DIRS.apps,
+      appName
+    );
+    const appDataDir = pathJoin(
+      this.system.configs.systemCfg.rootDir,
+      ROOT_DIRS.appsData,
+      appName
+    );
+
+    const filesDriver = this.system.drivers.getDriver<
+      FilesDriverType & DriverBase
+    >(DRIVER_NAMES.FilesDriver);
+
+    // TODO: copy from archive
+    //await filesDriver?.copyDirContent(srcDir, appDestDir);
+
+    // create app data dirs
+    for (const subDir of Object.values(APP_SUB_DIRS)) {
+      await filesDriver.mkDirP(pathJoin(appDataDir, subDir));
+    }
+
     const app = this.apps[appName];
     if (app.afterInstall) {
       app.afterInstall(false);

@@ -60,7 +60,7 @@ export class DriversManager {
     }
   }
 
-  getDriver<T extends DriverBase>(driverName: string): T | undefined {
+  getDriver<T extends DriverBase>(driverName: string): T {
     return this.drivers[driverName] as T;
   }
 
