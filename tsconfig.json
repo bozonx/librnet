@@ -22,7 +22,8 @@
   "include": [
     "src/**/*",
     "_old-before-2025/squidletctl",
-    "_old-before-2025/MemStorageDriver"
+    "_old-before-2025/MemStorageDriver",
+    "test"
   ],
   "exclude": [
     "src/starters/AndroidStarter",
@@ -33,7 +34,7 @@
     "distr",
     "__old-composition",
     "build",
-    "src/test",
+    "test",
     "_testData",
     "node_modules"
   ]
