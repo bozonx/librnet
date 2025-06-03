@@ -5,8 +5,8 @@ import type { SystemCfg } from '../../types/SystemCfg.js';
 import {
   SYSTEM_SUB_DIRS,
   CFG_FILE_EXT,
-  SYSTEM_CFG_DIR,
-  SYSTEM_CONFIG_FILE,
+  SYSTEM_LOCAL_CONFIG_FILE,
+  SYSTEM_SYNCED_CONFIG_FILE,
 } from '../../types/constants.js';
 import type { FilesDriver } from '../../drivers/FilesDriver/FilesDriver.js';
 
@@ -27,16 +27,16 @@ export class SystemConfigsManager {
     // Load system config
     let loadedCfg: SystemCfg = systemCfgDefaults;
 
-    if (await this.filesDriver.isExists(SYSTEM_CONFIG_FILE)) {
+    if (await this.filesDriver.isExists(SYSTEM_LOCAL_CONFIG_FILE)) {
       const fileContent = await this.filesDriver.readTextFile(
-        SYSTEM_CONFIG_FILE
+        SYSTEM_LOCAL_CONFIG_FILE
       );
 
       loadedCfg = JSON.parse(fileContent);
     } else {
       // if not exist then make a new file with default config
       await this.filesDriver.writeFile(
-        SYSTEM_CONFIG_FILE,
+        SYSTEM_LOCAL_CONFIG_FILE,
         JSON.stringify(systemCfgDefaults, null, 2)
       );
     }

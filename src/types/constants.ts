@@ -6,10 +6,8 @@ export const CFG_FILE_EXT = 'json';
 export const LOCAL_HOST = 'localhost';
 // UI port for localhost
 export const DEFAULT_HTTP_LOCAL_PORT = 41808;
-// UI port for localhost
-export const DEFAULT_WS_LOCAL_PORT = 41809;
-// Secured UI port for external connections
-export const DEFAULT_WSS_EXTERNAL_PORT = 41810;
+// Secured port for external connections
+export const DEFAULT_WSS_EXTERNAL_PORT = 41809;
 //export const SERVER_STARTING_TIMEOUT_SEC = 60
 //export const REQUEST_ID_LENGTH = 8
 

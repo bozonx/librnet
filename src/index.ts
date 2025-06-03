@@ -10,5 +10,4 @@ export * from './base/AppBase.js';
 export * from './helpers/helpers.js';
 export * from './types/constants.js';
 export * from './types/types.js';
-export * from './uiApi/SquidletAppApiConnection.js';
 export * from './types/Message.js';

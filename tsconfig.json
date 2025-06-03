@@ -19,7 +19,7 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "_old-before-2025/squidletctl"],
   "exclude": [
     "src/starters/AndroidStarter",
     "src/starters/DockerArmStarter",
