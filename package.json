@@ -22,7 +22,7 @@
     "types": "distr/types/index.d.ts"
   },
   "scripts": {
-    "dev": "ROOT_DIR=./_testData tsx ./src/starters/devLocal/index.ts",
+    "dev": "ROOT_DIR=./_testData ENV_MODE=dev tsx ./src/starters/devLocal/index.ts",
     "build": "tsc",
     "test": "mocha"
   },

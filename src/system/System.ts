@@ -1,11 +1,11 @@
 import {callSafely, IndexedEventEmitter, LogPublisher} from 'squidlet-lib'
-import {SystemEvents} from '../types/constants.js'
-import {IoManager} from './managers/IoManager.js'
+import { ENV_MODES, SystemEvents, type EnvMode } from '../types/constants.js';
+import { IoManager } from './managers/IoManager.js';
 import { ServicesManager } from './managers/ServicesManager.js';
-import {SystemConfigsManager} from './managers/SystemConfigsManager.js'
-import {PermissionsManager} from './managers/PermissionsManager.js'
-import type {PackageIndex} from '../types/types.js'
-import {PackageManager} from './managers/PackageManager.js'
+import { SystemConfigsManager } from './managers/SystemConfigsManager.js';
+import { PermissionsManager } from './managers/PermissionsManager.js';
+import type { PackageIndex } from '../types/types.js';
+import { PackageManager } from './managers/PackageManager.js';
 import { DriversManager } from './managers/DriversManager.js';
 import {
   SYSTEM_SUB_DIRS,
@@ -16,6 +16,7 @@ import type { FilesDriver } from '@/drivers/FilesDriver/FilesDriver.js';
 
 export class System {
   readonly events = new IndexedEventEmitter();
+  readonly envMode: EnvMode;
   // this is console logger
   readonly log = new LogPublisher((...p) =>
     this.events.emit(SystemEvents.logger, ...p)
@@ -29,7 +30,22 @@ export class System {
   readonly permissions = new PermissionsManager(this);
   readonly services = new ServicesManager(this);
 
-  constructor() {}
+  get isDevMode() {
+    return this.envMode === ENV_MODES.dev;
+  }
+
+  get isProdMode() {
+    return this.envMode === ENV_MODES.prod;
+  }
+
+  get isTestMode() {
+    return this.envMode === ENV_MODES.test;
+  }
+
+  constructor(rootDir: string, envMode: EnvMode) {
+    // TODO: receive  logger from outside
+    this.envMode = envMode;
+  }
 
   init() {
     (async () => {

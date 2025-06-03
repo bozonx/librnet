@@ -44,6 +44,14 @@ export enum NETWORK_CODES {
   noCategory,
 }
 
+export const ENV_MODES = {
+  dev: 'dev',
+  prod: 'prod',
+  test: 'test',
+};
+
+export type EnvMode = keyof typeof ENV_MODES;
+
 // real root dirs
 export const ROOT_DIRS = {
   system: 'system',

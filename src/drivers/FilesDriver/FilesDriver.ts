@@ -161,10 +161,10 @@ export class FilesDriver extends DriverBase implements FilesDriverType {
    * to inside of the specified dest dir
    */
   async copyDirContent(src: string, dest: string): Promise<void> {
-    // TODO: make it
-    // this.checkPermissions(src, 'r');
-    // this.checkPermissions(dest, 'w');
-    // return this.io.copyDir(src, dest);
+    const dirContent = (await this.readDir(src)).map((el) => pathJoin(src, el));
+    const prepared = await this.prepareBatchFileNames(dirContent, dest);
+
+    return this.io.copyFiles(prepared);
   }
 
   /**

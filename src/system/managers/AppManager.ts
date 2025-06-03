@@ -9,10 +9,7 @@ import {
   ROOT_DIRS,
   SYSTEM_SUB_DIRS,
 } from '@/types/constants.js';
-import type {
-  FilesDriverType,
-  WriteFilesDriverType,
-} from '@/types/FilesDriverType.js';
+import type { FilesDriverType } from '@/types/FilesDriverType.js';
 import type { DriverBase } from '@/base/DriverBase.js';
 
 export class AppManager {
@@ -24,7 +21,9 @@ export class AppManager {
   }
 
   async init() {
-    // TODO: load apps manifest and register apps in production mode
+    if (this.system.isProdMode) {
+      // TODO: load apps manifest and register apps in production mode
+    }
 
     for (const appName of Object.keys(this.apps)) {
       const app = this.apps[appName];
@@ -84,11 +83,13 @@ export class AppManager {
     }
   }
 
+  /**
+   * Install app from package to system.
+   * @param appName - app name.
+   * @param packagePath - path to app package.
+   */
   async installApp(appName: string, packagePath: string): Promise<void> {
     // TODO: add timeout
-    // TODO: check if exists
-    // TODO: copy code
-    // TODO: make app dir structure
 
     const appDestDir = pathJoin(
       this.system.configs.systemCfg.rootDir,
@@ -105,6 +106,10 @@ export class AppManager {
     const filesDriver = this.system.drivers.getDriver<
       FilesDriverType & DriverBase
     >(DRIVER_NAMES.FilesDriver);
+
+    if (await filesDriver.isExists(appDestDir)) {
+      throw new Error(`App "${appName}" already installed`);
+    }
 
     // TODO: copy from archive
     //await filesDriver?.copyDirContent(srcDir, appDestDir);
