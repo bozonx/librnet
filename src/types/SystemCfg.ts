@@ -4,7 +4,7 @@ export interface SystemCfg {
   // defaultVersionsCount: number
   // // like {fullRelPathToDir: 10}
   // versionsCount: Record<string, number>
-  rootDir: string;
+  // rootDir: string;
 }
 
 export const systemCfgDefaults: SystemCfg = {
@@ -12,5 +12,5 @@ export const systemCfgDefaults: SystemCfg = {
   // defaultVersionsCount: 5,
   // // TODO: WTF?
   // versionsCount: {},
-  rootDir: '',
+  // rootDir: '',
 };

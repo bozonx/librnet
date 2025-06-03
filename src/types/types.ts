@@ -25,3 +25,10 @@ export interface SubprogramError {
   codeText: string,
   errorText: string,
 }
+
+export interface SystemEnv {
+  ROOT_DIR: string;
+  FILES_UID: string;
+  FILES_GID: string;
+  EXT_DIRS: string;
+}

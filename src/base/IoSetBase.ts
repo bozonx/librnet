@@ -1,24 +1,24 @@
 import type {IoBase} from './IoBase.js'
 import type {PackageContext} from '../system/context/PackageContext.js'
-import type {IoIndex} from '../types/types.js'
+import type { IoIndex, SystemEnv } from '../types/types.js';
 import type {IoContext} from '../system/context/IoContext.js'
 
 
 export class IoSetBase {
-  private readonly ioCollection: {[index: string]: IoBase} = {}
-  private readonly pkgCtx: PackageContext
-  private ioCtx!: IoContext
-  private wasInited: boolean = false
+  readonly env: SystemEnv;
+  private readonly ioCollection: { [index: string]: IoBase } = {};
+  private readonly pkgCtx: PackageContext;
+  private ioCtx!: IoContext;
+  private wasInited: boolean = false;
 
-
-  constructor(pkgCtx: PackageContext) {
-    this.pkgCtx = pkgCtx
+  constructor(pkgCtx: PackageContext, env: SystemEnv) {
+    this.pkgCtx = pkgCtx;
+    this.env = env;
   }
 
   $giveIoContext(ioCtx: IoContext) {
-    this.ioCtx = ioCtx
+    this.ioCtx = ioCtx;
   }
-
 
   /**
    * It is called at the beginning of System initialization.
@@ -26,37 +26,35 @@ export class IoSetBase {
    */
   async init() {
     if (this.wasInited) {
-      throw new Error(`It isn't allowed to init IoSet more than once`)
+      throw new Error(`It isn't allowed to init IoSet more than once`);
     }
 
-    this.wasInited = true
+    this.wasInited = true;
 
     for (const ioName of Object.keys(this.ioCollection)) {
-      await this.initIo(ioName)
+      await this.initIo(ioName);
     }
   }
-
 
   /**
    * It is called only once on system destroy
    */
   async destroy() {
     // destroy of ios
-    const ioNames: string[] = this.getNames()
+    const ioNames: string[] = this.getNames();
 
     for (let ioName of ioNames) {
-      const ioItem = this.ioCollection[ioName]
+      const ioItem = this.ioCollection[ioName];
 
       // TODO: таймаут ожидания
 
-      this.pkgCtx.log.info(`IoSetBase: destroying IO "${ioName}"`)
+      this.pkgCtx.log.info(`IoSetBase: destroying IO "${ioName}"`);
 
-      if (ioItem.destroy) await ioItem.destroy()
+      if (ioItem.destroy) await ioItem.destroy();
 
-      delete this.ioCollection[ioName]
+      delete this.ioCollection[ioName];
     }
   }
-
 
   // /**
   //  * It is called before instantiating System if set.
@@ -69,16 +67,16 @@ export class IoSetBase {
    * To init use initIo()
    */
   registerIo(ioItemIndex: IoIndex) {
-    const io = ioItemIndex(this.ioCtx)
-    const ioName: string = io.myName || io.constructor.name
+    const io = ioItemIndex(this.ioCtx);
+    const ioName: string = io.myName || io.constructor.name;
 
-    this.pkgCtx.log.info(`IoSetBase: registering IO "${ioName}"`)
+    this.pkgCtx.log.info(`IoSetBase: registering IO "${ioName}"`);
 
     if (this.ioCollection[ioName]) {
-      throw new Error(`The same IO "${ioName}" is already in use`)
+      throw new Error(`The same IO "${ioName}" is already in use`);
     }
 
-    this.ioCollection[ioName] = io
+    this.ioCollection[ioName] = io;
   }
 
   /**
@@ -87,17 +85,18 @@ export class IoSetBase {
    * @param ioName
    */
   async initIo(ioName: string) {
-    const ioItem = this.ioCollection[ioName]
+    const ioItem = this.ioCollection[ioName];
 
-    if (!ioItem.init) return
+    if (!ioItem.init) return;
 
-    this.pkgCtx.log.info(`IoSetBase: initializing IO "${ioName}"`)
+    this.pkgCtx.log.info(`IoSetBase: initializing IO "${ioName}"`);
 
-    const ioCfg: Record<string, any> | undefined = await this.ioCtx.loadIoConfig(ioName)
+    const ioCfg: Record<string, any> | undefined =
+      await this.ioCtx.loadIoConfig(ioName);
 
     // TODO: таймаут ожидания
 
-    await ioItem.init(ioCfg)
+    await ioItem.init(ioCfg);
   }
 
   /**
@@ -118,5 +117,4 @@ export class IoSetBase {
   getNames(): string[] {
     return Object.keys(this.ioCollection);
   }
-
 }

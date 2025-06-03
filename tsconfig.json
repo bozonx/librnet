@@ -33,7 +33,7 @@
     "distr",
     "__old-composition",
     "build",
-    "test",
+    "src/test",
     "_testData",
     "node_modules"
   ]

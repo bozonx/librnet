@@ -42,7 +42,7 @@ export class System {
     return this.envMode === ENV_MODES.test;
   }
 
-  constructor(rootDir: string, envMode: EnvMode) {
+  constructor(envMode: EnvMode) {
     // TODO: receive  logger from outside
     this.envMode = envMode;
   }

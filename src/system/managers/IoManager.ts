@@ -22,7 +22,6 @@ export class IoManager {
       throw new Error(`Can't find FilesIo`);
     }
 
-    // TODO: зачем несколько IoSet?
     for (const ioSet of this.ioSets) {
       await ioSet.init();
     }
@@ -50,6 +49,7 @@ export class IoManager {
 
   // Register IoSet
   useIoSet(ioSet: IoSetBase) {
+    // TODO: получается что это только IoSet context?
     ioSet.$giveIoContext(this.ctx);
 
     this.ioSets.push(ioSet);
@@ -60,6 +60,8 @@ export class IoManager {
       if (this.ios[name]) {
         throw new Error(`The IO "${name}" has already registered`);
       }
+
+      // TODO: io должен иметь связь со своим IoSet и свой context
 
       this.ios[name] = ioSet.getIo(name);
     }
