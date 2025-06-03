@@ -16,6 +16,7 @@ import type { FilesDriver } from '@/drivers/FilesDriver/FilesDriver.js';
 
 export class System {
   readonly events = new IndexedEventEmitter();
+  // this is console logger
   readonly log = new LogPublisher((...p) =>
     this.events.emit(SystemEvents.logger, ...p)
   );

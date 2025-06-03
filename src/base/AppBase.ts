@@ -9,11 +9,7 @@ export const NOT_ALLOWED_APP_PROPS = [
   'getApi',
 ]
 
-
-// TODO: как зарегать приложение??? какой-то install script???
-// TODO: можно навешаться на событие init, destroy
-
-import type { AppContext } from '../services/AppsService/AppContext.js';
+import type { AppContext } from '../system/context/AppContext.js';
 
 export abstract class AppBase {
   abstract myName: string;
@@ -26,17 +22,18 @@ export abstract class AppBase {
     this.ctx = ctx;
   }
 
-  // async init() {
-  //   // TODO: будет выполненно на init
-  // }
+  /**
+   * This method is called after app is installed or updated.
+   */
+  abstract afterInstall(isUpdate: boolean): Promise<void>;
 
   start?(cfg?: Record<string, any>): Promise<void>;
   stop?(): Promise<void>;
 
-  /**
-   * Public local api of app.
-   * Put here only api which is accessible on local machine.
-   * For api which is accessible on network use PublicApiService
-   */
-  getApi?(): any;
+  // /**
+  //  * Public local api of app.
+  //  * Put here only api which is accessible on local machine.
+  //  * For api which is accessible on network use PublicApiService
+  //  */
+  // getApi?(): any;
 }

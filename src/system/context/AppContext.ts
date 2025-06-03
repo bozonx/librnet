@@ -2,15 +2,14 @@ import { IndexedEventEmitter, pathJoin } from 'squidlet-lib';
 import type { Logger } from 'squidlet-lib';
 import {
   DRIVER_NAMES,
-  EXTERNAL_ROOT_DIR,
   HOME_SUB_DIRS,
   ROOT_DIRS,
 } from '../../types/constants.js';
 import { FilesLog } from '../../helpers/wrappers/FilesLog.js';
 import { FilesWrapper } from '../../helpers/wrappers/FilesWrapper.js';
 import { FilesReadOnly } from '../../helpers/wrappers/FilesReadOnly.js';
-import type { DriversManager } from '../../system/managers/DriversManager.js';
-import type { System } from '../../system/System.js';
+import type { DriversManager } from '../managers/DriversManager.js';
+import type { System } from '../System.js';
 import { FilesHome } from '../../helpers/wrappers/FilesHome.js';
 import type { FilesDriver } from '../../drivers/FilesDriver/FilesDriver.js';
 import { FilesCache } from '../../helpers/wrappers/FilesCache.js';
