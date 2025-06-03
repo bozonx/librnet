@@ -1,17 +1,17 @@
-
-export const EVENT_DELIMITER = '|'
-export const VERSIONS_DIR_NAME = '.versions'
-export const WAIT_BEFORE_HALT_MS = 1000
-export const CFG_FILE_EXT = 'yml'
-export const LOCAL_HOST = 'localhost'
-// port for connections with other squidlets
-export const DEFAULT_WS_CONNECT_PORT = 41808
-// port for squidletctrl
-export const DEFAULT_WS_CTRL_PORT = 41809
-export const DEFAULT_UI_HTTP_PORT = 41810
-export const DEFAULT_UI_WS_PORT = 41811
-export const SERVER_STARTING_TIMEOUT_SEC = 60
-export const REQUEST_ID_LENGTH = 8
+export const EVENT_DELIMITER = '|';
+//export const VERSIONS_DIR_NAME = '.versions'
+// TODO: move this to system cfg
+export const WAIT_BEFORE_HALT_MS = 1000;
+export const CFG_FILE_EXT = 'json';
+export const LOCAL_HOST = 'localhost';
+// UI port for localhost
+export const DEFAULT_HTTP_LOCAL_PORT = 41808;
+// UI port for localhost
+export const DEFAULT_WS_LOCAL_PORT = 41809;
+// Secured UI port for external connections
+export const DEFAULT_WSS_EXTERNAL_PORT = 41810;
+//export const SERVER_STARTING_TIMEOUT_SEC = 60
+//export const REQUEST_ID_LENGTH = 8
 
 export enum SystemEvents {
   // driversInitialized,
@@ -25,14 +25,17 @@ export enum SystemEvents {
   systemDestroying,
 }
 
+// TODO: review
 export enum RootEvents {
   service,
 }
 
+// TODO: review
 export enum ServiceEvents {
   status,
 }
 
+// TODO: review, move to network service
 export enum NETWORK_CODES {
   success,
   badRequest,
@@ -45,43 +48,45 @@ export enum NETWORK_CODES {
 
 // real root dirs
 export const ROOT_DIRS = {
-  // ro app files
-  appFiles: 'appFiles',
-  appDataLocal: 'appDataLocal',
-  appDataSynced: 'appDataSynced',
-  cacheLocal: 'cacheLocal',
-  // configs of system and apps
+  system: 'system',
+  // apps data - synced and local files, db, configs
+  appsData: 'appsData',
+  // synced home dir
+  home: 'home',
+  // local cache
+  cache: 'cache',
+  // local tmp
+  tmp: 'tmp',
+  logLocal: 'logLocal',
+  logSynced: 'logSynced',
+};
+export const SYSTEM_SUB_DIRS = {
+  // Installed apps (their code)
+  apps: 'apps',
+  // Installed IOs
+  ios: 'ios',
+  // Installed drivers
+  drivers: 'drivers',
+  // Installed services
+  services: 'services',
+  // System config and configs of IOs, drivers and services. Not apps
   cfgLocal: 'cfgLocal',
   cfgSynced: 'cfgSynced',
-  db: 'db',
-  log: 'log',
-  tmpLocal: 'tmpLocal',
-  home: 'home',
-}
-// virtual external root dir
-export const EXTERNAL_ROOT_DIR = 'external'
-
-export const SYSTEM_DIR = 'system'
-export const COMMON_DIR = 'common'
-export const SYSTEM_CFG_DIR = `/${ROOT_DIRS.cfgLocal}/${SYSTEM_DIR}`
-export const SYSTEM_CONFIG_FILE = `${SYSTEM_CFG_DIR}/${SYSTEM_DIR}.${CFG_FILE_EXT}`
-//export const APP_CONFIG_FILE = `app-config.${CFG_FILE_EXT}`
-export const APP_FILES_PUBLIC_DIR = 'public'
-
-export const SYSTEM_SUB_DIRS = {
-  ios: 'ios',
-  drivers: 'drivers',
-  services: 'services',
-}
+};
 export const HOME_SUB_DIRS = {
-  '.trash': '.trash',
-  '.versions': '.versions',
-  _Apps: '_Apps',
-  _Downloads: '_Downloads',
-  _Media: '_Media',
-  _Mnt: '_Mnt',
-  _Tmp: '_Tmp',
-}
+  Trash: '.Trash',
+  //'.versions': '.Versions',
+  Downloads: 'Downloads',
+  Documents: 'Documents',
+};
+
+//// virtual local device root dir
+// export const DEVICE_ROOT_DIR = 'Device';
+//// virtual synced storage root dir
+// export const SYNCED_STORAGE_ROOT_DIR = 'Storage';
+
+export const SYSTEM_LOCAL_CONFIG_FILE = `${ROOT_DIRS.system}/${SYSTEM_SUB_DIRS.cfgLocal}/system.${CFG_FILE_EXT}`;
+export const SYSTEM_SYNCED_CONFIG_FILE = `${ROOT_DIRS.system}/${SYSTEM_SUB_DIRS.cfgSynced}/system.${CFG_FILE_EXT}`;
 
 export const SERVICE_STATUS = {
   // just instantiated
@@ -95,36 +100,37 @@ export const SERVICE_STATUS = {
   // init is in progress
   initializing: 'initializing',
   initialized: 'initialized',
-  initError: 'initError',
+  // initError: 'initError',
   starting: 'starting',
+  restarting: 'restarting',
   // after successfully run
   running: 'running',
-  startError: 'startError',
+  // startError: 'startError',
   stopping: 'stopping',
   stopped: 'stopped',
-  stopError: 'stopError',
+  // stopError: 'stopError',
   destroying: 'destroying',
   destroyed: 'destroyed',
-}
+};
 
 export const SERVICE_DESTROY_REASON = {
   noDependencies: 'noDependencies',
   systemDestroying: 'systemDestroying',
-}
+};
 
 export const SERVICE_TYPES = {
   service: 'service',
   target: 'target',
   oneshot: 'oneshot', // может быть таймаут запуска
   interval: 'interval', // переодично запускается типа cron
-}
+};
 
 export const SERVICE_TARGETS = {
   // only for system low level services
   root: 'root',
   // for not system services
   systemInitialized: 'systemInitialized',
-}
+};
 
 export const IO_NAMES = {
   FilesIo: 'FilesIo',
@@ -133,7 +139,7 @@ export const IO_NAMES = {
   MqttClientIo: 'MqttClientIo',
   WsClientIo: 'WsClientIo',
   WsServerIo: 'WsServerIo',
-}
+};
 
 export const DRIVER_NAMES = {
   FilesDriver: 'FilesDriver',
@@ -142,11 +148,11 @@ export const DRIVER_NAMES = {
   MqttClientDriver: 'MqttClientDriver',
   WsClientDriver: 'WsClientDriver',
   WsServerDriver: 'WsServerDriver',
-}
+};
 
 // system services which have api
 export const SYSTEM_SERVICE_NAMES = {
   Network: 'Network',
-  PublicApiService: 'PublicApiService',
+  // PublicApiService: 'PublicApiService',
   Sessions: 'Sessions',
-}
+};

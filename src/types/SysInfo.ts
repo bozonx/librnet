@@ -17,7 +17,6 @@ export const DEVICE_TYPE = {
   // microcontroller battery powered
   mcOnBattery: 'mcOnBattery',
   laptop: 'laptop',
-  microLaptop: 'microLaptop',
   tablet: 'tablet',
   // book reader with e-ink screen
   reader: 'reader',
@@ -28,19 +27,20 @@ export const DEVICE_TYPE = {
   vrHelmet: 'vrHelmet',
   // AR glasses
   glasses: 'glasses',
-}
+};
 
 export type DeviceType = keyof typeof DEVICE_TYPE
 
 export const OS_TYPE = {
   linux: 'linux',
-  // BSD, mac os etc
-  unixLike: 'unixLike',
+  // other unix-like OSs eg BSD, Solaris etc
+  unix: 'unix',
+  macos: 'macos',
   windows: 'windows',
   android: 'android',
   ios: 'ios',
-  // microcontroller
-  noOs: 'noOs',
+  // microcontroller's OS
+  mc: 'mc',
 }
 
 export type OsType = keyof typeof OS_TYPE
@@ -55,7 +55,7 @@ export type OsArch = keyof typeof OS_ARCH
 
 export const RUNTIME_ENV = {
   nodejs: 'nodejs',
-  pwa: 'pwa',
+  electron: 'electron',
 }
 
 export type RuntimeEnv = keyof typeof RUNTIME_ENV
@@ -72,7 +72,7 @@ export interface SysPermanentInfo {
     arch: OsArch
     // number of cpu threads
     cpuNum: number
-    // RAM in megabytes
+    // Total RAM in megabytes
     ramTotalMb: number
   }
 

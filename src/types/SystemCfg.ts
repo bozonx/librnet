@@ -7,6 +7,8 @@ export interface SystemCfg {
 }
 
 export const systemCfgDefaults: SystemCfg = {
+  // TODO: WTF?
   defaultVersionsCount: 5,
+  // TODO: WTF?
   versionsCount: {},
-}
+};

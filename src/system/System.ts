@@ -10,11 +10,9 @@ import { DriversManager } from './managers/DriversManager.js';
 import {
   SYSTEM_SUB_DIRS,
   ROOT_DIRS,
-  SYSTEM_CFG_DIR,
-  SYSTEM_DIR,
   HOME_SUB_DIRS,
-  COMMON_DIR,
 } from '../types/constants.js';
+import type { FilesDriver } from '@/drivers/FilesDriver/FilesDriver.js';
 
 export class System {
   readonly events = new IndexedEventEmitter();
@@ -85,57 +83,17 @@ export class System {
   }
 
   async _initDirectories() {
-    const driver = this.drivers.getDriver('FilesDriver');
+    const driver = this.drivers.getDriver<FilesDriver>('FilesDriver');
 
     // create root dirs
     for (const dir of Object.keys(ROOT_DIRS)) {
       await driver.mkDirP('/' + dir);
     }
 
-    // /appDataLocal/system/...
+    // /system/...
     for (const dir of Object.keys(SYSTEM_SUB_DIRS)) {
-      await driver.mkDirP(`/${ROOT_DIRS.appDataLocal}/${SYSTEM_DIR}/${dir}`);
+      await driver.mkDirP(`/${ROOT_DIRS.system}/${dir}`);
     }
-    // /appDataSynced/system/...
-    for (const dir of Object.keys(SYSTEM_SUB_DIRS)) {
-      await driver.mkDirP(`/${ROOT_DIRS.appDataSynced}/${SYSTEM_DIR}/${dir}`);
-    }
-    // /cacheLocal/system/...
-    for (const dir of Object.keys(SYSTEM_SUB_DIRS)) {
-      await driver.mkDirP(`/${ROOT_DIRS.cacheLocal}/${SYSTEM_DIR}/${dir}`);
-    }
-    // /cacheLocal/common
-    await driver.mkDirP(`/${ROOT_DIRS.cacheLocal}/${COMMON_DIR}`);
-    // create system cfgLocal sub dirs
-    for (const dir of Object.keys(SYSTEM_SUB_DIRS)) {
-      await driver.mkDirP(SYSTEM_CFG_DIR + '/' + dir);
-    }
-    // /cfgLocal/common
-    await driver.mkDirP(`/${ROOT_DIRS.cfgLocal}/${COMMON_DIR}`);
-    // create system cfgSynced sub dirs
-    for (const dir of Object.keys(SYSTEM_SUB_DIRS)) {
-      await driver.mkDirP(`/${ROOT_DIRS.cfgSynced}/${SYSTEM_DIR}/${dir}`);
-    }
-    // /cfgSynced/common
-    await driver.mkDirP(`/${ROOT_DIRS.cfgSynced}/${COMMON_DIR}`);
-    // /db/system/...
-    for (const dir of Object.keys(SYSTEM_SUB_DIRS)) {
-      await driver.mkDirP(`/${ROOT_DIRS.db}/${SYSTEM_DIR}/${dir}`);
-    }
-    // /db/common
-    await driver.mkDirP(`/${ROOT_DIRS.db}/${COMMON_DIR}`);
-    // /log/system/...
-    for (const dir of Object.keys(SYSTEM_SUB_DIRS)) {
-      await driver.mkDirP(`/${ROOT_DIRS.log}/${SYSTEM_DIR}/${dir}`);
-    }
-    // /log/common
-    await driver.mkDirP(`/${ROOT_DIRS.log}/${COMMON_DIR}`);
-    // /tmpLocal/system/...
-    for (const dir of Object.keys(SYSTEM_SUB_DIRS)) {
-      await driver.mkDirP(`/${ROOT_DIRS.tmpLocal}/${SYSTEM_DIR}/${dir}`);
-    }
-    // /tmpLocal/common
-    await driver.mkDirP(`/${ROOT_DIRS.tmpLocal}/${COMMON_DIR}`);
     // /home/...
     for (const dir of Object.keys(HOME_SUB_DIRS)) {
       await driver.mkDirP(`/${ROOT_DIRS.home}/${dir}`);

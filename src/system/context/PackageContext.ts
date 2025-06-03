@@ -1,42 +1,39 @@
 import type {IndexedEventEmitter, Logger} from 'squidlet-lib'
 import type {System} from '../System.js'
-import type {AppIndex, DriverIndex, ServiceIndex} from '../../types/types.js'
+import type { DriverIndex, ServiceIndex } from '../../types/types.js';
 import type {IoSetBase} from '../../base/IoSetBase.js'
 
 
 export class PackageContext {
-  private readonly system
-
+  private readonly system;
 
   get events(): IndexedEventEmitter {
-    return this.system.events
+    return this.system.events;
   }
 
   get log(): Logger {
-    return this.system.log
+    return this.system.log;
   }
-
 
   constructor(system: System) {
-    this.system = system
+    this.system = system;
   }
 
-
   useIoSet(ioSet: IoSetBase) {
-    this.system.io.useIoSet(ioSet)
+    this.system.io.useIoSet(ioSet);
   }
 
   useDriver(driverIndex: DriverIndex) {
-    this.system.drivers.useDriver(driverIndex)
+    this.system.drivers.useDriver(driverIndex);
   }
 
   useService(serviceIndex: ServiceIndex) {
-    this.system.services.useService(serviceIndex)
+    this.system.services.useService(serviceIndex);
   }
 
-  useApp(appIndex: AppIndex) {
-    this.system.apps.useApp(appIndex)
-  }
+  // useApp(appIndex: AppIndex) {
+  //   this.system.apps.useApp(appIndex)
+  // }
 
   // useApi() {
   //   // TODO: add
@@ -49,5 +46,4 @@ export class PackageContext {
   // useDestroyFunc() {
   //   // TODO: add
   // }
-
 }
