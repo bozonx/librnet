@@ -11,7 +11,10 @@ export interface SystemSyncedCfg {
   //
 }
 
-export type SystemCfg = SystemLocalCfg & SystemSyncedCfg;
+export interface SystemCfg {
+  local: SystemLocalCfg;
+  synced: SystemSyncedCfg;
+}
 
 export const systemLocalCfgDefaults: SystemLocalCfg = {
   // // TODO: WTF?
@@ -24,3 +27,4 @@ export const systemLocalCfgDefaults: SystemLocalCfg = {
 export const systemSyncedCfgDefaults: SystemSyncedCfg = {
   //cfgSynced: {},
 };
+

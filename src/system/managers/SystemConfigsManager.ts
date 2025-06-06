@@ -1,6 +1,10 @@
 import { pathJoin, mergeDeepObjects } from 'squidlet-lib';
 import type { System } from '../System.js';
-import { type SystemCfg } from '../../types/SystemCfg.js';
+import {
+  type SystemLocalCfg,
+  type SystemSyncedCfg,
+  type SystemCfg,
+} from '../../types/SystemCfg.js';
 import {
   SYSTEM_SUB_DIRS,
   CFG_FILE_EXT,
@@ -8,6 +12,7 @@ import {
   ROOT_DIRS,
 } from '../../types/constants.js';
 import type { FilesIo } from '@/ios/NodejsLinuxPack/FilesIo.js';
+import type { EntityCfg } from '@/types/types.js';
 
 export class SystemConfigsManager {
   systemCfg!: SystemCfg;
@@ -23,7 +28,7 @@ export class SystemConfigsManager {
   }
 
   async init() {
-    return this.loadEntityConfig('system');
+    this.systemCfg = (await this.loadEntityConfig('system')) as SystemCfg;
   }
 
   async loadIoConfig(ioName: string): Promise<Record<string, any>> {
@@ -38,94 +43,41 @@ export class SystemConfigsManager {
     return this.loadEntityConfig(serviceName);
   }
 
-  async saveIoConfig(ioName: string, newConfig: Record<string, any>) {
-    const cfgFilePath = pathJoin(
-      SYSTEM_CFG_DIR,
-      SYSTEM_SUB_DIRS.ios,
-      `${ioName}.${CFG_FILE_EXT}`
-    );
-
-    await this.filesDriver.writeFile(
-      cfgFilePath,
-      JSON.stringify(newConfig, null, 2)
-    );
+  async saveIoConfig(ioName: string, newConfig: EntityCfg) {
+    await this.saveEntityConfig(ioName, newConfig);
   }
 
-  async saveDriverConfig(driverName: string, newConfig: Record<string, any>) {
-    const cfgFilePath = pathJoin(
-      SYSTEM_CFG_DIR,
-      SYSTEM_SUB_DIRS.drivers,
-      `${driverName}.${CFG_FILE_EXT}`
-    );
-
-    await this.filesDriver.writeFile(
-      cfgFilePath,
-      JSON.stringify(newConfig, null, 2)
-    );
+  async saveDriverConfig(driverName: string, newConfig: EntityCfg) {
+    await this.saveEntityConfig(driverName, newConfig);
   }
 
-  async saveServiceConfig(serviceName: string, newConfig: Record<string, any>) {
-    const cfgFilePath = pathJoin(
-      SYSTEM_CFG_DIR,
-      SYSTEM_SUB_DIRS.services,
-      `${serviceName}.${CFG_FILE_EXT}`
-    );
-
-    await this.filesDriver.writeFile(
-      cfgFilePath,
-      JSON.stringify(newConfig, null, 2)
-    );
+  async saveServiceConfig(serviceName: string, newConfig: EntityCfg) {
+    await this.saveEntityConfig(serviceName, newConfig);
   }
 
-  async removeIoConfig(ioName: string) {
-    const cfgFilePath = pathJoin(
-      SYSTEM_CFG_DIR,
-      SYSTEM_SUB_DIRS.ios,
-      `${ioName}.${CFG_FILE_EXT}`
-    );
-
-    await this.filesDriver.unlink(cfgFilePath);
-  }
-
-  async removeDriverConfig(driverName: string) {
-    const cfgFilePath = pathJoin(
-      SYSTEM_CFG_DIR,
-      SYSTEM_SUB_DIRS.drivers,
-      `${driverName}.${CFG_FILE_EXT}`
-    );
-
-    await this.filesDriver.unlink(cfgFilePath);
-  }
-
-  async removeServiceConfig(serviceName: string) {
-    const cfgFilePath = pathJoin(
-      SYSTEM_CFG_DIR,
-      SYSTEM_SUB_DIRS.services,
-      `${serviceName}.${CFG_FILE_EXT}`
-    );
-
-    await this.filesDriver.unlink(cfgFilePath);
-  }
-
-  async setSystemCfg(partial: Partial<SystemCfg>) {
+  async setSystemCfg(
+    partialLocal?: Partial<SystemLocalCfg>,
+    partialSynced?: Partial<SystemSyncedCfg>
+  ) {
     // TODO: валидировать
     // TODO: валидировать - пути в versionsCount должны начинаться со слеша
 
-    this.systemCfg = mergeDeepObjects(partial, this.systemCfg);
-
-    await this.filesDriver.writeFile(
-      SYSTEM_CONFIG_FILE,
-      JSON.stringify(this.systemCfg, null, 2)
+    this.systemCfg = mergeDeepObjects(
+      {
+        local: partialLocal,
+        synced: partialSynced,
+      },
+      this.systemCfg
     );
+
+    await this.saveEntityConfig('system', this.systemCfg);
   }
 
   private async isFileExists(pathTo: string): Promise<boolean> {
     return Boolean(await this.filesIo.stat(pathTo));
   }
 
-  private async loadEntityConfig(
-    entityName: string
-  ): Promise<Record<string, any>> {
+  private async loadEntityConfig(entityName: string): Promise<EntityCfg> {
     const localCfgPath = pathJoin(
       ROOT_DIRS.system,
       SYSTEM_SUB_DIRS.cfgLocal,
@@ -136,40 +88,39 @@ export class SystemConfigsManager {
       SYSTEM_SUB_DIRS.cfgSynced,
       `${entityName}.${CFG_FILE_EXT}`
     );
-    let localCfg: Record<string, any> = {};
-    let syncedCfg: Record<string, any> = {};
+    const cfg: EntityCfg = {};
 
     if (await this.isFileExists(localCfgPath)) {
-      localCfg = JSON.parse(await this.filesIo.readTextFile(localCfgPath));
+      cfg.local = JSON.parse(await this.filesIo.readTextFile(localCfgPath));
     }
     if (await this.isFileExists(syncedCfgPath)) {
-      syncedCfg = JSON.parse(await this.filesIo.readTextFile(syncedCfgPath));
+      cfg.synced = JSON.parse(await this.filesIo.readTextFile(syncedCfgPath));
     }
 
-    return {
-      ...localCfg,
-      ...syncedCfg,
-    };
+    return cfg;
   }
 
-  private async saveEntityLocalConfig(
-    entityName: string,
-    newConfig: Record<string, any>
-  ) {
-    const cfgPath = pathJoin(
-      ROOT_DIRS.system,
-      SYSTEM_SUB_DIRS.cfgLocal,
-      `${entityName}.${CFG_FILE_EXT}`
-    );
+  private async saveEntityConfig(entityName: string, newConfig: EntityCfg) {
+    if (newConfig.local) {
+      await this.filesIo.writeFile(
+        pathJoin(
+          ROOT_DIRS.system,
+          SYSTEM_SUB_DIRS.cfgLocal,
+          `${entityName}.${CFG_FILE_EXT}`
+        ),
+        JSON.stringify(newConfig.local, null, 2)
+      );
+    }
 
-    await this.filesIo.writeFile(
-      cfgFilePathSynced,
-      JSON.stringify(newConfig, null, 2)
-    );
-
-    return {
-      ...localCfg,
-      ...syncedCfg,
-    };
+    if (newConfig.synced) {
+      await this.filesIo.writeFile(
+        pathJoin(
+          ROOT_DIRS.system,
+          SYSTEM_SUB_DIRS.cfgSynced,
+          `${entityName}.${CFG_FILE_EXT}`
+        ),
+        JSON.stringify(newConfig.synced, null, 2)
+      );
+    }
   }
 }

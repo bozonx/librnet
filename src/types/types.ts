@@ -32,3 +32,8 @@ export interface SystemEnv {
   FILES_GID?: string;
   EXT_DIRS?: string;
 }
+
+export interface EntityCfg {
+  local?: Record<string, any>;
+  synced?: Record<string, any>;
+}
