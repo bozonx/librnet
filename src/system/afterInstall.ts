@@ -20,4 +20,12 @@ export async function afterInstall(system: System) {
   for (const dir of Object.keys(HOME_SUB_DIRS)) {
     await driver.mkDirP(`/${ROOT_DIRS.home}/${dir}`);
   }
+
+  // TODO: make default config files
+
+  // if not exist then make a new file with default config
+  await this.filesIo.writeFile(
+    SYSTEM_LOCAL_CONFIG_FILE,
+    JSON.stringify(systemCfgDefaults, null, 2)
+  );
 }

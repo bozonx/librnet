@@ -1,3 +1,6 @@
+import type { ioSetLocalPkg } from '@/IoSets/IoSetLocal';
+import { versions } from 'process';
+
 export const EVENT_DELIMITER = '|';
 //export const VERSIONS_DIR_NAME = '.versions'
 // TODO: move this to system cfg
@@ -63,6 +66,8 @@ export const ROOT_DIRS = {
   cache: 'cache',
   // local tmp
   tmp: 'tmp',
+  // versions of user files
+  versions: 'versions',
   logLocal: 'logLocal',
   logSynced: 'logSynced',
 };
@@ -77,17 +82,22 @@ export const SYSTEM_SUB_DIRS = {
   services: 'services',
   // System config and configs of IOs, drivers and services. Not apps
   cfgLocal: 'cfgLocal',
+  // synced system config. It will be merged with local config
   cfgSynced: 'cfgSynced',
+  // variable data of IO, drivers and services
+  dataLocal: 'varLocal',
+  // synced variable data of IO, drivers and services
+  dataSynced: 'varSynced',
 };
 export const HOME_SUB_DIRS = {
   Trash: '.Trash',
-  //'.versions': '.Versions',
+  // Synced apps files
+  AppsFiles: 'AppsFiles',
   Downloads: 'Downloads',
   Documents: 'Documents',
 };
 export const APP_SUB_DIRS = {
   filesLocal: 'filesLocal',
-  filesSynced: 'filesSynced',
   dbLocal: 'dbLocal',
   dbSynced: 'dbSynced',
 };
@@ -96,9 +106,6 @@ export const APP_SUB_DIRS = {
 // export const DEVICE_ROOT_DIR = 'Device';
 //// virtual synced storage root dir
 // export const SYNCED_STORAGE_ROOT_DIR = 'Storage';
-
-export const SYSTEM_LOCAL_CONFIG_FILE = `${ROOT_DIRS.system}/${SYSTEM_SUB_DIRS.cfgLocal}/system.${CFG_FILE_EXT}`;
-export const SYSTEM_SYNCED_CONFIG_FILE = `${ROOT_DIRS.system}/${SYSTEM_SUB_DIRS.cfgSynced}/system.${CFG_FILE_EXT}`;
 
 export const SERVICE_STATUS = {
   // just instantiated

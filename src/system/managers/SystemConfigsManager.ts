@@ -1,23 +1,21 @@
 import { pathJoin, mergeDeepObjects } from 'squidlet-lib';
 import type { System } from '../System.js';
-import { systemCfgDefaults } from '../../types/SystemCfg.js';
-import type { SystemCfg } from '../../types/SystemCfg.js';
+import { type SystemCfg } from '../../types/SystemCfg.js';
 import {
   SYSTEM_SUB_DIRS,
   CFG_FILE_EXT,
-  SYSTEM_LOCAL_CONFIG_FILE,
-  SYSTEM_SYNCED_CONFIG_FILE,
+  IO_NAMES,
+  ROOT_DIRS,
 } from '../../types/constants.js';
-import type { FilesDriver } from '../../drivers/FilesDriver/FilesDriver.js';
+import type { FilesIo } from '@/ios/NodejsLinuxPack/FilesIo.js';
 
 export class SystemConfigsManager {
-  systemCfg: SystemCfg = systemCfgDefaults;
+  systemCfg!: SystemCfg;
 
   private readonly system: System;
 
-  // TODO: use IO
-  private get filesDriver(): FilesDriver {
-    return this.system.drivers.getDriver('FilesDriver');
+  private get filesIo(): FilesIo {
+    return this.system.io.getIo(IO_NAMES.FilesIo);
   }
 
   constructor(system: System) {
@@ -25,61 +23,19 @@ export class SystemConfigsManager {
   }
 
   async init() {
-    // Load system config
-    let loadedCfg: SystemCfg = systemCfgDefaults;
-
-    if (await this.filesDriver.isExists(SYSTEM_LOCAL_CONFIG_FILE)) {
-      const fileContent = await this.filesDriver.readTextFile(
-        SYSTEM_LOCAL_CONFIG_FILE
-      );
-
-      loadedCfg = JSON.parse(fileContent);
-    } else {
-      // if not exist then make a new file with default config
-      await this.filesDriver.writeFile(
-        SYSTEM_LOCAL_CONFIG_FILE,
-        JSON.stringify(systemCfgDefaults, null, 2)
-      );
-    }
-
-    this.systemCfg = {
-      ...this.systemCfg,
-      ...loadedCfg,
-    };
+    return this.loadEntityConfig('system');
   }
 
-  async loadIoConfig(ioName: string): Promise<Record<string, any> | undefined> {
-    const cfgFilePath = pathJoin(
-      SYSTEM_CFG_DIR,
-      SYSTEM_SUB_DIRS.ios,
-      `${ioName}.${CFG_FILE_EXT}`
-    );
-
-    return this.loadConfig(cfgFilePath);
+  async loadIoConfig(ioName: string): Promise<Record<string, any>> {
+    return this.loadEntityConfig(ioName);
   }
 
-  async loadDriverConfig(
-    driverName: string
-  ): Promise<Record<string, any> | undefined> {
-    const cfgFilePath = pathJoin(
-      SYSTEM_CFG_DIR,
-      SYSTEM_SUB_DIRS.drivers,
-      `${driverName}.${CFG_FILE_EXT}`
-    );
-
-    return this.loadConfig(cfgFilePath);
+  async loadDriverConfig(driverName: string): Promise<Record<string, any>> {
+    return this.loadEntityConfig(driverName);
   }
 
-  async loadServiceConfig(
-    serviceName: string
-  ): Promise<Record<string, any> | undefined> {
-    const cfgFilePath = pathJoin(
-      SYSTEM_CFG_DIR,
-      SYSTEM_SUB_DIRS.services,
-      `${serviceName}.${CFG_FILE_EXT}`
-    );
-
-    return this.loadConfig(cfgFilePath);
+  async loadServiceConfig(serviceName: string): Promise<Record<string, any>> {
+    return this.loadEntityConfig(serviceName);
   }
 
   async saveIoConfig(ioName: string, newConfig: Record<string, any>) {
@@ -163,11 +119,57 @@ export class SystemConfigsManager {
     );
   }
 
-  private async loadConfig(cfgFilePath: string) {
-    if (await this.filesDriver.isExists(cfgFilePath)) {
-      const fileContent = await this.filesDriver.readTextFile(cfgFilePath);
+  private async isFileExists(pathTo: string): Promise<boolean> {
+    return Boolean(await this.filesIo.stat(pathTo));
+  }
 
-      return JSON.parse(fileContent);
+  private async loadEntityConfig(
+    entityName: string
+  ): Promise<Record<string, any>> {
+    const localCfgPath = pathJoin(
+      ROOT_DIRS.system,
+      SYSTEM_SUB_DIRS.cfgLocal,
+      `${entityName}.${CFG_FILE_EXT}`
+    );
+    const syncedCfgPath = pathJoin(
+      ROOT_DIRS.system,
+      SYSTEM_SUB_DIRS.cfgSynced,
+      `${entityName}.${CFG_FILE_EXT}`
+    );
+    let localCfg: Record<string, any> = {};
+    let syncedCfg: Record<string, any> = {};
+
+    if (await this.isFileExists(localCfgPath)) {
+      localCfg = JSON.parse(await this.filesIo.readTextFile(localCfgPath));
     }
+    if (await this.isFileExists(syncedCfgPath)) {
+      syncedCfg = JSON.parse(await this.filesIo.readTextFile(syncedCfgPath));
+    }
+
+    return {
+      ...localCfg,
+      ...syncedCfg,
+    };
+  }
+
+  private async saveEntityLocalConfig(
+    entityName: string,
+    newConfig: Record<string, any>
+  ) {
+    const cfgPath = pathJoin(
+      ROOT_DIRS.system,
+      SYSTEM_SUB_DIRS.cfgLocal,
+      `${entityName}.${CFG_FILE_EXT}`
+    );
+
+    await this.filesIo.writeFile(
+      cfgFilePathSynced,
+      JSON.stringify(newConfig, null, 2)
+    );
+
+    return {
+      ...localCfg,
+      ...syncedCfg,
+    };
   }
 }
