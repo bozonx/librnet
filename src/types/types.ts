@@ -28,7 +28,7 @@ export interface SubprogramError {
 
 export interface SystemEnv {
   ROOT_DIR: string;
-  FILES_UID: string;
-  FILES_GID: string;
-  EXT_DIRS: string;
+  FILES_UID?: string;
+  FILES_GID?: string;
+  EXT_DIRS?: string;
 }

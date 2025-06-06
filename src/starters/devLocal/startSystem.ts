@@ -12,7 +12,7 @@ import { HttpServerIoIndex } from '@/ios/NodejsPack/HttpServerIo.js';
 import { WsClientIoIndex } from '@/ios/NodejsPack/WsClientIo.js';
 import { WsServerIoIndex } from '@/ios/NodejsPack/WsServerIo.js';
 import { SystemExtraPkg } from '@/packages/SystemExtraPkg/index.js';
-import type { EnvMode } from '@/types/constants.js';
+import { SystemEvents, type EnvMode } from '@/types/constants.js';
 
 export async function startSystem(
   ROOT_DIR: string,
@@ -33,8 +33,8 @@ export async function startSystem(
         SysInfoIoIndex,
         HttpClientIoIndex,
         HttpServerIoIndex,
-        WsClientIoIndex,
-        WsServerIoIndex,
+        // WsClientIoIndex,
+        // WsServerIoIndex,
       ],
       {
         ROOT_DIR,
@@ -46,17 +46,18 @@ export async function startSystem(
   );
   system.use(ConsoleLoggerPkg({ logLevel: LOG_LEVELS.debug as LogLevel }));
   system.use(SystemCommonPkg());
-  system.use(SystemExtraPkg());
-  system.use(SystemWithUiPkg());
+  // system.use(SystemExtraPkg());
+  // system.use(SystemWithUiPkg());
 
   await middleware?.(system);
 
   // init the system
-  system.init();
-  // start the system
-  system.events.once(SystemEvents.systemInited, () => system.start());
+  await system.init();
+  // start services and apps
+  await system.start();
+
+  // Enable graceful stop
   system.events.once(SystemEvents.systemStarted, () => {
-    // Enable graceful stop
     process.once('SIGINT', () => system.destroy());
     process.once('SIGTERM', () => system.destroy());
   });

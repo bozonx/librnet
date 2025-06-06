@@ -2,6 +2,21 @@
 
 Easy make IoT devices and local net of devices which can be managed by master
 
+## Development
+
+Run in dev mode
+
+```bash
+npm run dev
+```
+
+
+
+
+
+
+-------
+
 
 ## Environment variables
 

@@ -14,15 +14,15 @@ import {ClusterServiceIndex} from '../../services/ClusterService/ClusterService.
 
 export function SystemCommonPkg (): PackageIndex {
   return (ctx: PackageContext) => {
-    ctx.useDriver(FilesDriverIndex)
-    ctx.useDriver(HttpClientDriverIndex)
-    ctx.useDriver(HttpServerDriverIndex)
-    ctx.useDriver(WsClientDriverIndex)
-    ctx.useDriver(WsServerDriverIndex)
-    ctx.useService(SessionsServiceIndex)
-    ctx.useService(ChannelServiceIndex)
-    ctx.useService(ClusterServiceIndex)
-    ctx.useService(NetworkServiceIndex)
-    ctx.useService(PublicApiServiceIndex)
+    ctx.useDriver(FilesDriverIndex);
+    ctx.useDriver(HttpClientDriverIndex);
+    ctx.useDriver(HttpServerDriverIndex);
+    // ctx.useDriver(WsClientDriverIndex)
+    // ctx.useDriver(WsServerDriverIndex)
+    // ctx.useService(SessionsServiceIndex)
+    // ctx.useService(ChannelServiceIndex)
+    // ctx.useService(ClusterServiceIndex)
+    // ctx.useService(NetworkServiceIndex)
+    // ctx.useService(PublicApiServiceIndex)
   }
 }

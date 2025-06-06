@@ -12,7 +12,7 @@ import {
 import type { FilesDriverType } from '@/types/FilesDriverType.js';
 import type { DriverBase } from '@/base/DriverBase.js';
 
-export class AppManager {
+export class AppsManager {
   private readonly system: System;
   private apps: Record<string, AppBase> = {};
 
@@ -28,6 +28,13 @@ export class AppManager {
     for (const appName of Object.keys(this.apps)) {
       const app = this.apps[appName];
 
+      await this._initApp(app, appName);
+    }
+  }
+
+  async startAll() {
+    for (const appName of Object.keys(this.apps)) {
+      const app = this.apps[appName];
       await this._initApp(app, appName);
     }
   }
