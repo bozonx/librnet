@@ -7,16 +7,12 @@ import { PermissionsManager } from './managers/PermissionsManager.js';
 import type { PackageIndex } from '../types/types.js';
 import { PackageManager } from './managers/PackageManager.js';
 import { DriversManager } from './managers/DriversManager.js';
-import {
-  SYSTEM_SUB_DIRS,
-  ROOT_DIRS,
-  HOME_SUB_DIRS,
-} from '../types/constants.js';
-import type { FilesDriver } from '@/drivers/FilesDriver/FilesDriver.js';
+import { afterInstall } from './afterInstall.js';
 
 export class System {
   readonly events = new IndexedEventEmitter();
   readonly envMode: EnvMode;
+  readonly justInstalled: boolean;
   // this is console logger
   readonly log = new LogPublisher((...p) =>
     this.events.emit(SystemEvents.logger, ...p)
@@ -42,18 +38,27 @@ export class System {
     return this.envMode === ENV_MODES.test;
   }
 
-  constructor(envMode: EnvMode) {
+  constructor(
+    envMode: EnvMode = ENV_MODES.prod as EnvMode,
+    justInstalled: boolean = false
+  ) {
     // TODO: receive  logger from outside
     this.envMode = envMode;
+    this.justInstalled = justInstalled;
   }
 
   init() {
     (async () => {
       await this.io.init();
-      await this.drivers.init();
-      await this._initDirectories();
+      //this is system configs for IO, drivers and services
       await this.configs.init();
-      await this.permissions.init();
+      await this.drivers.init();
+
+      if (this.justInstalled) {
+        await afterInstall(this);
+      }
+
+      // await this.permissions.init();
       await this.services.init();
       // load all the installed packages
       await this.packageManager.loadInstalled();
@@ -97,23 +102,5 @@ export class System {
 
   use(pkg: PackageIndex) {
     pkg(this.packageManager.ctx);
-  }
-
-  async _initDirectories() {
-    const driver = this.drivers.getDriver<FilesDriver>('FilesDriver');
-
-    // create root dirs
-    for (const dir of Object.keys(ROOT_DIRS)) {
-      await driver.mkDirP('/' + dir);
-    }
-
-    // /system/...
-    for (const dir of Object.keys(SYSTEM_SUB_DIRS)) {
-      await driver.mkDirP(`/${ROOT_DIRS.system}/${dir}`);
-    }
-    // /home/...
-    for (const dir of Object.keys(HOME_SUB_DIRS)) {
-      await driver.mkDirP(`/${ROOT_DIRS.home}/${dir}`);
-    }
   }
 }
