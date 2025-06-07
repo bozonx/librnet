@@ -1,7 +1,7 @@
-import type {IoBase} from './IoBase.js'
-import type {PackageContext} from '../system/context/PackageContext.js'
-import type { IoIndex, SystemEnv } from '../types/types.js';
-import { IoContext } from '../system/context/IoContext.js';
+import type { IoBase } from './IoBase.js';
+import type { PackageContext } from '../context/PackageContext.js';
+import type { IoIndex, SystemEnv } from '../../types/types.js';
+import { IoContext } from '../context/IoContext.js';
 
 export class IoSetBase {
   readonly name: string;
@@ -93,22 +93,22 @@ export class IoSetBase {
   }
 }
 
-  // /**
-  //  * Init Io
-  //  * Call it if you register an Io after system initialization
-  //  * @param ioName
-  //  */
-  // async initIo(ioName: string) {
-  //   const ioItem = this.ioCollection[ioName];
+// /**
+//  * Init Io
+//  * Call it if you register an Io after system initialization
+//  * @param ioName
+//  */
+// async initIo(ioName: string) {
+//   const ioItem = this.ioCollection[ioName];
 
-  //   if (!ioItem.init) return;
+//   if (!ioItem.init) return;
 
-  //   this.pkgCtx.log.info(`${this.name}: initializing IO "${ioName}"`);
+//   this.pkgCtx.log.info(`${this.name}: initializing IO "${ioName}"`);
 
-  //   const ioCfg: Record<string, any> | undefined =
-  //     await this.pkgCtx.loadIoConfig(ioName);
+//   const ioCfg: Record<string, any> | undefined =
+//     await this.pkgCtx.loadIoConfig(ioName);
 
-  //   // TODO: таймаут ожидания
+//   // TODO: таймаут ожидания
 
-  //   await ioItem.init(ioCfg);
-  // }
+//   await ioItem.init(ioCfg);
+// }

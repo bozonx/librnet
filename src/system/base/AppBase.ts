@@ -1,4 +1,3 @@
-
 export const NOT_ALLOWED_APP_PROPS = [
   'myName',
   'requireDriver',
@@ -7,9 +6,9 @@ export const NOT_ALLOWED_APP_PROPS = [
   'init',
   'destroy',
   'getApi',
-]
+];
 
-import type { AppContext } from '../system/context/AppContext.js';
+import type { AppContext } from '../context/AppContext.js';
 
 export abstract class AppBase {
   abstract myName: string;

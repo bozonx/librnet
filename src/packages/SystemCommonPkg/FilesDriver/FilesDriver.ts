@@ -1,13 +1,13 @@
 // TODO: не импортировать
 import { isUtf8 } from 'buffer';
 import { pathBasename, pathDirname, pathJoin } from 'squidlet-lib';
-import { DriverBase } from '../../../base/DriverBase.js';
+import { DriverBase } from '../../../system/base/DriverBase.js';
 import type { DriverContext } from '../../../system/context/DriverContext.js';
 import type { DriverIndex, PermissionFileType } from '../../../types/types.js';
 import type FilesIoType from '../../../types/io/FilesIoType.js';
 import type { StatsSimplified } from '../../../types/io/FilesIoType.js';
 import { IO_NAMES } from '../../../types/constants.js';
-import type { IoBase } from '../../../base/IoBase.js';
+import type { IoBase } from '../../../system/base/IoBase.js';
 import type { FilesDriverType } from '../../../types/FilesDriverType.js';
 
 export const FilesDriverIndex: DriverIndex = (ctx: DriverContext) => {

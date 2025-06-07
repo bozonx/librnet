@@ -1,8 +1,8 @@
 import type { HttpRequest } from 'squidlet-lib';
 import type { DriverContext } from '../../../system/context/DriverContext.js';
 import type { DriverIndex } from '../../../types/types.js';
-import DriverFactoryBase from '../../../base/DriverFactoryBase.js';
-import DriverInstanceBase from '../../../base/DriverInstanceBase.js';
+import DriverFactoryBase from '../../../system/base/DriverFactoryBase.js';
+import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js';
 import { IO_NAMES } from '../../../types/constants.js';
 import { HttpServerEvent } from '../../../types/io/HttpServerIoType.js';
 import type {
@@ -15,7 +15,7 @@ import type {
   HttpDriverRequest,
   HttpDriverResponse,
 } from './HttpServerDriverLogic.js';
-import { IoBase } from '../../../base/IoBase.js';
+import { IoBase } from '../../../system/base/IoBase.js';
 
 export const HttpServerDriverIndex: DriverIndex = (ctx: DriverContext) => {
   return new HttpServerDriver(ctx);

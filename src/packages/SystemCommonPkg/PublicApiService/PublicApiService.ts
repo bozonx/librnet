@@ -1,7 +1,7 @@
 import {deepGet, deepSet} from 'squidlet-lib'
 import type { ServiceIndex, SubprogramError } from '../../../types/types.js';
 import type { ServiceContext } from '../../../system/context/ServiceContext.js';
-import { ServiceBase } from '../../../base/ServiceBase.js';
+import { ServiceBase } from '../../../system/base/ServiceBase.js';
 import {
   NETWORK_CODES,
   SYSTEM_SERVICE_NAMES,

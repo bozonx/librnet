@@ -1,7 +1,7 @@
 import { serializeJson, deserializeJson, getDeepMethod } from 'squidlet-lib';
 import type { ServiceIndex, SubprogramError } from '../../src/types/types.js';
 import type { ServiceContext } from '../../src/system/context/ServiceContext.js';
-import { ServiceBase } from '../../src/base/ServiceBase.js';
+import { ServiceBase } from '../../src/system/base/ServiceBase.js';
 import {
   DEFAULT_WS_CTRL_PORT,
   DRIVER_NAMES,

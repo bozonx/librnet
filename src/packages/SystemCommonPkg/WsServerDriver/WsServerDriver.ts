@@ -1,7 +1,7 @@
 import { Promised, IndexedEventEmitter } from 'squidlet-lib';
 import type { DriverIndex } from '../../../types/types.js';
 import type { DriverContext } from '../../../system/context/DriverContext.js';
-import DriverFactoryBase from '../../../base/DriverFactoryBase.js';
+import DriverFactoryBase from '../../../system/base/DriverFactoryBase.js';
 import { IO_NAMES } from '../../../types/constants.js';
 import { WsServerEvent } from '../../../types/io/WsServerIoType.js';
 import type {
@@ -9,7 +9,7 @@ import type {
   WsServerIoFullType,
   WsServerProps,
 } from '../../../types/io/WsServerIoType.js';
-import DriverInstanceBase from '../../../base/DriverInstanceBase.js';
+import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js';
 
 // TODO: а оно надо??? может лучше сессию использовать?
 export const SETCOOKIE_LABEL = '__SET_COOKIE__';
