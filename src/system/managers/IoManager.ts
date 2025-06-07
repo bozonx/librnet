@@ -7,7 +7,7 @@ import {IO_NAMES} from '../../types/constants.js'
 
 export class IoManager {
   private readonly system: System;
-  private readonly ioSets: IoSetBase[] = [];
+  private readonly ioSets: Record<string, IoSetBase> = {};
   // object like {ioName: IoBase}
   private ios: Record<string, IoBase> = {};
   private readonly ctx;
@@ -60,7 +60,9 @@ export class IoManager {
   // Register IoSet
   useIoSet(ioSet: IoSetBase) {
     // TODO: получается что это только IoSet context?
-    ioSet.$giveIoContext(this.ctx);
+    //ioSet.$giveIoContext(this.ctx);
+
+    // TODO: init ioSet
 
     this.ioSets.push(ioSet);
 

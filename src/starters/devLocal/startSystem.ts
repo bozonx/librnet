@@ -24,7 +24,8 @@ export async function startSystem(
   middleware?: (system: System) => Promise<void>
 ) {
   const system = new System(ENV_MODE, justInstalled);
-
+  
+  system.use(ConsoleLoggerPkg({ logLevel: LOG_LEVELS.debug as LogLevel }));
   // use packages
   system.use(
     ioSetLocalPkg(
@@ -44,7 +45,6 @@ export async function startSystem(
       }
     )
   );
-  system.use(ConsoleLoggerPkg({ logLevel: LOG_LEVELS.debug as LogLevel }));
   system.use(SystemCommonPkg());
   // system.use(SystemExtraPkg());
   // system.use(SystemWithUiPkg());

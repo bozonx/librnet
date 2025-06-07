@@ -5,19 +5,16 @@ import type {IoContext} from '../system/context/IoContext.js'
 
 
 export class IoSetBase {
+  readonly name: string;
   readonly env: SystemEnv;
   private readonly ioCollection: { [index: string]: IoBase } = {};
   private readonly pkgCtx: PackageContext;
-  private ioCtx!: IoContext;
   private wasInited: boolean = false;
 
-  constructor(pkgCtx: PackageContext, env: SystemEnv) {
+  constructor(name: string, pkgCtx: PackageContext, env: SystemEnv) {
+    this.name = name;
     this.pkgCtx = pkgCtx;
     this.env = env;
-  }
-
-  $giveIoContext(ioCtx: IoContext) {
-    this.ioCtx = ioCtx;
   }
 
   /**
@@ -48,18 +45,14 @@ export class IoSetBase {
 
       // TODO: таймаут ожидания
 
-      this.pkgCtx.log.info(`IoSetBase: destroying IO "${ioName}"`);
-
-      if (ioItem.destroy) await ioItem.destroy();
+      if (ioItem.destroy) {
+        this.pkgCtx.log.info(`${this.name}: destroying IO "${ioName}"`);
+        await ioItem.destroy();
+      }
 
       delete this.ioCollection[ioName];
     }
   }
-
-  // /**
-  //  * It is called before instantiating System if set.
-  //  */
-  // prepare?(): Promise<void>
 
   /**
    * Register a new IO item.
@@ -67,8 +60,8 @@ export class IoSetBase {
    * To init use initIo()
    */
   registerIo(ioItemIndex: IoIndex) {
-    const io = ioItemIndex(this.ioCtx);
-    const ioName: string = io.myName || io.constructor.name;
+    const io = ioItemIndex();
+    const ioName: string = io.name || io.constructor.name;
 
     this.pkgCtx.log.info(`IoSetBase: registering IO "${ioName}"`);
 

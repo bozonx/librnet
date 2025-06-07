@@ -4,10 +4,10 @@ import { IoSetBase } from '../base/IoSetBase.js';
 
 export function ioSetLocalPkg(ios: IoIndex[], env: SystemEnv): PackageIndex {
   return (pkgCtx: PackageContext) => {
-    const ioSetLocal = new IoSetLocal(pkgCtx, env);
+    const ioSetLocal = new IoSetLocal('ioSetLocal', pkgCtx, env);
     // register all the IO items in IoSet
     for (const io of ios) ioSetLocal.registerIo(io);
-    // register IoSet itself
+    // register IoSet in the system
     pkgCtx.useIoSet(ioSetLocal);
   };
 }
