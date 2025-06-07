@@ -23,7 +23,8 @@
     "src/**/*",
     "_old-before-2025/squidletctl",
     "_old-before-2025/MemStorageDriver",
-    "test"
+    "test",
+    "_old-before-2025/CtrlService"
   ],
   "exclude": [
     "src/starters/AndroidStarter",

@@ -3,7 +3,7 @@ import { LOG_LEVELS } from 'squidlet-lib';
 import type { LogLevel } from 'squidlet-lib';
 import { ConsoleLoggerPkg } from '@/packages/ConsoleLoggerPkg/index.js';
 import { SystemCommonPkg } from '@/packages/SystemCommonPkg/index.js';
-import { SystemWithUiPkg } from '@/packages/SystemUiPkg/index.js';
+import { SystemWithUiPkg } from '@/packages/AppsSubSystemPkg/index.js';
 import { ioSetLocalPkg } from '@/IoSets/IoSetLocal.js';
 import { FilesIoIndex } from '@/ios/NodejsLinuxPack/FilesIo.js';
 import { SysInfoIoIndex } from '@/ios/NodejsLinuxPack/SysInfoIo.js';
