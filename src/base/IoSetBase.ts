@@ -1,8 +1,7 @@
 import type {IoBase} from './IoBase.js'
 import type {PackageContext} from '../system/context/PackageContext.js'
 import type { IoIndex, SystemEnv } from '../types/types.js';
-import type {IoContext} from '../system/context/IoContext.js'
-
+import { IoContext } from '../system/context/IoContext.js';
 
 export class IoSetBase {
   readonly name: string;
@@ -18,7 +17,7 @@ export class IoSetBase {
   }
 
   /**
-   * It is called at the beginning of System initialization.
+   * It is used to connect to the remote ioSet
    * It is called only once.
    */
   async init() {
@@ -27,30 +26,17 @@ export class IoSetBase {
     }
 
     this.wasInited = true;
-
-    for (const ioName of Object.keys(this.ioCollection)) {
-      await this.initIo(ioName);
-    }
   }
 
   /**
-   * It is called only once on system destroy
+   * Use it to close connection of the remote ioSet
    */
   async destroy() {
     // destroy of ios
     const ioNames: string[] = this.getNames();
 
     for (let ioName of ioNames) {
-      const ioItem = this.ioCollection[ioName];
-
-      // TODO: таймаут ожидания
-
-      if (ioItem.destroy) {
-        this.pkgCtx.log.info(`${this.name}: destroying IO "${ioName}"`);
-        await ioItem.destroy();
-      }
-
-      delete this.ioCollection[ioName];
+      await this.destroyIo(ioName);
     }
   }
 
@@ -60,36 +46,17 @@ export class IoSetBase {
    * To init use initIo()
    */
   registerIo(ioItemIndex: IoIndex) {
-    const io = ioItemIndex();
+    const ioCtx = new IoContext(this.pkgCtx);
+    const io = ioItemIndex(ioCtx);
     const ioName: string = io.name || io.constructor.name;
 
-    this.pkgCtx.log.info(`IoSetBase: registering IO "${ioName}"`);
+    this.pkgCtx.log.info(`${this.name}: registering IO "${ioName}"`);
 
     if (this.ioCollection[ioName]) {
       throw new Error(`The same IO "${ioName}" is already in use`);
     }
 
     this.ioCollection[ioName] = io;
-  }
-
-  /**
-   * Init Io
-   * Call it if you register an Io after system initialization
-   * @param ioName
-   */
-  async initIo(ioName: string) {
-    const ioItem = this.ioCollection[ioName];
-
-    if (!ioItem.init) return;
-
-    this.pkgCtx.log.info(`IoSetBase: initializing IO "${ioName}"`);
-
-    const ioCfg: Record<string, any> | undefined =
-      await this.ioCtx.loadIoConfig(ioName);
-
-    // TODO: таймаут ожидания
-
-    await ioItem.init(ioCfg);
   }
 
   /**
@@ -110,4 +77,38 @@ export class IoSetBase {
   getNames(): string[] {
     return Object.keys(this.ioCollection);
   }
+
+  /**
+   * Destroy an IO item.
+   */
+  private async destroyIo(ioName: string) {
+    // TODO: таймаут ожидания
+    const ioItem = this.ioCollection[ioName];
+    if (ioItem.destroy) {
+      this.pkgCtx.log.info(`${this.name}: destroying IO "${ioName}"`);
+      await ioItem.destroy();
+    }
+
+    delete this.ioCollection[ioName];
+  }
 }
+
+  // /**
+  //  * Init Io
+  //  * Call it if you register an Io after system initialization
+  //  * @param ioName
+  //  */
+  // async initIo(ioName: string) {
+  //   const ioItem = this.ioCollection[ioName];
+
+  //   if (!ioItem.init) return;
+
+  //   this.pkgCtx.log.info(`${this.name}: initializing IO "${ioName}"`);
+
+  //   const ioCfg: Record<string, any> | undefined =
+  //     await this.pkgCtx.loadIoConfig(ioName);
+
+  //   // TODO: таймаут ожидания
+
+  //   await ioItem.init(ioCfg);
+  // }

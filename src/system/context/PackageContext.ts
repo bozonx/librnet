@@ -2,7 +2,7 @@ import type {IndexedEventEmitter, Logger} from 'squidlet-lib'
 import type {System} from '../System.js'
 import type { DriverIndex, ServiceIndex } from '../../types/types.js';
 import type {IoSetBase} from '../../base/IoSetBase.js'
-
+import type { SystemConfigsManager } from '../managers/SystemConfigsManager.js';
 
 export class PackageContext {
   private readonly system;
@@ -13,6 +13,10 @@ export class PackageContext {
 
   get log(): Logger {
     return this.system.log;
+  }
+
+  get configs(): SystemConfigsManager {
+    return this.system.configs;
   }
 
   constructor(system: System) {
@@ -46,4 +50,20 @@ export class PackageContext {
   // useDestroyFunc() {
   //   // TODO: add
   // }
+
+  async loadIoConfig(ioName: string): Promise<Record<string, any> | undefined> {
+    return this.configs.loadIoConfig(ioName);
+  }
+
+  async loadDriverConfig(
+    driverName: string
+  ): Promise<Record<string, any> | undefined> {
+    return this.configs.loadDriverConfig(driverName);
+  }
+
+  async loadServiceConfig(
+    serviceName: string
+  ): Promise<Record<string, any> | undefined> {
+    return this.configs.loadServiceConfig(serviceName);
+  }
 }

@@ -7,14 +7,13 @@ export class IoBase {
   readonly ioSet: IoSetBase;
   protected ctx!: IoContext;
 
-  constructor(ioSet: IoSetBase, name: string) {
-    this.name = name;
+  constructor(ioSet: IoSetBase) {
     this.ioSet = ioSet;
   }
 
-  $giveIoContext(ctx: IoContext) {
-    this.ctx = ctx;
-  }
+  // $giveIoContext(ctx: IoContext) {
+  //   this.ctx = ctx;
+  // }
 
   init?(cfg?: any): Promise<void>;
   destroy?(): Promise<void>;

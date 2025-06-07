@@ -1,6 +1,5 @@
 import type {System} from '../System.js'
-import type {IoBase} from '../../base/IoBase.js'
-import {IoContext} from '../context/IoContext.js'
+import type { IoBase } from '../../base/IoBase.js';
 import type {IoSetBase} from '../../base/IoSetBase.js'
 import {IO_NAMES} from '../../types/constants.js'
 
@@ -10,11 +9,9 @@ export class IoManager {
   private readonly ioSets: Record<string, IoSetBase> = {};
   // object like {ioName: IoBase}
   private ios: Record<string, IoBase> = {};
-  private readonly ctx;
 
   constructor(system: System) {
     this.system = system;
-    this.ctx = new IoContext(this.system);
   }
 
   async initSystemIos() {
@@ -23,6 +20,7 @@ export class IoManager {
       throw new Error(`Can't find LocalFilesIo`);
     }
 
+    // TODO: add timeout
     this.ios[IO_NAMES.LocalFilesIo].init?.();
   }
 
@@ -33,6 +31,7 @@ export class IoManager {
         continue;
       }
 
+      // TODO: add timeout
       await io.init?.();
     }
   }
@@ -43,7 +42,9 @@ export class IoManager {
     }
 
     for (const index in this.ioSets) {
-      await this.ioSets[index].destroy();
+      const ioSet = this.ioSets[index];
+
+      await ioSet.destroy();
 
       delete this.ioSets[index];
     }
@@ -73,9 +74,8 @@ export class IoManager {
         throw new Error(`The IO "${name}" has already registered`);
       }
 
-      const ioCtx = new IoContext(this.system);
       const io = ioSet.getIo(name);
-      io.$giveIoContext(ioCtx);
+      // io.$giveIoContext(ioCtx);
       this.ios[name] = io;
     }
   }
