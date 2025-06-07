@@ -1,7 +1,11 @@
 import type { FilesDriver } from '@/drivers/FilesDriver/FilesDriver.js';
 import type { System } from './System.js';
-import { SYSTEM_SUB_DIRS } from '@/types/constants.js';
-import { ROOT_DIRS } from '@/types/constants.js';
+import {
+  LOCAL_DATA_SUB_DIRS,
+  ROOT_DIRS,
+  SYNCED_DATA_SUB_DIRS,
+  CFG_FILE_EXT,
+} from '@/types/constants.js';
 import { HOME_SUB_DIRS } from '@/types/constants.js';
 import {
   systemLocalCfgDefaults,
@@ -17,10 +21,16 @@ export async function afterInstall(system: System) {
     await driver.mkDirP('/' + dir);
   }
 
-  // /system/...
-  for (const dir of Object.keys(SYSTEM_SUB_DIRS)) {
-    await driver.mkDirP(`/${ROOT_DIRS.system}/${dir}`);
+  // /localData/...
+  for (const dir of Object.keys(LOCAL_DATA_SUB_DIRS)) {
+    await driver.mkDirP(`/${ROOT_DIRS.localData}/${dir}`);
   }
+
+  // /syncedData/...
+  for (const dir of Object.keys(SYNCED_DATA_SUB_DIRS)) {
+    await driver.mkDirP(`/${ROOT_DIRS.syncedData}/${dir}`);
+  }
+
   // /home/...
   for (const dir of Object.keys(HOME_SUB_DIRS)) {
     await driver.mkDirP(`/${ROOT_DIRS.home}/${dir}`);
@@ -28,11 +38,19 @@ export async function afterInstall(system: System) {
 
   // Make default system config files
   await driver.writeFile(
-    pathJoin(ROOT_DIRS.system, SYSTEM_SUB_DIRS.cfgLocal, 'system.json'),
+    pathJoin(
+      ROOT_DIRS.localData,
+      LOCAL_DATA_SUB_DIRS.configs,
+      'system.' + CFG_FILE_EXT
+    ),
     JSON.stringify(systemLocalCfgDefaults, null, 2)
   );
   await driver.writeFile(
-    pathJoin(ROOT_DIRS.system, SYSTEM_SUB_DIRS.cfgSynced, 'system.json'),
+    pathJoin(
+      ROOT_DIRS.syncedData,
+      SYNCED_DATA_SUB_DIRS.configs,
+      'system.' + CFG_FILE_EXT
+    ),
     JSON.stringify(systemSyncedCfgDefaults, null, 2)
   );
 }

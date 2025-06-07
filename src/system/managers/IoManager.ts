@@ -17,13 +17,23 @@ export class IoManager {
     this.ctx = new IoContext(this.system);
   }
 
-  async init() {
-    if (!this.ios[IO_NAMES.FilesIo]) {
-      throw new Error(`Can't find FilesIo`);
+  async initSystemIos() {
+    // init only FileIo
+    if (!this.ios[IO_NAMES.LocalFilesIo]) {
+      throw new Error(`Can't find LocalFilesIo`);
     }
 
-    for (const ioSet of this.ioSets) {
-      await ioSet.init();
+    this.ios[IO_NAMES.LocalFilesIo].init?.();
+  }
+
+  async initOtherIos() {
+    // TODO: skip files io
+    for (const io of this.ios) {
+      if (io.myName === IO_NAMES.LocalFilesIo) {
+        continue;
+      }
+
+      await io.init?.();
     }
   }
 
@@ -61,9 +71,10 @@ export class IoManager {
         throw new Error(`The IO "${name}" has already registered`);
       }
 
-      // TODO: io должен иметь связь со своим IoSet и свой context
-
-      this.ios[name] = ioSet.getIo(name);
+      const ioCtx = new IoContext(this.system);
+      const io = ioSet.getIo(name);
+      io.$giveIoContext(ioCtx);
+      this.ios[name] = io;
     }
   }
 }

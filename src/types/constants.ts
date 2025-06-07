@@ -55,51 +55,42 @@ export const ENV_MODES = {
 
 export type EnvMode = keyof typeof ENV_MODES;
 
-// real root dirs
+// root dirs
 export const ROOT_DIRS = {
-  system: 'system',
-  // apps data - synced and local files, db, configs
-  appsData: 'appsData',
-  // synced home dir
+  // Installed packages (their code)
+  // Included IO, drivers and services and apps
+  packages: 'packages',
+  localData: 'localData',
+  // Synced only using internal synchronization
+  syncedData: 'syncedData',
+  // synced home dir using watch
   home: 'home',
-  // local cache
+};
+export const LOCAL_DATA_SUB_DIRS = {
+  // Local data of io, drivers, services and apps
+  programData: 'programData',
+  configs: 'configs',
+  logs: 'logs',
   cache: 'cache',
-  // local tmp
   tmp: 'tmp',
+};
+export const SYNCED_DATA_SUB_DIRS = {
+  // Synced data of io, drivers, services and apps
+  programData: 'programData',
+  configs: 'configs',
+  logs: 'logs',
+  trash: 'trash',
   // versions of user files
   versions: 'versions',
-  logLocal: 'logLocal',
-  logSynced: 'logSynced',
-};
-export const SYSTEM_SUB_DIRS = {
-  // Installed apps (their code)
-  apps: 'apps',
-  // Installed IOs
-  ios: 'ios',
-  // Installed drivers
-  drivers: 'drivers',
-  // Installed services
-  services: 'services',
-  // System config and configs of IOs, drivers and services. Not apps
-  cfgLocal: 'cfgLocal',
-  // synced system config. It will be merged with local config
-  cfgSynced: 'cfgSynced',
-  // variable data of IO, drivers and services
-  dataLocal: 'varLocal',
-  // synced variable data of IO, drivers and services
-  dataSynced: 'varSynced',
 };
 export const HOME_SUB_DIRS = {
-  Trash: '.Trash',
-  // Synced apps files
-  AppsFiles: 'AppsFiles',
   Downloads: 'Downloads',
   Documents: 'Documents',
+  Media: 'Media',
 };
 export const APP_SUB_DIRS = {
-  filesLocal: 'filesLocal',
-  dbLocal: 'dbLocal',
-  dbSynced: 'dbSynced',
+  files: 'files',
+  db: 'db',
 };
 
 //// virtual local device root dir
@@ -152,7 +143,7 @@ export const SERVICE_TARGETS = {
 };
 
 export const IO_NAMES = {
-  FilesIo: 'FilesIo',
+  LocalFilesIo: 'LocalFilesIo',
   HttpClientIo: 'HttpClientIo',
   HttpServerIo: 'HttpServerIo',
   MqttClientIo: 'MqttClientIo',

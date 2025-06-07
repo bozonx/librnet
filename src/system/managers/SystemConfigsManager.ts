@@ -6,10 +6,11 @@ import {
   type SystemCfg,
 } from '../../types/SystemCfg.js';
 import {
-  SYSTEM_SUB_DIRS,
   CFG_FILE_EXT,
   IO_NAMES,
+  LOCAL_DATA_SUB_DIRS,
   ROOT_DIRS,
+  SYNCED_DATA_SUB_DIRS,
 } from '../../types/constants.js';
 import type { FilesIo } from '@/ios/NodejsLinuxPack/FilesIo.js';
 import type { EntityCfg } from '@/types/types.js';
@@ -79,13 +80,13 @@ export class SystemConfigsManager {
 
   private async loadEntityConfig(entityName: string): Promise<EntityCfg> {
     const localCfgPath = pathJoin(
-      ROOT_DIRS.system,
-      SYSTEM_SUB_DIRS.cfgLocal,
+      ROOT_DIRS.localData,
+      LOCAL_DATA_SUB_DIRS.configs,
       `${entityName}.${CFG_FILE_EXT}`
     );
     const syncedCfgPath = pathJoin(
-      ROOT_DIRS.system,
-      SYSTEM_SUB_DIRS.cfgSynced,
+      ROOT_DIRS.syncedData,
+      SYNCED_DATA_SUB_DIRS.configs,
       `${entityName}.${CFG_FILE_EXT}`
     );
     const cfg: EntityCfg = {};
@@ -104,8 +105,8 @@ export class SystemConfigsManager {
     if (newConfig.local) {
       await this.filesIo.writeFile(
         pathJoin(
-          ROOT_DIRS.system,
-          SYSTEM_SUB_DIRS.cfgLocal,
+          ROOT_DIRS.localData,
+          LOCAL_DATA_SUB_DIRS.configs,
           `${entityName}.${CFG_FILE_EXT}`
         ),
         JSON.stringify(newConfig.local, null, 2)
@@ -115,8 +116,8 @@ export class SystemConfigsManager {
     if (newConfig.synced) {
       await this.filesIo.writeFile(
         pathJoin(
-          ROOT_DIRS.system,
-          SYSTEM_SUB_DIRS.cfgSynced,
+          ROOT_DIRS.syncedData,
+          SYNCED_DATA_SUB_DIRS.configs,
           `${entityName}.${CFG_FILE_EXT}`
         ),
         JSON.stringify(newConfig.synced, null, 2)

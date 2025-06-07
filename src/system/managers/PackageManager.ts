@@ -2,14 +2,16 @@ import {pathJoin} from 'squidlet-lib'
 import type {System} from '../System.js'
 import {PackageContext} from '../context/PackageContext.js'
 import type {FilesDriver} from '../../drivers/FilesDriver/FilesDriver.js'
-
+import type { PackageIndex } from '@/types/types.js';
+import type { FilesIo } from '@/ios/NodejsLinuxPack/FilesIo.js';
+import { IO_NAMES } from '@/types/constants.js';
 
 export class PackageManager {
   private readonly system;
   readonly ctx;
 
-  private get filesDriver(): FilesDriver {
-    return this.system.drivers.getDriver('FilesDriver');
+  private get filesIo(): FilesIo {
+    return this.system.io.getIo(IO_NAMES.FilesIo);
   }
 
   constructor(system: System) {
@@ -17,9 +19,9 @@ export class PackageManager {
     this.ctx = new PackageContext(this.system);
   }
 
-  async init() {
-    // TODO: what to do here?
-  }
+  // async init() {
+  //   // TODO: what to do here?
+  // }
 
   async destroy() {
     // TODO: дестроить то на что пакеты навешались дестроить
@@ -27,31 +29,27 @@ export class PackageManager {
 
   // TODO: наверное сделать отдельный дестрой для системных пакетов и пользовательских
 
-  //async loadInstalled() {
-  // TODO: не правильно
-  // const appsDirContent = await this.filesDriver.readDir(pathJoin(ROOT_DIRS.appFiles))
-  //
-  // for (const appDir of appsDirContent) {
-  //   // TODO: не правильно
-  //   const indexFilePath = pathJoin(ROOT_DIRS.appFiles, appDir, 'index.js')
-  //   const indexFileContent = await this.filesDriver.readTextFile(indexFilePath)
-  //
-  //   // TODO: Что делать с зависимостями этого фала ???? сбилдить в 1 файл в require???
-  //   // TODO: засунуть в sandbox
-  //
-  //   // TODO: должен ещё быть запущен init io, driver, service который предоставляет пакет
-  // }
-  //}
+  async loadInstalled() {
+    // TODO: должно быть установлено всё пакетами
+    // TODO: и нужно пройтись по всем пакетам и сделать use(pkg)
+    // TODO: загружать нужно файл через import
+    // TODO: и нужно использовать sandbox
+  }
 
-  async install() {
+  async install(pkgPath: string) {
     // TODO: add
   }
 
-  async update() {
+  async update(pkgName: string) {
     // TODO: чтобы обновить пакет нужно понять что к нему относится
   }
 
-  async uninstall() {
+  async uninstall(pkgName: string) {
     // TODO: чтобы удалить пакет нужно понять что к нему относится
+  }
+
+  // это работает без инициализации пакета
+  use(pkg: PackageIndex) {
+    pkg(this.ctx);
   }
 }

@@ -20,11 +20,10 @@ export class System {
   );
   // managers
   readonly packageManager = new PackageManager(this);
+  readonly configs = new SystemConfigsManager(this);
+  // readonly permissions = new PermissionsManager(this);
   readonly io = new IoManager(this);
   readonly drivers = new DriversManager(this);
-  // It is wrapper for DB which is works with configs
-  readonly configs = new SystemConfigsManager(this);
-  readonly permissions = new PermissionsManager(this);
   readonly services = new ServicesManager(this);
   readonly apps = new AppsManager(this);
 
@@ -51,9 +50,11 @@ export class System {
 
   async init() {
     try {
-      await this.io.init();
+      await this.io.initSystemIos();
       // system configs for IO, drivers and services
       await this.configs.init();
+      await this.packageManager.loadInstalled();
+      await this.io.initOtherIos();
       await this.drivers.init();
 
       if (this.justInstalled) {
@@ -61,7 +62,6 @@ export class System {
       }
 
       // await this.permissions.init();
-      await this.packageManager.init();
       await this.services.init();
       await this.apps.init();
       // notify that system is inited
@@ -106,6 +106,6 @@ export class System {
   }
 
   use(pkg: PackageIndex) {
-    pkg(this.packageManager.ctx);
+    this.packageManager.use(pkg);
   }
 }
