@@ -5,22 +5,22 @@ import {
   parseBody,
   prepareBody,
   resolveBodyType,
-} from 'squidlet-lib'
+} from 'squidlet-lib';
 import type {
   JsonTypes,
   HttpRequest,
   HttpResponse,
   HttpRequestBase,
-} from 'squidlet-lib'
+} from 'squidlet-lib';
 import type {
   HttpRequestHandler,
-  HttpServerEvent, HttpServerIoFullType,
+  HttpServerEvent,
+  HttpServerIoFullType,
   HttpServerIoType,
   HttpServerProps,
-} from '../../types/io/HttpServerIoType.js'
-import {IoBase} from '../../base/IoBase.js'
-import {SERVER_STARTING_TIMEOUT_SEC} from '../../types/constants.js'
-
+} from '../../../types/io/HttpServerIoType.js';
+import { IoBase } from '../../../base/IoBase.js';
+import { SERVER_STARTING_TIMEOUT_SEC } from '../../../types/constants.js';
 
 export interface HttpDriverRequest extends HttpRequestBase {
   body?: JsonTypes | Uint8Array;
@@ -35,27 +35,27 @@ export interface HttpDriverResponse {
   body?: JsonTypes | Uint8Array;
 }
 
-type HttpDriverHandler = (request: HttpDriverRequest) => Promise<HttpDriverResponse>;
-
+type HttpDriverHandler = (
+  request: HttpDriverRequest
+) => Promise<HttpDriverResponse>;
 
 export default class HttpServerDriverLogic {
   // it fulfils when server is start listening
   get startedPromise(): Promise<void> {
-    return this._startedPromised.promise
+    return this._startedPromised.promise;
   }
 
   private requestEvents = new IndexedEvents<HttpRequestHandler>();
-  private readonly httpServerIo: HttpServerIoFullType
-  private readonly props: HttpServerProps
-  private readonly onClose: () => void
-  private readonly logDebug: (message: string) => void
-  private readonly logInfo: (message: string) => void
-  private readonly logError: (message: string) => void
+  private readonly httpServerIo: HttpServerIoFullType;
+  private readonly props: HttpServerProps;
+  private readonly onClose: () => void;
+  private readonly logDebug: (message: string) => void;
+  private readonly logInfo: (message: string) => void;
+  private readonly logError: (message: string) => void;
 
   // TODO: why not undefined?
-  private serverId: string = ''
-  private _startedPromised: Promised<void>
-
+  private serverId: string = '';
+  private _startedPromised: Promised<void>;
 
   constructor(
     httpServerIo: HttpServerIoFullType,
@@ -65,91 +65,101 @@ export default class HttpServerDriverLogic {
     onClose: () => void,
     logDebug: (message: string) => void,
     logInfo: (message: string) => void,
-    logError: (message: string) => void,
+    logError: (message: string) => void
   ) {
-    this.httpServerIo = httpServerIo
-    this.props = props
-    this.onClose = onClose
-    this.logDebug = logDebug
-    this.logInfo = logInfo
-    this.logError = logError
-    this._startedPromised = new Promised<void>()
+    this.httpServerIo = httpServerIo;
+    this.props = props;
+    this.onClose = onClose;
+    this.logDebug = logDebug;
+    this.logInfo = logInfo;
+    this.logError = logError;
+    this._startedPromised = new Promised<void>();
   }
 
   async init() {
-    this.logInfo(`... Starting http server: ${this.props.host}:${this.props.port}`)
+    this.logInfo(
+      `... Starting http server: ${this.props.host}:${this.props.port}`
+    );
 
-    this.serverId = await this.httpServerIo.newServer(this.props)
+    this.serverId = await this.httpServerIo.newServer(this.props);
 
-    await this.startListen()
+    await this.startListen();
   }
 
   async destroy() {
     if (!this.isInitialized()) {
-      return this.logError(`HttpServerLogic.destroy: Server hasn't been initialized yet.`)
+      return this.logError(
+        `HttpServerLogic.destroy: Server hasn't been initialized yet.`
+      );
     }
 
-    this.logDebug(`... destroying http server: ${this.props.host}:${this.props.port}`)
-    this.requestEvents.destroy()
+    this.logDebug(
+      `... destroying http server: ${this.props.host}:${this.props.port}`
+    );
+    this.requestEvents.destroy();
     // TODO: не должно поднять события
-    await this.httpServerIo.closeServer(this.serverId)
+    await this.httpServerIo.closeServer(this.serverId);
 
-    this.serverId = ''
+    this.serverId = '';
   }
-
 
   isInitialized(): boolean {
-    return Boolean(this.serverId)
+    return Boolean(this.serverId);
   }
 
-
   async closeServer(force?: boolean) {
-    if (!this.serverId) return
+    if (!this.serverId) return;
 
     // TODO: use force
     // TODO: должно при этом подняться событие close
-    await this.httpServerIo.closeServer(this.serverId)
+    await this.httpServerIo.closeServer(this.serverId);
 
-    this.serverId = ''
+    this.serverId = '';
   }
 
   onRequest(cb: HttpDriverHandler): number {
     const cbWrapper = (requestId: number, request: HttpRequest) => {
-      this.callRequestCb(requestId, request, cb)
-        .catch(this.logError)
+      this.callRequestCb(requestId, request, cb).catch(this.logError);
     };
 
-    return this.requestEvents.addListener(cbWrapper)
+    return this.requestEvents.addListener(cbWrapper);
   }
 
   removeRequestListener(handlerIndex: number) {
-    this.requestEvents.removeListener(handlerIndex)
+    this.requestEvents.removeListener(handlerIndex);
   }
 
   handleServerListening = () => {
-    this.logDebug(`HttpServerLogic: server ${this.props.host}:${this.props.port} started listening`);
+    this.logDebug(
+      `HttpServerLogic: server ${this.props.host}:${this.props.port} started listening`
+    );
     this._startedPromised.resolve();
-  }
+  };
 
   handleServerClose = () => {
     // TODO: review
-    this.logDebug(`HttpServerLogic: server ${this.props.host}:${this.props.port} has been closed`);
+    this.logDebug(
+      `HttpServerLogic: server ${this.props.host}:${this.props.port} has been closed`
+    );
 
-    this.serverId = ''
+    this.serverId = '';
     // TODO: maybe better use destroy???
-    this.requestEvents.removeAll()
-    this.onClose()
-  }
+    this.requestEvents.removeAll();
+    this.onClose();
+  };
 
   handleServerError = (err: string) => {
-    this.logError(err)
-  }
+    this.logError(err);
+  };
 
   handleServerRequest = (requestId: number, request: HttpRequest) => {
-    this.logDebug(`HttpServerLogic: income message of server ${this.props.host}:${this.props.port}, request ${JSON.stringify(request)}`)
-    this.requestEvents.emit(requestId, request)
-  }
-
+    this.logDebug(
+      `HttpServerLogic: income message of server ${this.props.host}:${
+        this.props.port
+      }, request ${JSON.stringify(request)}`
+    );
+    this.requestEvents.emit(requestId, request);
+  };
 
   private async startListen() {
     // TODO: проверить как быдет отписываться
@@ -161,39 +171,44 @@ export default class HttpServerDriverLogic {
     //   this.handleTimeout()
     //     .catch(this.logError);
     // }, SERVER_STARTING_TIMEOUT_SEC * 1000)
-
   }
 
   private async handleTimeout() {
-    this._startedPromised.reject(new Error(`Server hasn't been started. Timeout has been exceeded`));
+    this._startedPromised.reject(
+      new Error(`Server hasn't been started. Timeout has been exceeded`)
+    );
     await this.httpServerIo.closeServer(this.serverId);
   }
 
-  private async callRequestCb(requestId: number, request: HttpRequest, cb: HttpDriverHandler) {
+  private async callRequestCb(
+    requestId: number,
+    request: HttpRequest,
+    cb: HttpDriverHandler
+  ) {
     // prepare simplified request object to manipulate it in the upper code
     const preparedRequest: HttpDriverRequest = {
       ...request,
       body: parseBody(request.headers['content-type'], request.body),
-    }
+    };
 
-    let preparedResponse: HttpResponse
+    let preparedResponse: HttpResponse;
 
     try {
-      const response: HttpDriverResponse = await cb(preparedRequest)
+      const response: HttpDriverResponse = await cb(preparedRequest);
 
-      preparedResponse = this.makeSuccessResponse(response)
-    }
-    catch(err) {
-      preparedResponse = this.startServerErrorResponse(String(err))
+      preparedResponse = this.makeSuccessResponse(response);
+    } catch (err) {
+      preparedResponse = this.startServerErrorResponse(String(err));
     }
 
-    await this.httpServerIo.sendResponse(requestId, preparedResponse)
+    await this.httpServerIo.sendResponse(requestId, preparedResponse);
   }
 
   private makeSuccessResponse(response: HttpDriverResponse): HttpResponse {
     // TODO: если с заглавными букавми ???
-    const contentType: string | undefined = (response.headers && response.headers['content-type'])
-      || resolveBodyType(response.body);
+    const contentType: string | undefined =
+      (response.headers && response.headers['content-type']) ||
+      resolveBodyType(response.body);
 
     const preparedResponse: HttpResponse = {
       ...response,
@@ -217,5 +232,4 @@ export default class HttpServerDriverLogic {
       body: err,
     };
   }
-
 }

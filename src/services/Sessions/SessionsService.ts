@@ -5,7 +5,7 @@ import {
   DRIVER_NAMES
 } from '../../types/constants.js'
 import type {ServiceProps} from '../../types/ServiceProps.js'
-import type {WsServerInstance} from '../../drivers/WsServerDriver/WsServerDriver.js'
+import type { WsServerInstance } from '../../packages/SystemCommonPkg/WsServerDriver/WsServerDriver.js';
 
 
 export const SessionsServiceIndex: ServiceIndex = (ctx: ServiceContext): ServiceBase => {

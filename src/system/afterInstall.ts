@@ -1,4 +1,4 @@
-import type { FilesDriver } from '@/drivers/FilesDriver/FilesDriver.js';
+import type { FilesDriver } from '@/packages/SystemCommonPkg/FilesDriver/FilesDriver.js';
 import type { System } from './System.js';
 import {
   LOCAL_DATA_SUB_DIRS,

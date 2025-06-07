@@ -6,7 +6,7 @@
 
 
 import {DriversManager} from '../../system/managers/DriversManager.js'
-import type {FilesDriver} from '../../drivers/FilesDriver/FilesDriver.js'
+import type { FilesDriver } from '../../packages/SystemCommonPkg/FilesDriver/FilesDriver.js';
 import {FilesWrapper} from './FilesWrapper.js'
 
 

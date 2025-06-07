@@ -1,7 +1,7 @@
 import {pathJoin} from 'squidlet-lib'
 import type {System} from '../System.js'
 import {PackageContext} from '../context/PackageContext.js'
-import type {FilesDriver} from '../../drivers/FilesDriver/FilesDriver.js'
+import type { FilesDriver } from '../../packages/SystemCommonPkg/FilesDriver/FilesDriver.js';
 import type { PackageIndex } from '@/types/types.js';
 import type { FilesIo } from '@/ios/NodejsLinuxPack/FilesIo.js';
 import { IO_NAMES } from '@/types/constants.js';

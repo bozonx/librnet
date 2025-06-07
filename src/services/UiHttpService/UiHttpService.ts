@@ -9,7 +9,10 @@ import {
 import type {ServiceIndex, SubprogramError} from '../../types/types.js'
 import type {ServiceContext} from '../../system/context/ServiceContext.js'
 import {ServiceBase} from '../../base/ServiceBase.js'
-import type {HttpServerDriver, HttpServerInstance} from '../../drivers/HttpServerDriver/HttpServerDriver.js'
+import type {
+  HttpServerDriver,
+  HttpServerInstance,
+} from '../../packages/SystemCommonPkg/HttpServerDriver/HttpServerDriver.js';
 import {
   APP_FILES_PUBLIC_DIR,
   DEFAULT_UI_HTTP_PORT,
@@ -19,9 +22,12 @@ import {
 } from '../../types/constants.js'
 import type {HttpServerProps} from '../../types/io/HttpServerIoType.js'
 import type {ServiceProps} from '../../types/ServiceProps.js'
-import type {HttpDriverRequest, HttpDriverResponse} from '../../drivers/HttpServerDriver/HttpServerDriverLogic.js'
+import type {
+  HttpDriverRequest,
+  HttpDriverResponse,
+} from '../../packages/SystemCommonPkg/HttpServerDriver/HttpServerDriverLogic.js';
 import {uiHtml} from './uiHtmlTmpl.js'
-import type {FilesDriver} from '../../drivers/FilesDriver/FilesDriver.js'
+import type { FilesDriver } from '../../packages/SystemCommonPkg/FilesDriver/FilesDriver.js';
 
 
 // TODO: можно добавить специальный кукис сессии чтобы проверять откуда сделан запрос

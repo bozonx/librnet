@@ -11,7 +11,7 @@ import { FilesReadOnly } from '../../helpers/wrappers/FilesReadOnly.js';
 import type { DriversManager } from '../managers/DriversManager.js';
 import type { System } from '../System.js';
 import { FilesHome } from '../../helpers/wrappers/FilesHome.js';
-import type { FilesDriver } from '../../drivers/FilesDriver/FilesDriver.js';
+import type { FilesDriver } from '../../packages/SystemCommonPkg/FilesDriver/FilesDriver.js';
 import { FilesCache } from '../../helpers/wrappers/FilesCache.js';
 import { FilesDb } from '../../helpers/wrappers/FilesDb.js';
 

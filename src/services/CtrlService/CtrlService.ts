@@ -8,7 +8,10 @@ import {
 } from '../../types/constants.js'
 import type {ServiceProps} from '../../types/ServiceProps.js'
 import type {WsServerConnectionParams, WsServerProps} from '../../types/io/WsServerIoType.js'
-import type {WsServerDriver, WsServerInstance} from '../../drivers/WsServerDriver/WsServerDriver.js'
+import type {
+  WsServerDriver,
+  WsServerInstance,
+} from '../../packages/SystemCommonPkg/WsServerDriver/WsServerDriver.js';
 import {requestError} from '../../helpers/helpers.js'
 import type {RequestError} from '../../helpers/helpers.js'
 import type {RequestMessage, ResponseMessage} from '../../types/Message.js'
