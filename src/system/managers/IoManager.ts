@@ -1,7 +1,11 @@
 import type {System} from '../System.js'
 import type { IoBase } from '../base/IoBase.js';
 import type { IoSetBase } from '../base/IoSetBase.js';
-import {ENTITY_DESTROY_TIMEOUT_SEC, ENTITY_INIT_TIMEOUT_SEC, IO_NAMES} from '../../types/constants.js
+import {
+  ENTITY_DESTROY_TIMEOUT_SEC,
+  ENTITY_INIT_TIMEOUT_SEC,
+  IO_NAMES,
+} from '../../types/constants.js';
 import { Promised } from 'squidlet-lib';
 
 
@@ -35,7 +39,6 @@ export class IoManager {
    * It initializes all the IOs except FilesIo
    */
   async initIos() {
-    // TODO: skip files io
     for (const io of Object.values(this.ios)) {
       if (io.name === IO_NAMES.LocalFilesIo) {
         continue;
@@ -50,13 +53,18 @@ export class IoManager {
       delete this.ios[ioName];
     }
 
+    // TODO: наверное перенести сюда destroy Io
+
     for (const index in this.ioSets) {
       const ioSet = this.ioSets[index];
 
       const promised = new Promised();
 
       try {
-        await promised.start(ioSet.destroy(), ENTITY_DESTROY_TIMEOUT_SEC * 1000);
+        await promised.start(
+          ioSet.destroy(),
+          ENTITY_DESTROY_TIMEOUT_SEC * 1000
+        );
       } catch (e) {
         throw new Error(`Destroying of "${ioSet.type}" failed: ${e}`);
       }
@@ -85,7 +93,7 @@ export class IoManager {
       }
 
       const io = ioSet.getIo(name);
-      
+
       this.ios[name] = io;
     }
   }
