@@ -1,12 +1,13 @@
 import type {System} from '../System.js'
 import type { IoBase } from '../base/IoBase.js';
 import type { IoSetBase } from '../base/IoSetBase.js';
-import {IO_NAMES} from '../../types/constants.js
+import {ENTITY_DESTROY_TIMEOUT_SEC, ENTITY_INIT_TIMEOUT_SEC, IO_NAMES} from '../../types/constants.js
+import { Promised } from 'squidlet-lib';
 
 
 export class IoManager {
   private readonly system: System;
-  private readonly ioSets: Record<string, IoSetBase> = {};
+  private readonly ioSets: IoSetBase[] = [];
   // object like {ioName: IoBase}
   private ios: Record<string, IoBase> = {};
 
@@ -16,7 +17,15 @@ export class IoManager {
 
   async initIoSetsAndFilesIo() {
     // Init all the ioSets
-    for (const ioSet of Object.values(this.ioSets)) await ioSet.init();
+    for (const ioSet of Object.values(this.ioSets)) {
+      const promised = new Promised();
+
+      try {
+        await promised.start(ioSet.init(), ENTITY_INIT_TIMEOUT_SEC * 1000);
+      } catch (e) {
+        throw new Error(`Initialization of IoSet "${ioSet.type}" failed: ${e}`);
+      }
+    }
 
     // init only FileIo
     await this.initIo(IO_NAMES.LocalFilesIo);
@@ -27,13 +36,12 @@ export class IoManager {
    */
   async initIos() {
     // TODO: skip files io
-    for (const io of this.ios) {
-      if (io.myName === IO_NAMES.LocalFilesIo) {
+    for (const io of Object.values(this.ios)) {
+      if (io.name === IO_NAMES.LocalFilesIo) {
         continue;
       }
 
-      // TODO: add timeout
-      await io.init?.();
+      await this.initIo(io.name);
     }
   }
 
@@ -45,7 +53,13 @@ export class IoManager {
     for (const index in this.ioSets) {
       const ioSet = this.ioSets[index];
 
-      await ioSet.destroy();
+      const promised = new Promised();
+
+      try {
+        await promised.start(ioSet.destroy(), ENTITY_DESTROY_TIMEOUT_SEC * 1000);
+      } catch (e) {
+        throw new Error(`Destroying of "${ioSet.type}" failed: ${e}`);
+      }
 
       delete this.ioSets[index];
     }
@@ -61,11 +75,6 @@ export class IoManager {
 
   // Register IoSet
   useIoSet(ioSet: IoSetBase) {
-    // TODO: получается что это только IoSet context?
-    //ioSet.$giveIoContext(this.ctx);
-
-    // TODO: init ioSet
-
     this.ioSets.push(ioSet);
 
     const ioNames = ioSet.getNames();
@@ -76,17 +85,26 @@ export class IoManager {
       }
 
       const io = ioSet.getIo(name);
-      // io.$giveIoContext(ioCtx);
+      
       this.ios[name] = io;
     }
   }
 
   private async initIo(ioName: string) {
     const io = this.ios[ioName];
+
     if (!io) {
       throw new Error(`Can't find IO "${ioName}"`);
     }
 
-    await io.init?.();
+    if (!io.init) return;
+
+    const promised = new Promised();
+
+    try {
+      await promised.start(io.init(), ENTITY_INIT_TIMEOUT_SEC * 1000);
+    } catch (e) {
+      throw new Error(`Initialization of "${ioName}" failed: ${e}`);
+    }
   }
 }

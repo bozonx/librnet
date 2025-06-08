@@ -5,6 +5,8 @@ export const EVENT_DELIMITER = '|';
 //export const VERSIONS_DIR_NAME = '.versions'
 // TODO: move this to system cfg
 export const WAIT_BEFORE_HALT_MS = 1000;
+export const ENTITY_INIT_TIMEOUT_SEC = 20;
+export const ENTITY_DESTROY_TIMEOUT_SEC = 20;
 export const CFG_FILE_EXT = 'json';
 export const LOCAL_HOST = 'localhost';
 // UI port for localhost
