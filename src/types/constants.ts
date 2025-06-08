@@ -166,3 +166,7 @@ export const SYSTEM_SERVICE_NAMES = {
   // PublicApiService: 'PublicApiService',
   Sessions: 'Sessions',
 };
+
+export const IO_SET_TYPES = {
+  IoSetLocal: 'IoSetLocal',
+};

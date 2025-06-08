@@ -3,21 +3,20 @@ import type { PackageContext } from '../context/PackageContext.js';
 import type { IoIndex, SystemEnv } from '../../types/types.js';
 import { IoContext } from '../context/IoContext.js';
 
-export class IoSetBase {
-  readonly name: string;
+export abstract class IoSetBase {
+  abstract readonly type: string;
   readonly env: SystemEnv;
   private readonly ioCollection: { [index: string]: IoBase } = {};
   private readonly pkgCtx: PackageContext;
   private wasInited: boolean = false;
 
-  constructor(name: string, pkgCtx: PackageContext, env: SystemEnv) {
-    this.name = name;
+  constructor(pkgCtx: PackageContext, env: SystemEnv) {
     this.pkgCtx = pkgCtx;
     this.env = env;
   }
 
   /**
-   * It is used to connect to the remote ioSet
+   * Use it to connect to the remote ioSet
    * It is called only once.
    */
   async init() {
@@ -33,11 +32,7 @@ export class IoSetBase {
    */
   async destroy() {
     // destroy of ios
-    const ioNames: string[] = this.getNames();
-
-    for (let ioName of ioNames) {
-      await this.destroyIo(ioName);
-    }
+    for (let ioName of this.getNames()) await this.destroyIo(ioName);
   }
 
   /**
@@ -48,14 +43,14 @@ export class IoSetBase {
   registerIo(ioItemIndex: IoIndex) {
     const ioCtx = new IoContext(this.pkgCtx);
     const io = ioItemIndex(ioCtx);
-    const ioName: string = io.name || io.constructor.name;
+    const ioName: string = io.name;
 
-    this.pkgCtx.log.info(`${this.name}: registering IO "${ioName}"`);
+    this.pkgCtx.log.info(`${this.type}: registering IO "${ioName}"`);
 
     if (this.ioCollection[ioName]) {
       throw new Error(`The same IO "${ioName}" is already in use`);
     }
-
+    // only register it not init (it will be inited in IoManager)
     this.ioCollection[ioName] = io;
   }
 
@@ -85,7 +80,7 @@ export class IoSetBase {
     // TODO: таймаут ожидания
     const ioItem = this.ioCollection[ioName];
     if (ioItem.destroy) {
-      this.pkgCtx.log.info(`${this.name}: destroying IO "${ioName}"`);
+      this.pkgCtx.log.info(`${this.type}: destroying IO "${ioName}"`);
       await ioItem.destroy();
     }
 

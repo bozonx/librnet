@@ -1,7 +1,7 @@
 import type {System} from '../System.js'
 import type { IoBase } from '../base/IoBase.js';
 import type { IoSetBase } from '../base/IoSetBase.js';
-import {IO_NAMES} from '../../types/constants.js'
+import {IO_NAMES} from '../../types/constants.js
 
 
 export class IoManager {
@@ -14,17 +14,18 @@ export class IoManager {
     this.system = system;
   }
 
-  async initSystemIos() {
-    // init only FileIo
-    if (!this.ios[IO_NAMES.LocalFilesIo]) {
-      throw new Error(`Can't find LocalFilesIo`);
-    }
+  async initIoSetsAndFilesIo() {
+    // Init all the ioSets
+    for (const ioSet of Object.values(this.ioSets)) await ioSet.init();
 
-    // TODO: add timeout
-    this.ios[IO_NAMES.LocalFilesIo].init?.();
+    // init only FileIo
+    await this.initIo(IO_NAMES.LocalFilesIo);
   }
 
-  async initOtherIos() {
+  /**
+   * It initializes all the IOs except FilesIo
+   */
+  async initIos() {
     // TODO: skip files io
     for (const io of this.ios) {
       if (io.myName === IO_NAMES.LocalFilesIo) {
@@ -78,5 +79,14 @@ export class IoManager {
       // io.$giveIoContext(ioCtx);
       this.ios[name] = io;
     }
+  }
+
+  private async initIo(ioName: string) {
+    const io = this.ios[ioName];
+    if (!io) {
+      throw new Error(`Can't find IO "${ioName}"`);
+    }
+
+    await io.init?.();
   }
 }

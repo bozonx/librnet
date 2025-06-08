@@ -51,19 +51,19 @@ export class PackageContext {
   //   // TODO: add
   // }
 
-  async loadIoConfig(ioName: string): Promise<Record<string, any> | undefined> {
-    return this.configs.loadIoConfig(ioName);
-  }
+  // async loadIoConfig(ioName: string): Promise<Record<string, any> | undefined> {
+  //   return this.configs.loadIoConfig(ioName);
+  // }
 
-  async loadDriverConfig(
-    driverName: string
-  ): Promise<Record<string, any> | undefined> {
-    return this.configs.loadDriverConfig(driverName);
-  }
+  // async loadDriverConfig(
+  //   driverName: string
+  // ): Promise<Record<string, any> | undefined> {
+  //   return this.configs.loadDriverConfig(driverName);
+  // }
 
-  async loadServiceConfig(
-    serviceName: string
-  ): Promise<Record<string, any> | undefined> {
-    return this.configs.loadServiceConfig(serviceName);
-  }
+  // async loadServiceConfig(
+  //   serviceName: string
+  // ): Promise<Record<string, any> | undefined> {
+  //   return this.configs.loadServiceConfig(serviceName);
+  // }
 }

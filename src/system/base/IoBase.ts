@@ -1,9 +1,9 @@
 import type { IoContext } from '../context/IoContext.js';
 import type { IoSetBase } from './IoSetBase.js';
 
-export class IoBase {
+export abstract class IoBase {
   // put name of the IO here it it not the same as class name
-  readonly name?: string;
+  abstract readonly name: string;
   readonly ioSet: IoSetBase;
   protected ctx!: IoContext;
 

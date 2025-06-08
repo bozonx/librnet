@@ -50,11 +50,11 @@ export class System {
 
   async init() {
     try {
-      await this.io.initSystemIos();
+      await this.io.initIoSetsAndFilesIo();
       // system configs for IO, drivers and services
       await this.configs.init();
       await this.packageManager.loadInstalled();
-      await this.io.initOtherIos();
+      await this.io.initIos();
       await this.drivers.init();
 
       if (this.justInstalled) {
