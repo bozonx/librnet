@@ -1,4 +1,4 @@
-import type { ioSetLocalPkg } from '@/IoSets/IoSetLocal';
+import type { ioSetLocalPkg } from '@/packages/IoSetLocal';
 import { versions } from 'process';
 
 export const EVENT_DELIMITER = '|';
