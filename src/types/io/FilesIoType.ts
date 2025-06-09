@@ -14,12 +14,12 @@ export interface StatsSimplified {
   // birthtime
 }
 
-export interface FilesIoConfig {
-  uid?: number;
-  gid?: number;
-  external: Record<string, string>
-  dirs: Record<keyof typeof ROOT_DIRS, string>
-}
+// export interface FilesIoConfig {
+//   uid?: number;
+//   gid?: number;
+//   // external: Record<string, string>
+//   // dirs: Record<keyof typeof ROOT_DIRS, string>
+// }
 
 
 /**

@@ -12,7 +12,9 @@ import { AppsManager } from './managers/AppsManager.js';
 
 export class System {
   readonly events = new IndexedEventEmitter();
-  readonly envMode: EnvMode;
+  readonly ENV_MODE: EnvMode;
+  readonly ROOT_DIR: string;
+  readonly EXT_DIRS?: string;
   readonly justInstalled: boolean;
   // this is console logger
   readonly log = new LogPublisher((...p) =>
@@ -28,23 +30,27 @@ export class System {
   readonly apps = new AppsManager(this);
 
   get isDevMode() {
-    return this.envMode === ENV_MODES.dev;
+    return this.ENV_MODE === ENV_MODES.dev;
   }
 
   get isProdMode() {
-    return this.envMode === ENV_MODES.prod;
+    return this.ENV_MODE === ENV_MODES.prod;
   }
 
   get isTestMode() {
-    return this.envMode === ENV_MODES.test;
+    return this.ENV_MODE === ENV_MODES.test;
   }
 
   constructor(
-    envMode: EnvMode = ENV_MODES.prod as EnvMode,
+    ENV_MODE: EnvMode = ENV_MODES.prod as EnvMode,
+    ROOT_DIR: string,
+    EXT_DIRS?: string,
     justInstalled: boolean = false
   ) {
     // TODO: receive  logger from outside
-    this.envMode = envMode;
+    this.ENV_MODE = ENV_MODE;
+    this.ROOT_DIR = ROOT_DIR;
+    this.EXT_DIRS = EXT_DIRS;
     this.justInstalled = justInstalled;
   }
 

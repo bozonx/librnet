@@ -21,7 +21,7 @@ export async function startSystem(
   justInstalled?: boolean,
   middleware?: (system: System) => Promise<void>
 ) {
-  const system = new System(ENV_MODE, justInstalled);
+  const system = new System(ENV_MODE, ROOT_DIR, EXT_DIRS, justInstalled);
 
   system.use(ConsoleLoggerPkg({ logLevel: LOG_LEVELS.debug as LogLevel }));
   // use packages
@@ -36,11 +36,9 @@ export async function startSystem(
         WsServerIoIndex,
       ],
       {
-        ROOT_DIR,
         ENV_MODE,
         FILES_UID,
         FILES_GID,
-        EXT_DIRS,
       }
     )
   );

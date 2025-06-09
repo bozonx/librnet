@@ -1,16 +1,16 @@
 import type { IoBase } from './IoBase.js';
 import type { PackageContext } from '../context/PackageContext.js';
-import type { IoIndex, SystemEnv } from '../../types/types.js';
+import type { IoIndex, IoSetEnv } from '../../types/types.js';
 import { IoContext } from '../context/IoContext.js';
 
 export abstract class IoSetBase {
   abstract readonly type: string;
-  readonly env: SystemEnv;
+  readonly env: IoSetEnv;
   private readonly ioCollection: { [index: string]: IoBase } = {};
   private readonly pkgCtx: PackageContext;
   private wasInited: boolean = false;
 
-  constructor(pkgCtx: PackageContext, env: SystemEnv) {
+  constructor(pkgCtx: PackageContext, env: IoSetEnv) {
     this.pkgCtx = pkgCtx;
     this.env = env;
   }
@@ -43,7 +43,7 @@ export abstract class IoSetBase {
    */
   registerIo(ioItemIndex: IoIndex) {
     const ioCtx = new IoContext(this.pkgCtx);
-    const io = ioItemIndex(ioCtx);
+    const io = ioItemIndex(this, ioCtx);
     const ioName: string = io.name;
 
     this.pkgCtx.log.info(`${this.type}: registering IO "${ioName}"`);

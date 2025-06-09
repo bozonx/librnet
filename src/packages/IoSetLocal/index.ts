@@ -1,9 +1,9 @@
-import type { IoIndex, PackageIndex, SystemEnv } from '../../types/types.js';
+import type { IoIndex, PackageIndex, IoSetEnv } from '../../types/types.js';
 import type { PackageContext } from '../../system/context/PackageContext.js';
 import { IoSetBase } from '../../system/base/IoSetBase.js';
 import { IO_SET_TYPES } from '@/types/constants.js';
 
-export function ioSetLocalPkg(ios: IoIndex[], env: SystemEnv): PackageIndex {
+export function ioSetLocalPkg(ios: IoIndex[], env: IoSetEnv): PackageIndex {
   return (pkgCtx: PackageContext) => {
     const ioSetLocal = new IoSetLocal(pkgCtx, env);
     // register all the IO items in IoSet

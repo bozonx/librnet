@@ -1,5 +1,4 @@
-import type {Logger} from 'squidlet-lib'
-import type {System} from '../System.js'
+import type { Logger } from 'squidlet-lib';
 import type { PackageContext } from './PackageContext.js';
 
 export class IoContext {
@@ -13,7 +12,7 @@ export class IoContext {
     this.pkgCtx = pkgCtx;
   }
 
-  async loadIoConfig(ioName: string): Promise<Record<string, any> | undefined> {
-    return this.pkgCtx.loadIoConfig(ioName);
-  }
+  // async loadIoConfig(ioName: string): Promise<Record<string, any> | undefined> {
+  //   return this.pkgCtx.loadIoConfig(ioName);
+  // }
 }

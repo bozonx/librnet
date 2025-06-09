@@ -11,31 +11,31 @@ import type {
   SERVICE_STATUS,
 } from './constants.js';
 import type { AppBase } from '@/system/base/AppBase.js';
-
+import type { IoSetBase } from '@/system/base/IoSetBase.js';
 
 // It is called right after it is set to system via use()
 // That means very early, before system.init()
-export type PackageIndex = (ctx: PackageContext) => void
-export type IoIndex = (ctx: IoContext) => IoBase
-export type DriverIndex = (ctx: DriverContext) => DriverBase
-export type ServiceIndex = (ctx: ServiceContext) => ServiceBase
+export type PackageIndex = (ctx: PackageContext) => void;
+export type IoIndex = (ioSet: IoSetBase, ctx: IoContext) => IoBase;
+export type DriverIndex = (ctx: DriverContext) => DriverBase;
+export type ServiceIndex = (ctx: ServiceContext) => ServiceBase;
 export type AppIndex = () => AppBase;
-export type ServiceStatus = keyof typeof SERVICE_STATUS
-export type ServiceDestroyReason = keyof typeof SERVICE_DESTROY_REASON
-export type PermissionFileType = 'r' | 'w'
+export type ServiceStatus = keyof typeof SERVICE_STATUS;
+export type ServiceDestroyReason = keyof typeof SERVICE_DESTROY_REASON;
+export type PermissionFileType = 'r' | 'w';
 
 export interface SubprogramError {
-  code: number,
-  codeText: string,
-  errorText: string,
+  code: number;
+  codeText: string;
+  errorText: string;
 }
 
-export interface SystemEnv {
-  ROOT_DIR: string;
+export interface IoSetEnv {
+  // ROOT_DIR: string;
   ENV_MODE?: EnvMode;
   FILES_UID?: string;
   FILES_GID?: string;
-  EXT_DIRS?: string;
+  // EXT_DIRS?: string;
 }
 
 export interface EntityCfg {
