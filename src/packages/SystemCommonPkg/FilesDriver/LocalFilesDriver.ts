@@ -353,4 +353,44 @@ export class FilesDriver extends DriverBase implements FilesDriverType {
 
     return prepared;
   }
+
+  /**
+   * Make real path on external file system
+   * @param pathTo - it has to be /appFiles/..., /cfg/... etc.
+   *   /external/extMountedDir/... is a virtual path to virtual dir where some
+   *   external virtual dirs are mounted
+   * @private
+   */
+  private makePath(pathTo: string): string {
+    if (pathTo.indexOf('/') !== 0) {
+      throw new Error(`Path has to start with "/": ${pathTo}`);
+    }
+
+    const pathMatch = pathTo.match(/^\/([^\/]+)(\/.+)?$/);
+
+    if (!pathMatch) throw new Error(`Wrong path "${pathTo}"`);
+
+    const subDir = pathMatch[1] as keyof typeof ROOT_DIRS;
+    const restPath = pathMatch[2] || '';
+
+    if ((subDir as string) === EXTERNAL_ROOT_DIR) {
+      const extMatch = pathTo.match(/^\/([^\/]+)(\/.+)?$/);
+
+      if (!extMatch) throw new Error(`Wrong external path "${pathTo}"`);
+
+      const extDir = extMatch[1];
+      const extRestPath = extMatch[2] || '';
+      const resolvedExtAbsDir: string | undefined = this.cfg.external[extDir];
+
+      if (resolvedExtAbsDir) return resolvedExtAbsDir + extRestPath;
+
+      throw new Error(`Can't resolve external path "${pathTo}"`);
+    }
+    // resolve root dir
+    const resolvedAbsDir: string | undefined = this.cfg.dirs[subDir];
+    // replace sub dir to system path
+    if (resolvedAbsDir) return resolvedAbsDir + restPath;
+
+    throw new Error(`Can't resolve path "${pathTo}"`);
+  }
 }

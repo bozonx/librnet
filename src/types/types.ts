@@ -33,8 +33,8 @@ export interface SubprogramError {
 export interface IoSetEnv {
   // ROOT_DIR: string;
   ENV_MODE?: EnvMode;
-  FILES_UID?: string;
-  FILES_GID?: string;
+  FILES_UID?: number;
+  FILES_GID?: number;
   // EXT_DIRS?: string;
 }
 

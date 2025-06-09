@@ -12,7 +12,7 @@ import {
   ROOT_DIRS,
   SYNCED_DATA_SUB_DIRS,
 } from '../../types/constants.js';
-import type { FilesIo } from '@/ios/NodejsLinuxPack/LocalFilesIo.js';
+import type { FilesIo } from '@/ios/NodejsPack/LocalFilesIo.js';
 import type { EntityCfg } from '@/types/types.js';
 
 export class SystemConfigsManager {

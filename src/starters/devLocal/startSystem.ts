@@ -4,7 +4,7 @@ import type { LogLevel } from 'squidlet-lib';
 import { ConsoleLoggerPkg } from '@/packages/ConsoleLoggerPkg/index.js';
 import { SystemCommonPkg } from '@/packages/SystemCommonPkg/index.js';
 import { ioSetLocalPkg } from '@/packages/IoSetLocal/index.js';
-import { FilesIoIndex } from '@/ios/NodejsLinuxPack/LocalFilesIo.js';
+import { FilesIoIndex } from '@/ios/NodejsPack/LocalFilesIo.js';
 import { SysInfoIoIndex } from '@/ios/NodejsLinuxPack/SysInfoIo.js';
 import { HttpClientIoIndex } from '@/ios/NodejsPack/HttpClientIo.js';
 import { HttpServerIoIndex } from '@/ios/NodejsPack/HttpServerIo.js';
