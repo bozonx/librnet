@@ -40,9 +40,7 @@ export class IoManager {
    */
   async initIos() {
     for (const io of Object.values(this.ios)) {
-      if (io.name === IO_NAMES.LocalFilesIo) {
-        continue;
-      }
+      if (io.name === IO_NAMES.LocalFilesIo) continue;
 
       await this.initIo(io.name);
     }
@@ -50,14 +48,12 @@ export class IoManager {
 
   async destroy() {
     for (const ioName of Object.keys(this.ios)) {
+      await this.destroyIo(ioName);
       delete this.ios[ioName];
     }
 
-    // TODO: наверное перенести сюда destroy Io
-
     for (const index in this.ioSets) {
       const ioSet = this.ioSets[index];
-
       const promised = new Promised();
 
       try {
@@ -101,10 +97,7 @@ export class IoManager {
   private async initIo(ioName: string) {
     const io = this.ios[ioName];
 
-    if (!io) {
-      throw new Error(`Can't find IO "${ioName}"`);
-    }
-
+    if (!io) throw new Error(`Can't find IO "${ioName}"`);
     if (!io.init) return;
 
     const promised = new Promised();
@@ -113,6 +106,21 @@ export class IoManager {
       await promised.start(io.init(), ENTITY_INIT_TIMEOUT_SEC * 1000);
     } catch (e) {
       throw new Error(`Initialization of "${ioName}" failed: ${e}`);
+    }
+  }
+
+  private async destroyIo(ioName: string) {
+    const io = this.ios[ioName];
+
+    if (!io) throw new Error(`Can't find IO "${ioName}"`);
+    if (!io.destroy) return;
+
+    const promised = new Promised();
+
+    try {
+      await promised.start(io.destroy(), ENTITY_DESTROY_TIMEOUT_SEC * 1000);
+    } catch (e) {
+      throw new Error(`Destroying of "${ioName}" failed: ${e}`);
     }
   }
 }

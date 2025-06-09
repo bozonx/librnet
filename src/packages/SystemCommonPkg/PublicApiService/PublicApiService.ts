@@ -8,7 +8,7 @@ import {
 } from '../../../types/constants.js';
 import type { ServiceProps } from '../../../types/ServiceProps.js';
 import type {NetworkServiceApi} from '../Network/NetworkService.js'
-import type { NetworkIncomeRequest } from '../../../types/Network.js';
+import type { NetworkIncomeRequest } from '../../NetworkSubSystem/Network.js';
 
 
 export interface PublicApiServiceApi {

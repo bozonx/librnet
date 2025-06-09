@@ -11,12 +11,8 @@ export abstract class IoBase {
     this.ioSet = ioSet;
   }
 
-  // $giveIoContext(ctx: IoContext) {
-  //   this.ctx = ctx;
-  // }
-
-  init?(cfg?: any): Promise<void>;
-  destroy?(): Promise<void>;
+  abstract init?(cfg?: any): Promise<void>;
+  abstract destroy?(): Promise<void>;
 
   // /**
   //  * Setup props before init.

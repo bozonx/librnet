@@ -31,8 +31,9 @@ export abstract class IoSetBase {
    * Use it to close connection of the remote ioSet
    */
   async destroy() {
-    // destroy of ios
-    for (let ioName of this.getNames()) await this.destroyIo(ioName);
+    // Ios destroyed before in IoManager.
+    // And now just remove them
+    for (let ioName of this.getNames()) delete this.ioCollection[ioName];
   }
 
   /**

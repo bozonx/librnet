@@ -21,7 +21,7 @@ import type { RequestError } from '../../../helpers/helpers.js';
 import type {
   RequestMessage,
   ResponseMessage,
-} from '../../../types/Message.js';
+} from '../../NetworkSubSystem/Message.js';
 
 export interface UiApiRequestData {
   // api method to call can be with "." separator

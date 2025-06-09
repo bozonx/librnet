@@ -5,7 +5,11 @@ import type { IoBase } from '../system/base/IoBase.js';
 import type { ServiceBase } from '../system/base/ServiceBase.js';
 import type {ServiceContext} from '../system/context/ServiceContext.js'
 import type {IoContext} from '../system/context/IoContext.js'
-import type {SERVICE_DESTROY_REASON, SERVICE_STATUS} from './constants.js'
+import type {
+  EnvMode,
+  SERVICE_DESTROY_REASON,
+  SERVICE_STATUS,
+} from './constants.js';
 import type { AppBase } from '@/system/base/AppBase.js';
 
 
@@ -28,6 +32,7 @@ export interface SubprogramError {
 
 export interface SystemEnv {
   ROOT_DIR: string;
+  ENV_MODE?: EnvMode;
   FILES_UID?: string;
   FILES_GID?: string;
   EXT_DIRS?: string;

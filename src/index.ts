@@ -10,4 +10,4 @@ export * from './system/base/AppBase.js';
 export * from './helpers/helpers.js';
 export * from './types/constants.js';
 export * from './types/types.js';
-export * from './types/Message.js';
+export * from './packages/NetworkSubSystem/Message.js';

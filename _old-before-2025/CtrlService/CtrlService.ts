@@ -21,7 +21,7 @@ import type { RequestError } from '../../src/helpers/helpers.js';
 import type {
   RequestMessage,
   ResponseMessage,
-} from '../../src/types/Message.js';
+} from '../../src/packages/NetworkSubSystem/Message.js';
 
 export interface CtrlServiceRequestData {}
 
