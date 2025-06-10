@@ -37,32 +37,79 @@ export interface StatsSimplified {
  * But actually it joins these paths with workDir and result will be like /workdir/envSet/...
  */
 export default interface FilesIoType {
-  appendFile(pathTo: string, data: string | Uint8Array): Promise<void>;
-  mkdir(pathTo: string): Promise<void>;
-  readdir(pathTo: string): Promise<string[]>;
   readTextFile(pathTo: string): Promise<string>;
   readBinFile(pathTo: string): Promise<Uint8Array>;
+
   /**
    * You should pass only symlink. Resolve it by using stat().
    * It returns an absolute path to target file
    */
   readlink(pathTo: string): Promise<string>;
-  // remove an empty dir
-  rmdir(pathTo: string): Promise<void>;
-  unlink(paths: string[]): Promise<PromiseSettledResult<void>[]>;
+
+  /**
+   * Append data to file even if it doesn't exist
+   * @param pathTo
+   * @param data
+   * @returns
+   */
+  appendFile(pathTo: string, data: string | Uint8Array): Promise<void>;
+
+  /**
+   * Write or overwrite file
+   * @param pathTo
+   * @param data
+   */
   writeFile(pathTo: string, data: string | Uint8Array): Promise<void>;
+
+  /**
+   * Try to remove all the files.
+   * If has errors it will wait for all the files to be removed
+   * and return the array of errors like {path, error}
+   * @param paths
+   * @returns
+   */
+  unlink(paths: string[]): Promise<PromiseSettledResult<void>[]>;
+
   stat(pathTo: string): Promise<StatsSimplified | undefined>;
-  // Copy specified files. Use full path
-  // files is [SRC, DEST][]
+
+  /**
+   * Copy specified files. Use full path
+   * files is [SRC, DEST][]
+   * @param files
+   * @returns
+   */
   copyFiles(files: [string, string][]): Promise<void>;
-  // rename or remove. Use full path
-  // files is [OLD_PATH, NEW_PATH][]
+
+  /**
+   * Rename or remove. Use full path
+   * files is [OLD_PATH, NEW_PATH][]
+   * @param files
+   * @returns
+   */
   renameFiles(files: [string, string][]): Promise<void>;
-  // remove directory recursively
-  rmdirR(pathTo: string): Promise<void>;
+
+  readdir(pathTo: string): Promise<string[]>;
+
+  mkdir(pathTo: string): Promise<void>;
+  /**
+   * Create directory recursively as mkdir -p
+   * @param pathTo
+   * @returns
+   */
   mkDirP(pathTo: string): Promise<void>;
 
-  // TODO: может для батч операций просто передавать некую очередь
-  // TODO: что по части удаления нескольких файлов
-  // TODO: чтение файла блоками
+  /**
+   * Remove an empty dir
+   * @param pathTo
+   * @returns
+   */
+  rmdir(pathTo: string): Promise<void>;
+
+  /**
+   * Remove directory recursively as rm -Rf
+   * @param pathTo
+   * @returns
+   */
+  // remove directory recursively
+  rmdirRf(pathTo: string): Promise<void>;
 }

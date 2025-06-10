@@ -16,6 +16,20 @@ export const FilesIoIndex: IoIndex = (ioSet: IoSetBase, ctx: IoContext) => {
 export class LocalFilesIo extends IoBase implements FilesIoType {
   readonly name = IO_NAMES.LocalFilesIo;
 
+  async readTextFile(pathTo: string): Promise<string> {
+    return fs.readFile(pathTo, DEFAULT_ENCODE);
+  }
+
+  async readBinFile(pathTo: string): Promise<Uint8Array> {
+    const buffer: Buffer = await fs.readFile(pathTo);
+
+    return convertBufferToUint8Array(buffer);
+  }
+
+  readlink(pathTo: string): Promise<string> {
+    return fs.readlink(pathTo);
+  }
+
   async appendFile(pathTo: string, data: string | Uint8Array): Promise<void> {
     let wasExist = true;
 
@@ -35,41 +49,16 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     if (!wasExist) await this.chown(pathTo);
   }
 
-  async mkdir(pathTo: string): Promise<void> {
-    await fs.mkdir(pathTo);
+  async writeFile(pathTo: string, data: string | Uint8Array): Promise<void> {
+    if (typeof data === 'string') {
+      await fs.writeFile(pathTo, data, DEFAULT_ENCODE);
+    } else {
+      await fs.writeFile(pathTo, data);
+    }
 
-    return this.chown(pathTo);
+    await this.chown(pathTo);
   }
 
-  readdir(pathTo: string): Promise<string[]> {
-    return fs.readdir(pathTo, DEFAULT_ENCODE);
-  }
-
-  async readTextFile(pathTo: string): Promise<string> {
-    return fs.readFile(pathTo, DEFAULT_ENCODE);
-  }
-
-  async readBinFile(pathTo: string): Promise<Uint8Array> {
-    const buffer: Buffer = await fs.readFile(pathTo);
-
-    return convertBufferToUint8Array(buffer);
-  }
-
-  readlink(pathTo: string): Promise<string> {
-    return fs.readlink(pathTo);
-  }
-
-  rmdir(pathTo: string): Promise<void> {
-    return fs.rmdir(pathTo);
-  }
-
-  /**
-   * Try to remove all the files.
-   * If has errors it will wait for all the files to be removed
-   * and return the array of errors
-   * @param paths
-   * @returns
-   */
   async unlink(paths: string[]): Promise<PromiseSettledResult<void>[]> {
     return Promise.allSettled(paths.map((path) => fs.unlink(path))).then(
       (results) => {
@@ -84,23 +73,12 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
           }));
 
         if (errors.length > 0) {
-          console.error('Errors during file deletion:', errors);
           throw errors;
         }
 
         return results;
       }
     );
-  }
-
-  async writeFile(pathTo: string, data: string | Uint8Array): Promise<void> {
-    if (typeof data === 'string') {
-      await fs.writeFile(pathTo, data, DEFAULT_ENCODE);
-    } else {
-      await fs.writeFile(pathTo, data);
-    }
-
-    await this.chown(pathTo);
   }
 
   async stat(pathTo: string): Promise<StatsSimplified | undefined> {
@@ -132,6 +110,7 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     };
   }
 
+  // TODO: возвращать массив ошибок
   async copyFiles(files: [string, string][]): Promise<void> {
     for (const item of files) {
       await fs.copyFile(item[0], item[1]);
@@ -139,18 +118,33 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     }
   }
 
+  // TODO: возвращать массив ошибок
   async renameFiles(files: [string, string][]): Promise<void> {
     for (const item of files) {
       await fs.rename(item[0], item[1]);
     }
   }
 
-  async rmdirR(pathTo: string): Promise<void> {
-    await fs.rm(pathTo, { force: true, recursive: true });
+  readdir(pathTo: string): Promise<string[]> {
+    return fs.readdir(pathTo, DEFAULT_ENCODE);
+  }
+
+  async mkdir(pathTo: string): Promise<void> {
+    await fs.mkdir(pathTo);
+
+    return this.chown(pathTo);
   }
 
   async mkDirP(pathTo: string): Promise<void> {
     await fs.mkdir(pathTo, { recursive: true });
+  }
+
+  rmdir(pathTo: string): Promise<void> {
+    return fs.rmdir(pathTo);
+  }
+
+  async rmdirRf(pathTo: string): Promise<void> {
+    await fs.rm(pathTo, { force: true, recursive: true });
   }
 
   private async chown(pathTo: string) {
