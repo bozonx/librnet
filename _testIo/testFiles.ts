@@ -53,17 +53,21 @@ const tmpDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'tmp');
   if (text2 !== 'test2') {
     throw new Error('Text is not correct');
   }
+  await filesIo.mkdir(path.join(tmpDir, '1/2'));
+  const files = await filesIo.readdir(tmpDir + '/1');
+  if (files.length !== 2) {
+    throw new Error('Files length is not correct');
+  } else if (files[0] !== '2' || files[1] !== 'test.txt') {
+    throw new Error('File is not correct');
+  }
   try {
     await filesIo.rmdir(path.join(tmpDir, '1'));
     throw new Error('Directory is not removed');
   } catch (e) {
     // ok
   }
-
   await filesIo.rmdirRf(path.join(tmpDir, '1'));
 
   // readBinFile , append bin, writeFile bin
-  // readlink, renameFiles, copyFiles, writeFile
-
-  // TODO: удаление не пустой директории - mkdir, readdir
+  // readlink, renameFiles, copyFiles
 })();
