@@ -47,16 +47,23 @@ const tmpDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'tmp');
   }
 
   // writeFile  and remove dir
-
   await filesIo.writeFile(path.join(tmpDir, '1', 'test.txt'), 'test');
   await filesIo.writeFile(path.join(tmpDir, '1', 'test.txt'), 'test2');
   const text2 = await filesIo.readTextFile(path.join(tmpDir, '1', 'test.txt'));
   if (text2 !== 'test2') {
     throw new Error('Text is not correct');
   }
+  try {
+    await filesIo.rmdir(path.join(tmpDir, '1'));
+    throw new Error('Directory is not removed');
+  } catch (e) {
+    // ok
+  }
+
+  await filesIo.rmdirRf(path.join(tmpDir, '1'));
 
   // readBinFile , append bin, writeFile bin
   // readlink, renameFiles, copyFiles, writeFile
 
-  // TODO: удаление не пустой директории - mkdir, rmdir, rmdirRf, readdir
+  // TODO: удаление не пустой директории - mkdir, readdir
 })();

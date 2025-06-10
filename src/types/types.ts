@@ -23,6 +23,26 @@ export type AppIndex = () => AppBase;
 export type ServiceStatus = keyof typeof SERVICE_STATUS;
 export type ServiceDestroyReason = keyof typeof SERVICE_DESTROY_REASON;
 export type PermissionFileType = 'r' | 'w';
+export type BinTypes =
+  | Int8Array
+  | Uint8Array
+  | Uint8ClampedArray
+  | Int16Array
+  | Uint16Array
+  | Int32Array
+  | Uint32Array
+  | Float32Array
+  | Float64Array;
+export type BinTypesNames =
+  | 'Int8Array'
+  | 'Uint8Array'
+  | 'Uint8ClampedArray'
+  | 'Int16Array'
+  | 'Uint16Array'
+  | 'Int32Array'
+  | 'Uint32Array'
+  | 'Float32Array'
+  | 'Float64Array';
 
 export interface SubprogramError {
   code: number;

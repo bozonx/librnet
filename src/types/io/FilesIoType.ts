@@ -1,3 +1,5 @@
+import type { BinTypes, BinTypesNames } from '../types';
+
 export interface StatsSimplified {
   // in bytes
   size: number;
@@ -38,7 +40,7 @@ export interface StatsSimplified {
  */
 export default interface FilesIoType {
   readTextFile(pathTo: string): Promise<string>;
-  readBinFile(pathTo: string): Promise<Uint8Array>;
+  readBinFile(pathTo: string, returnType: BinTypesNames): Promise<BinTypes>;
 
   /**
    * You should pass only symlink. Resolve it by using stat().
@@ -52,14 +54,14 @@ export default interface FilesIoType {
    * @param data
    * @returns
    */
-  appendFile(pathTo: string, data: string | Uint8Array): Promise<void>;
+  appendFile(pathTo: string, data: string | BinTypes): Promise<void>;
 
   /**
    * Write or overwrite file
    * @param pathTo
    * @param data
    */
-  writeFile(pathTo: string, data: string | Uint8Array): Promise<void>;
+  writeFile(pathTo: string, data: string | BinTypes): Promise<void>;
 
   /**
    * Try to remove all the files.
