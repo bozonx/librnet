@@ -1,17 +1,16 @@
 import {pathJoin} from 'squidlet-lib'
 import type {System} from '../System.js'
-import {PackageContext} from '../context/PackageContext.js'
-import type { FilesDriver } from '../../packages/SystemCommonPkg/FilesDriver/FilesDriver.js';
+import { PackageContext } from '../context/PackageContext.js';
 import type { PackageIndex } from '@/types/types.js';
-import type { FilesIo } from '@/ios/NodejsPack/LocalFilesIo.js';
+import type { LocalFilesIo } from '@/ios/NodejsPack/LocalFilesIo.js';
 import { IO_NAMES } from '@/types/constants.js';
 
 export class PackageManager {
   private readonly system;
   readonly ctx;
 
-  private get filesIo(): FilesIo {
-    return this.system.io.getIo(IO_NAMES.FilesIo);
+  private get filesIo(): LocalFilesIo {
+    return this.system.io.getIo(IO_NAMES.LocalFilesIo);
   }
 
   constructor(system: System) {

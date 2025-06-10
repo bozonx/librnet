@@ -3,7 +3,7 @@ import { LOG_LEVELS } from 'squidlet-lib';
 import type { LogLevel } from 'squidlet-lib';
 import { ConsoleLoggerPkg } from '@/packages/ConsoleLoggerPkg/index.js';
 import { SystemCommonPkg } from '@/packages/SystemCommonPkg/index.js';
-import { ioSetLocalPkg } from '@/packages/IoSetLocal/index.js';
+import { ioSetLocalPkg } from '@/packages/IoSetLocalPkg/index.js';
 import { FilesIoIndex } from '@/ios/NodejsPack/LocalFilesIo.js';
 import { SysInfoIoIndex } from '@/ios/NodejsLinuxPack/SysInfoIo.js';
 import { HttpClientIoIndex } from '@/ios/NodejsPack/HttpClientIo.js';
@@ -15,13 +15,13 @@ import { SystemEvents, type EnvMode } from '@/types/constants.js';
 export async function startSystem(
   ROOT_DIR: string,
   ENV_MODE?: EnvMode,
-  FILES_UID?: string,
-  FILES_GID?: string,
-  EXT_DIRS?: string,
-  justInstalled?: boolean,
+  FILES_UID?: number,
+  FILES_GID?: number,
+  EXT_DIRS?: string[],
+  JUST_INSTALLED?: boolean,
   middleware?: (system: System) => Promise<void>
 ) {
-  const system = new System(ENV_MODE, ROOT_DIR, EXT_DIRS, justInstalled);
+  const system = new System(ENV_MODE, ROOT_DIR, EXT_DIRS, JUST_INSTALLED);
 
   system.use(ConsoleLoggerPkg({ logLevel: LOG_LEVELS.debug as LogLevel }));
   // use packages

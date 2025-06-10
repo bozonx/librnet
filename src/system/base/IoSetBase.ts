@@ -31,7 +31,7 @@ export abstract class IoSetBase {
    * Use it to close connection of the remote ioSet
    */
   async destroy() {
-    // Ios destroyed before in IoManager.
+    // Ios were destroyed before in IoManager.
     // And now just remove them
     for (let ioName of this.getNames()) delete this.ioCollection[ioName];
   }
@@ -73,38 +73,4 @@ export abstract class IoSetBase {
   getNames(): string[] {
     return Object.keys(this.ioCollection);
   }
-
-  /**
-   * Destroy an IO item.
-   */
-  private async destroyIo(ioName: string) {
-    // TODO: таймаут ожидания
-    const ioItem = this.ioCollection[ioName];
-    if (ioItem.destroy) {
-      this.pkgCtx.log.info(`${this.type}: destroying IO "${ioName}"`);
-      await ioItem.destroy();
-    }
-
-    delete this.ioCollection[ioName];
-  }
 }
-
-// /**
-//  * Init Io
-//  * Call it if you register an Io after system initialization
-//  * @param ioName
-//  */
-// async initIo(ioName: string) {
-//   const ioItem = this.ioCollection[ioName];
-
-//   if (!ioItem.init) return;
-
-//   this.pkgCtx.log.info(`${this.name}: initializing IO "${ioName}"`);
-
-//   const ioCfg: Record<string, any> | undefined =
-//     await this.pkgCtx.loadIoConfig(ioName);
-
-//   // TODO: таймаут ожидания
-
-//   await ioItem.init(ioCfg);
-// }

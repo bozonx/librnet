@@ -14,8 +14,8 @@ export class System {
   readonly events = new IndexedEventEmitter();
   readonly ENV_MODE: EnvMode;
   readonly ROOT_DIR: string;
-  readonly EXT_DIRS?: string;
-  readonly justInstalled: boolean;
+  readonly EXT_DIRS?: string[];
+  readonly JUST_INSTALLED: boolean;
   // this is console logger
   readonly log = new LogPublisher((...p) =>
     this.events.emit(SystemEvents.logger, ...p)
@@ -44,14 +44,14 @@ export class System {
   constructor(
     ENV_MODE: EnvMode = ENV_MODES.prod as EnvMode,
     ROOT_DIR: string,
-    EXT_DIRS?: string,
-    justInstalled: boolean = false
+    EXT_DIRS?: string[],
+    JUST_INSTALLED: boolean = false
   ) {
     // TODO: receive  logger from outside
     this.ENV_MODE = ENV_MODE;
     this.ROOT_DIR = ROOT_DIR;
     this.EXT_DIRS = EXT_DIRS;
-    this.justInstalled = justInstalled;
+    this.JUST_INSTALLED = JUST_INSTALLED;
   }
 
   async init() {
@@ -63,7 +63,7 @@ export class System {
       await this.io.initIos();
       await this.drivers.init();
 
-      if (this.justInstalled) {
+      if (this.JUST_INSTALLED) {
         await afterInstall(this);
       }
 

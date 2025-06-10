@@ -6,10 +6,30 @@ export interface StatsSimplified {
   symbolicLink: boolean;
   // modified time - number of milliseconds elapsed since 1 January 1970 00:00:00 UTC
   mtime: number;
-  // TODO: add
-  // atime
-  // ctime
-  // birthtime
+  // access time - number of milliseconds elapsed since 1 January 1970 00:00:00 UTC
+  atime: number;
+  // change time - number of milliseconds elapsed since 1 January 1970 00:00:00 UTC
+  ctime: number;
+  // birth time - number of milliseconds elapsed since 1 January 1970 00:00:00 UTC
+  birthtime: number;
+  // file mode (permissions)
+  mode: number;
+  // user ID of owner
+  uid: number;
+  // group ID of owner
+  gid: number;
+  // device ID
+  dev: number;
+  // inode number
+  ino: number;
+  // number of hard links
+  nlink: number;
+  // device ID (if special file)
+  rdev: number;
+  // block size for I/O operations
+  blksize: number;
+  // number of blocks allocated
+  blocks: number;
 }
 
 /**
@@ -29,7 +49,7 @@ export default interface FilesIoType {
   readlink(pathTo: string): Promise<string>;
   // remove an empty dir
   rmdir(pathTo: string): Promise<void>;
-  unlink(paths: string[]): Promise<void>;
+  unlink(paths: string[]): Promise<PromiseSettledResult<void>[]>;
   writeFile(pathTo: string, data: string | Uint8Array): Promise<void>;
   stat(pathTo: string): Promise<StatsSimplified | undefined>;
   // Copy specified files. Use full path

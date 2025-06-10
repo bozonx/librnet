@@ -3,9 +3,9 @@ import { startSystem } from './startSystem';
 
 const ROOT_DIR = process.env.ROOT_DIR as string;
 const ENV_MODE = process.env.ENV_MODE as unknown as EnvMode;
-const FILES_UID = process.env.FILES_UID as string;
-const FILES_GID = process.env.FILES_GID as string;
-const EXT_DIRS = process.env.EXT_DIRS as string;
+const FILES_UID = process.env.FILES_UID as unknown as number;
+const FILES_GID = process.env.FILES_GID as unknown as number;
+const EXT_DIRS = process.env.EXT_DIRS as unknown as string[];
 const JUST_INSTALLED =
   typeof process.env.JUST_INSTALLED === 'string'
     ? process.env.JUST_INSTALLED === 'true'

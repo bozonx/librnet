@@ -9,8 +9,6 @@ import type { IoContext } from '../../system/context/IoContext.js';
 import { IO_NAMES } from '../../types/constants.js';
 import type { IoSetBase } from '@/system/base/IoSetBase.js';
 
-// export const execPromise = promisify(exec);
-
 export const FilesIoIndex: IoIndex = (ioSet: IoSetBase, ctx: IoContext) => {
   return new LocalFilesIo(ioSet, ctx);
 };
@@ -27,8 +25,8 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
       wasExist = false;
     }
 
-    // TODO: будет ли работать appendFile если файл не существует?
     if (typeof data === 'string') {
+      // if file doesn't exist it will be created
       await fs.appendFile(pathTo, data, DEFAULT_ENCODE);
     } else {
       await fs.appendFile(pathTo, data);
@@ -65,9 +63,34 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     return fs.rmdir(pathTo);
   }
 
-  // TODO: в случае ошибки возвращать массив ошибок по файлам
-  unlink(paths: string[]): Promise<void> {
-    return fs.unlink(paths);
+  /**
+   * Try to remove all the files.
+   * If has errors it will wait for all the files to be removed
+   * and return the array of errors
+   * @param paths
+   * @returns
+   */
+  async unlink(paths: string[]): Promise<PromiseSettledResult<void>[]> {
+    return Promise.allSettled(paths.map((path) => fs.unlink(path))).then(
+      (results) => {
+        const errors = results
+          .filter(
+            (result): result is PromiseRejectedResult =>
+              result.status === 'rejected'
+          )
+          .map((result) => ({
+            path: result.reason.path || 'unknown',
+            error: result.reason.message || 'Unknown error',
+          }));
+
+        if (errors.length > 0) {
+          console.error('Errors during file deletion:', errors);
+          throw errors;
+        }
+
+        return results;
+      }
+    );
   }
 
   async writeFile(pathTo: string, data: string | Uint8Array): Promise<void> {
@@ -84,7 +107,7 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     let stat: Stats;
 
     try {
-      stat = await fs.lstat(pathTo);
+      stat = await fs.stat(pathTo);
     } catch (e) {
       return undefined;
     }
@@ -94,6 +117,18 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
       dir: stat.isDirectory(),
       symbolicLink: stat.isSymbolicLink(),
       mtime: stat.mtime.getTime(),
+      atime: stat.atime.getTime(),
+      ctime: stat.ctime.getTime(),
+      birthtime: stat.birthtime.getTime(),
+      mode: stat.mode,
+      uid: stat.uid,
+      gid: stat.gid,
+      dev: stat.dev,
+      ino: stat.ino,
+      nlink: stat.nlink,
+      rdev: stat.rdev,
+      blksize: stat.blksize,
+      blocks: stat.blocks,
     };
   }
 
