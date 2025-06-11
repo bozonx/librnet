@@ -37,9 +37,9 @@ const tmpDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'tmp');
   }
 
   // Try to remove directory with unlink
-  await filesIo.unlink([path.join(tmpDir, 'test.txt')]);
+  await filesIo.rm([path.join(tmpDir, 'test.txt')]);
   try {
-    await filesIo.unlink([path.join(tmpDir, '1')]);
+    await filesIo.rm([path.join(tmpDir, '1')]);
   } catch (errors) {
     if (errors.length !== 1) {
       throw new Error('Errors length is not correct');
@@ -68,6 +68,78 @@ const tmpDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'tmp');
   }
   await filesIo.rmdirRf(path.join(tmpDir, '1'));
 
+  // renameFiles
+  await filesIo.mkDirP(path.join(tmpDir, '2'));
+  await filesIo.writeFile(path.join(tmpDir, 'testToMove.txt'), 'test');
+  await filesIo.rename([
+    [
+      path.join(tmpDir, 'testToMove.txt'),
+      path.join(tmpDir, '2', 'testMoved.txt'),
+    ],
+  ]);
+  await filesIo.rename([[path.join(tmpDir, '2'), path.join(tmpDir, '3')]]);
+  if (!(await filesIo.stat(path.join(tmpDir, '3', 'testMoved.txt')))) {
+    throw new Error('File is not removed');
+  }
+  await filesIo.rmdirRf(path.join(tmpDir, '3'));
+  try {
+    await filesIo.rename([[path.join(tmpDir, '4'), path.join(tmpDir, '5')]]);
+  } catch (errors) {
+    if (errors.length !== 1) {
+      throw new Error('Errors length is not correct');
+    }
+  }
+
+  // copy files
+  await filesIo.mkDirP(path.join(tmpDir, '4'));
+  await filesIo.writeFile(path.join(tmpDir, 'testCopy.txt'), 'test');
+  await filesIo.cp(
+    [
+      [
+        path.join(tmpDir, 'testCopy.txt'),
+        path.join(tmpDir, '4', 'testCopy.txt'),
+      ],
+    ],
+    {
+      errorOnExist: true,
+    }
+  );
+  if (!(await filesIo.stat(path.join(tmpDir, '4', 'testCopy.txt')))) {
+    throw new Error('File is not copied');
+  }
+
+  await filesIo.cp([[path.join(tmpDir, '4'), path.join(tmpDir, '5')]], {
+    errorOnExist: true,
+    recursive: true,
+  });
+  if (!(await filesIo.stat(path.join(tmpDir, '5', 'testCopy.txt')))) {
+    throw new Error('File is not copied');
+  }
+  // try to copy to existing dir
+  try {
+    await filesIo.cp([[path.join(tmpDir, '4'), path.join(tmpDir, '5')]], {
+      errorOnExist: true,
+    });
+  } catch (errors) {
+    if (errors.length !== 1) {
+      throw new Error('Errors length is not correct');
+    }
+  }
+
+  await filesIo.rmdirRf(path.join(tmpDir, '4'));
+  await filesIo.rmdirRf(path.join(tmpDir, '5'));
+  await filesIo.rmdirRf(path.join(tmpDir, 'testCopy.txt'));
+
+  try {
+    await filesIo.cp([
+      [path.join(tmpDir, 'nonexistent'), path.join(tmpDir, 'nonexistent2')],
+    ]);
+  } catch (errors) {
+    if (errors.length !== 1) {
+      throw new Error('Errors length is not correct');
+    }
+  }
+
   // readBinFile , append bin, writeFile bin
-  // readlink, renameFiles, copyFiles
+  // readlink, createLink
 })();

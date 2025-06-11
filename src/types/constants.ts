@@ -1,6 +1,7 @@
 import type { ioSetLocalPkg } from '@/packages/IoSetLocalPkg';
 import { versions } from 'process';
 
+export const DEFAULT_ENCODE = 'utf-8';
 export const EVENT_DELIMITER = '|';
 //export const VERSIONS_DIR_NAME = '.versions'
 // TODO: move this to system cfg

@@ -10,6 +10,10 @@ import { IO_NAMES } from '../../../types/constants.js';
 import type { IoBase } from '../../../system/base/IoBase.js';
 import type { FilesDriverType } from '../../../types/FilesDriverType.js';
 
+
+// TODO:  add tmpdir https://nodejs.org/api/fs.html#fspromisesmkdtempprefix-options
+// TODO: запретить передавать URL и другие типы путей для чтения и записи
+
 export const FilesDriverIndex: DriverIndex = (ctx: DriverContext) => {
   return new FilesDriver(ctx);
 };

@@ -10,6 +10,13 @@ Run in dev mode
 npm run dev
 ```
 
+## Test
+
+Test IO
+
+```bash
+npx tsx ./_testIo/testFiles.ts
+```
 
 
 

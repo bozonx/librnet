@@ -1,5 +1,7 @@
 import type { BinTypes, BinTypesNames } from '../types';
 
+// TODO: Add lutimes, utimes
+
 export interface StatsSimplified {
   // in bytes
   size: number;
@@ -34,13 +36,55 @@ export interface StatsSimplified {
   blocks: number;
 }
 
+export interface CopyOptions {
+  // overwrite existing file or directory. The copy operation will ignore errors if you set this to false and the destination exists. Use the errorOnExist option to change this behavior. Default: true.
+  force?: boolean;
+  // When true timestamps from src will be preserved. Default: false.
+  preserveTimestamps?: boolean;
+  // copy directories recursively Default: false
+  recursive?: boolean;
+  // when force is false, and the destination exists, throw an error. Default: false.
+  errorOnExist?: boolean;
+}
+
+export interface RmOptions {
+  // When true, exceptions will be ignored if path does not exist. Default: false
+  force?: boolean;
+  // If true, perform a recursive directory removal. In recursive mode operations are retried on failure. Default: false.
+  recursive?: boolean;
+}
+
+export interface ReadTextFileOptions {
+  // if not set then it will be UTF-8
+  encoding?: BufferEncoding;
+}
+
+export interface WriteFileOptions {
+  // if not set then it will be UTF-8
+  encoding?: BufferEncoding;
+}
+
+export interface ReaddirOptions {
+  // if not set then it will be UTF-8
+  encoding?: BufferEncoding;
+  // If true, reads the contents of a directory recursively. In recursive mode, it will list all files, sub files, and directories. Default: false.
+  recursive?: boolean;
+}
+
 /**
  * FilesIo works with absolute paths like /envSet/..., /varData/... and /tmp/...
  * But actually it joins these paths with workDir and result will be like /workdir/envSet/...
  */
 export default interface FilesIoType {
-  readTextFile(pathTo: string): Promise<string>;
-  readBinFile(pathTo: string, returnType: BinTypesNames): Promise<BinTypes>;
+  readTextFile(pathTo: string, options?: ReadTextFileOptions): Promise<string>;
+
+  /**
+   * Read binary file and return it as specified type
+   * @param pathTo
+   * @param returnType - Default is Uint8Array
+   * @returns
+   */
+  readBinFile(pathTo: string, returnType?: BinTypesNames): Promise<BinTypes>;
 
   /**
    * You should pass only symlink. Resolve it by using stat().
@@ -54,43 +98,59 @@ export default interface FilesIoType {
    * @param data
    * @returns
    */
-  appendFile(pathTo: string, data: string | BinTypes): Promise<void>;
+  appendFile(
+    pathTo: string,
+    data: string | Uint8Array,
+    options?: WriteFileOptions
+  ): Promise<void>;
 
   /**
    * Write or overwrite file
    * @param pathTo
    * @param data
    */
-  writeFile(pathTo: string, data: string | BinTypes): Promise<void>;
+  writeFile(
+    pathTo: string,
+    data: string | BinTypes,
+    options?: WriteFileOptions
+  ): Promise<void>;
 
   /**
    * Try to remove all the files.
    * If has errors it will wait for all the files to be removed
    * and return the array of errors like {path, error}
    * @param paths
+   * @param options
    * @returns
    */
-  unlink(paths: string[]): Promise<PromiseSettledResult<void>[]>;
+  rm(paths: string[]): Promise<void>;
 
   stat(pathTo: string): Promise<StatsSimplified | undefined>;
 
   /**
    * Copy specified files. Use full path
-   * files is [SRC, DEST][]
+   * files is ["~/1/old.txt", "~/2/new.txt"][]
+   * If has errors it will wait for all the files to be copied
+   * and return the array of errors like {path, error}
    * @param files
+   * @param options
    * @returns
    */
-  copyFiles(files: [string, string][]): Promise<void>;
+  cp(files: [string, string][], options?: CopyOptions): Promise<void>;
 
   /**
-   * Rename or remove. Use full path
-   * files is [OLD_PATH, NEW_PATH][]
+   * Rename or move files and dirs. Use full path
+   * files is ["~/1/old.txt", "~/2/new.txt"][]
+   * The destination path or directory should`t exist.
+   * If has errors it will wait for all the files to be renamed
+   * and return the array of errors like {path, error}
    * @param files
+   * @param options
    * @returns
    */
-  renameFiles(files: [string, string][]): Promise<void>;
+  rename(files: [string, string][]): Promise<void>;
 
-  readdir(pathTo: string): Promise<string[]>;
+  readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]>;
 
   mkdir(pathTo: string): Promise<void>;
   /**
@@ -100,6 +160,7 @@ export default interface FilesIoType {
    */
   mkDirP(pathTo: string): Promise<void>;
 
+  // TODO: зачем нужно если есть rm
   /**
    * Remove an empty dir
    * @param pathTo
@@ -107,6 +168,7 @@ export default interface FilesIoType {
    */
   rmdir(pathTo: string): Promise<void>;
 
+  // TODO: зачем нужно если есть rm
   /**
    * Remove directory recursively as rm -Rf
    * @param pathTo

@@ -32,7 +32,9 @@ export type BinTypes =
   | Int32Array
   | Uint32Array
   | Float32Array
-  | Float64Array;
+  | Float64Array
+  | BigInt64Array
+  | BigUint64Array;
 export type BinTypesNames =
   | 'Int8Array'
   | 'Uint8Array'
@@ -42,7 +44,9 @@ export type BinTypesNames =
   | 'Int32Array'
   | 'Uint32Array'
   | 'Float32Array'
-  | 'Float64Array';
+  | 'Float64Array'
+  | 'BigInt64Array'
+  | 'BigUint64Array';
 
 export interface SubprogramError {
   code: number;
