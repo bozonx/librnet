@@ -71,6 +71,11 @@ export interface ReaddirOptions {
   recursive?: boolean;
 }
 
+export interface MkdirOptions {
+  // If true, creates parent directories recursively. Default: false.
+  recursive?: boolean;
+}
+
 /**
  * FilesIo works with absolute paths like /envSet/..., /varData/... and /tmp/...
  * But actually it joins these paths with workDir and result will be like /workdir/envSet/...
@@ -152,13 +157,7 @@ export default interface FilesIoType {
 
   readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]>;
 
-  mkdir(pathTo: string): Promise<void>;
-  /**
-   * Create directory recursively as mkdir -p
-   * @param pathTo
-   * @returns
-   */
-  mkDirP(pathTo: string): Promise<void>;
+  mkdir(pathTo: string, options?: MkdirOptions): Promise<void>;
 
   // TODO: зачем нужно если есть rm
   /**

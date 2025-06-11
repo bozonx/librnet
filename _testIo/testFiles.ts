@@ -17,7 +17,7 @@ const tmpDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'tmp');
     new IoContext({} as PackageContext)
   );
 
-  await filesIo.mkDirP(path.join(tmpDir, '1'));
+  await filesIo.mkdir(path.join(tmpDir, '1'), { recursive: true });
 
   // append text file and read it
   await filesIo.appendFile(path.join(tmpDir, 'test.txt'), 'test');
@@ -69,7 +69,7 @@ const tmpDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'tmp');
   await filesIo.rmdirRf(path.join(tmpDir, '1'));
 
   // renameFiles
-  await filesIo.mkDirP(path.join(tmpDir, '2'));
+  await filesIo.mkdir(path.join(tmpDir, '2'), { recursive: true });
   await filesIo.writeFile(path.join(tmpDir, 'testToMove.txt'), 'test');
   await filesIo.rename([
     [
@@ -91,7 +91,7 @@ const tmpDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'tmp');
   }
 
   // copy files
-  await filesIo.mkDirP(path.join(tmpDir, '4'));
+  await filesIo.mkdir(path.join(tmpDir, '4'), { recursive: true });
   await filesIo.writeFile(path.join(tmpDir, 'testCopy.txt'), 'test');
   await filesIo.cp(
     [

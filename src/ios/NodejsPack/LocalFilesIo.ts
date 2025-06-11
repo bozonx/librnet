@@ -4,6 +4,7 @@ import { convertBufferToUint8Array } from 'squidlet-lib';
 import type FilesIoType from '../../types/io/FilesIoType.js';
 import type {
   CopyOptions,
+  MkdirOptions,
   ReaddirOptions,
   ReadTextFileOptions,
   RmOptions,
@@ -209,14 +210,10 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     });
   }
 
-  async mkdir(pathTo: string): Promise<void> {
-    await fs.mkdir(pathTo);
+  async mkdir(pathTo: string, options?: MkdirOptions): Promise<void> {
+    await fs.mkdir(pathTo, { recursive: options?.recursive || false });
 
     return this.chown(pathTo);
-  }
-
-  async mkDirP(pathTo: string): Promise<void> {
-    await fs.mkdir(pathTo, { recursive: true });
   }
 
   rmdir(pathTo: string): Promise<void> {
