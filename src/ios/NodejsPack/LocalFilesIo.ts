@@ -33,6 +33,7 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     });
   }
 
+  // TODO: test
   async readBinFile(
     pathTo: string,
     returnType: BinTypesNames = 'Uint8Array'
@@ -69,10 +70,12 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     // return convertBufferToUint8Array(buffer);
   }
 
+  // TODO: test
   readlink(pathTo: string): Promise<string> {
     return fs.readlink(pathTo);
   }
 
+  // TODO: test binary files
   async appendFile(
     pathTo: string,
     data: string | Uint8Array,
@@ -98,6 +101,7 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     if (!wasExist) await this.chown(pathTo);
   }
 
+  // TODO: test binary files
   async writeFile(
     pathTo: string,
     data: string | BinTypes,
@@ -216,14 +220,7 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     return this.chown(pathTo);
   }
 
-  rmdir(pathTo: string): Promise<void> {
-    return fs.rmdir(pathTo);
-  }
-
-  async rmdirRf(pathTo: string): Promise<void> {
-    await fs.rm(pathTo, { force: true, recursive: true });
-  }
-
+  // TODO: add review
   private async chown(pathTo: string) {
     if (!this.ioSet.env.FILES_UID && !this.ioSet.env.FILES_GID) {
       // if noting to change - just return

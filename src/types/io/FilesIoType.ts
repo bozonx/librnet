@@ -81,6 +81,12 @@ export interface MkdirOptions {
  * But actually it joins these paths with workDir and result will be like /workdir/envSet/...
  */
 export default interface FilesIoType {
+  /**
+   * Read text file and return it as string
+   * @param pathTo
+   * @param options
+   * @returns
+   */
   readTextFile(pathTo: string, options?: ReadTextFileOptions): Promise<string>;
 
   /**
@@ -130,6 +136,11 @@ export default interface FilesIoType {
    */
   rm(paths: string[]): Promise<void>;
 
+  /**
+   * Get file or directory stats
+   * @param pathTo
+   * @returns
+   */
   stat(pathTo: string): Promise<StatsSimplified | undefined>;
 
   /**
@@ -158,21 +169,4 @@ export default interface FilesIoType {
   readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]>;
 
   mkdir(pathTo: string, options?: MkdirOptions): Promise<void>;
-
-  // TODO: зачем нужно если есть rm
-  /**
-   * Remove an empty dir
-   * @param pathTo
-   * @returns
-   */
-  rmdir(pathTo: string): Promise<void>;
-
-  // TODO: зачем нужно если есть rm
-  /**
-   * Remove directory recursively as rm -Rf
-   * @param pathTo
-   * @returns
-   */
-  // remove directory recursively
-  rmdirRf(pathTo: string): Promise<void>;
 }

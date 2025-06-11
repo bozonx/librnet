@@ -61,12 +61,12 @@ const tmpDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'tmp');
     throw new Error('File is not correct');
   }
   try {
-    await filesIo.rmdir(path.join(tmpDir, '1'));
+    await filesIo.rm([path.join(tmpDir, '1')]);
     throw new Error('Directory is not removed');
   } catch (e) {
     // ok
   }
-  await filesIo.rmdirRf(path.join(tmpDir, '1'));
+  await filesIo.rm([path.join(tmpDir, '1')], { recursive: true });
 
   // renameFiles
   await filesIo.mkdir(path.join(tmpDir, '2'), { recursive: true });
@@ -81,7 +81,7 @@ const tmpDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'tmp');
   if (!(await filesIo.stat(path.join(tmpDir, '3', 'testMoved.txt')))) {
     throw new Error('File is not removed');
   }
-  await filesIo.rmdirRf(path.join(tmpDir, '3'));
+  await filesIo.rm([path.join(tmpDir, '3')], { recursive: true });
   try {
     await filesIo.rename([[path.join(tmpDir, '4'), path.join(tmpDir, '5')]]);
   } catch (errors) {
@@ -126,9 +126,9 @@ const tmpDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'tmp');
     }
   }
 
-  await filesIo.rmdirRf(path.join(tmpDir, '4'));
-  await filesIo.rmdirRf(path.join(tmpDir, '5'));
-  await filesIo.rmdirRf(path.join(tmpDir, 'testCopy.txt'));
+  await filesIo.rm([path.join(tmpDir, '4')], { recursive: true });
+  await filesIo.rm([path.join(tmpDir, '5')], { recursive: true });
+  await filesIo.rm([path.join(tmpDir, 'testCopy.txt')]);
 
   try {
     await filesIo.cp([
