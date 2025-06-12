@@ -98,15 +98,10 @@ export default interface FilesIoType {
   readBinFile(pathTo: string, returnType?: BinTypesNames): Promise<BinTypes>;
 
   /**
-   * You should pass only symlink. Resolve it by using stat().
-   * It returns an absolute path to target file
-   */
-  readlink(pathTo: string): Promise<string>;
-
-  /**
    * Append data to file even if it doesn't exist
    * @param pathTo
    * @param data
+   * @param options - If data is string then default encoding is UTF-8
    * @returns
    */
   appendFile(
@@ -119,6 +114,7 @@ export default interface FilesIoType {
    * Write or overwrite file
    * @param pathTo
    * @param data
+   * @param options - If data is string then default encoding is UTF-8
    */
   writeFile(
     pathTo: string,
@@ -134,7 +130,7 @@ export default interface FilesIoType {
    * @param options
    * @returns
    */
-  rm(paths: string[]): Promise<void>;
+  rm(paths: string[], options?: RmOptions): Promise<void>;
 
   /**
    * Get file or directory stats
@@ -166,7 +162,34 @@ export default interface FilesIoType {
    */
   rename(files: [string, string][]): Promise<void>;
 
+  /**
+   * Read directory
+   * @param pathTo
+   * @param options - Default encoding is UTF-8
+   * @returns
+   */
   readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]>;
 
+  /**
+   * Create directory
+   * @param pathTo
+   * @param options
+   * @returns
+   */
   mkdir(pathTo: string, options?: MkdirOptions): Promise<void>;
+
+  /**
+   * You should pass only symlink. Resolve it by using stat().
+   * It returns an absolute path to target file
+   */
+  readlink(pathTo: string): Promise<string>;
+
+  /**
+   * Create symlink.
+   * On windows type file or dir are automatically detected
+   * @param target - target path
+   * @param pathTo - path to symlink
+   * @returns
+   */
+  symlink(target: string, pathTo: string): Promise<void>;
 }

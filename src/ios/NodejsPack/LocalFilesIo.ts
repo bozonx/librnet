@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 import type { Stats } from 'node:fs';
-import { convertBufferToUint8Array } from 'squidlet-lib';
 import type FilesIoType from '../../types/io/FilesIoType.js';
 import type {
   CopyOptions,
@@ -33,7 +32,6 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     });
   }
 
-  // TODO: test
   async readBinFile(
     pathTo: string,
     returnType: BinTypesNames = 'Uint8Array'
@@ -66,16 +64,8 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
       default:
         throw new Error(`Unknown return type: ${returnType}`);
     }
-
-    // return convertBufferToUint8Array(buffer);
   }
 
-  // TODO: test
-  readlink(pathTo: string): Promise<string> {
-    return fs.readlink(pathTo);
-  }
-
-  // TODO: test binary files
   async appendFile(
     pathTo: string,
     data: string | Uint8Array,
@@ -95,13 +85,12 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
         encoding: options?.encoding || DEFAULT_ENCODE,
       });
     } else {
-      await fs.appendFile(pathTo, data);
+      await fs.appendFile(pathTo, data, options);
     }
 
     if (!wasExist) await this.chown(pathTo);
   }
 
-  // TODO: test binary files
   async writeFile(
     pathTo: string,
     data: string | BinTypes,
@@ -112,7 +101,7 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
         encoding: options?.encoding || DEFAULT_ENCODE,
       });
     } else {
-      await fs.writeFile(pathTo, data);
+      await fs.writeFile(pathTo, data, options);
     }
 
     await this.chown(pathTo);
@@ -209,15 +198,25 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
 
   readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]> {
     return fs.readdir(pathTo, {
+      ...options,
       encoding: options?.encoding || DEFAULT_ENCODE,
-      recursive: options?.recursive || false,
     });
   }
 
   async mkdir(pathTo: string, options?: MkdirOptions): Promise<void> {
-    await fs.mkdir(pathTo, { recursive: options?.recursive || false });
+    await fs.mkdir(pathTo, options);
 
     return this.chown(pathTo);
+  }
+
+  // TODO: test
+  readlink(pathTo: string): Promise<string> {
+    return fs.readlink(pathTo);
+  }
+
+  async symlink(target: string, pathTo: string): Promise<void> {
+    await fs.symlink(target, pathTo);
+    await this.chown(pathTo);
   }
 
   // TODO: add review

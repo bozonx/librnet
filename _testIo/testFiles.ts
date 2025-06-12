@@ -17,6 +17,8 @@ const tmpDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'tmp');
     new IoContext({} as PackageContext)
   );
 
+  //////////////////////
+  // text files and dirs
   await filesIo.mkdir(path.join(tmpDir, '1'), { recursive: true });
 
   // append text file and read it
@@ -46,6 +48,7 @@ const tmpDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'tmp');
     }
   }
 
+  //////////////////////
   // writeFile  and remove dir
   await filesIo.writeFile(path.join(tmpDir, '1', 'test.txt'), 'test');
   await filesIo.writeFile(path.join(tmpDir, '1', 'test.txt'), 'test2');
@@ -68,6 +71,7 @@ const tmpDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'tmp');
   }
   await filesIo.rm([path.join(tmpDir, '1')], { recursive: true });
 
+  //////////////////////
   // renameFiles
   await filesIo.mkdir(path.join(tmpDir, '2'), { recursive: true });
   await filesIo.writeFile(path.join(tmpDir, 'testToMove.txt'), 'test');
@@ -90,6 +94,7 @@ const tmpDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'tmp');
     }
   }
 
+  //////////////////////
   // copy files
   await filesIo.mkdir(path.join(tmpDir, '4'), { recursive: true });
   await filesIo.writeFile(path.join(tmpDir, 'testCopy.txt'), 'test');
@@ -140,6 +145,22 @@ const tmpDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'tmp');
     }
   }
 
-  // readBinFile , append bin, writeFile bin
+  //////////////////////
+  // Bin files
+
+  await filesIo.writeFile(
+    path.join(tmpDir, 'testBin.bin'),
+    new Uint8Array([70, 71, 72])
+  );
+  await filesIo.appendFile(
+    path.join(tmpDir, 'testBin.bin'),
+    new Uint8Array([73])
+  );
+  const bin = await filesIo.readBinFile(path.join(tmpDir, 'testBin.bin'));
+  if (bin[0] !== 70 || bin[1] !== 71 || bin[2] !== 72 || bin[3] !== 73) {
+    throw new Error('Bin is not correct');
+  }
+  await filesIo.rm([path.join(tmpDir, 'testBin.bin')]);
+
   // readlink, createLink
 })();
