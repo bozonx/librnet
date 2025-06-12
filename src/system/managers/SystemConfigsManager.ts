@@ -12,7 +12,7 @@ import {
   ROOT_DIRS,
   SYNCED_DATA_SUB_DIRS,
 } from '../../types/constants.js';
-import type { FilesIo } from '@/ios/NodejsPack/LocalFilesIo.js';
+import type { LocalFilesIo } from '@/ios/NodejsPack/LocalFilesIo.js';
 import type { EntityCfg } from '@/types/types.js';
 
 export class SystemConfigsManager {
@@ -20,8 +20,8 @@ export class SystemConfigsManager {
 
   private readonly system: System;
 
-  private get filesIo(): FilesIo {
-    return this.system.io.getIo(IO_NAMES.FilesIo);
+  private get filesIo(): LocalFilesIo {
+    return this.system.io.getIo(IO_NAMES.LocalFilesIo);
   }
 
   constructor(system: System) {

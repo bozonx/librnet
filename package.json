@@ -30,7 +30,9 @@
     "src": "./src"
   },
   "dependencies": {
+    "@types/koa": "^2.15.0",
     "axios": "^1.9.0",
+    "koa": "^3.0.0",
     "squidlet-lib": "file:../squidlet-lib",
     "ws": "^8.18.2",
     "yaml": "^2.8.0"

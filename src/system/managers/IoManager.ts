@@ -100,10 +100,11 @@ export class IoManager {
     if (!io) throw new Error(`Can't find IO "${ioName}"`);
     if (!io.init) return;
 
+    const cfg = await this.system.configs.loadIoConfig(ioName);
     const promised = new Promised();
 
     try {
-      await promised.start(io.init(), ENTITY_INIT_TIMEOUT_SEC * 1000);
+      await promised.start(io.init(cfg), ENTITY_INIT_TIMEOUT_SEC * 1000);
     } catch (e) {
       throw new Error(`Initialization of "${ioName}" failed: ${e}`);
     }

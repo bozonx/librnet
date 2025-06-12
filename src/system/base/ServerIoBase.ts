@@ -32,7 +32,7 @@ export abstract class ServerIoBase<ServerItem, Props> extends IoBase {
     const serverId: string = this.makeServerId(props)
 
     if (this.servers[serverId]) {
-      throw new Error(`WS server ${serverId} already exists`)
+      throw new Error(`Server ${serverId} already exists`)
     }
 
     this.servers[serverId] = this.startServer(serverId, props)
@@ -40,7 +40,7 @@ export abstract class ServerIoBase<ServerItem, Props> extends IoBase {
     return serverId
   }
 
-  async closeServer(serverId: string): Promise<void> {
+  async stopServer(serverId: string): Promise<void> {
     return this.destroyServer(serverId)
   }
 

@@ -12,7 +12,7 @@ export abstract class IoBase {
     this.ioSet = ioSet;
   }
 
-  init?(cfg?: any): Promise<void>;
+  init?(cfg?: Record<string, any>): Promise<void>;
   destroy?(): Promise<void>;
 
   // /**
