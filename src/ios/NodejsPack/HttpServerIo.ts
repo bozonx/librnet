@@ -1,4 +1,4 @@
-//import {createServer, IncomingMessage, Server, ServerResponse} from 'http'
+import { createServer, IncomingMessage, Server, ServerResponse } from 'http';
 import { IndexedEvents, makeUniqNumber, callPromised } from 'squidlet-lib';
 import type { HttpRequest, HttpResponse } from 'squidlet-lib';
 import { HttpServerEvent } from '../../types/io/HttpServerIoType.js';
@@ -9,8 +9,8 @@ import type {
 import { ServerIoBase } from '../../system/base/ServerIoBase.js';
 import type { IoIndex } from '../../types/types.js';
 import type { IoContext } from '../../system/context/IoContext.js';
-import Koa from 'koa';
 import type { IoSetBase } from '@/system/base/IoSetBase.js';
+import { DEFAULT_ENCODE } from '@/types/constants.js';
 
 type ServerItem = [
   // Http server instance
@@ -51,8 +51,6 @@ export class HttpServerIo
   private cfg: HttpServerIoConfig = HTTP_SERVER_IO_CONFIG_DEFAULTS;
 
   init = async (cfg?: HttpServerIoConfig) => {
-    // const app = new Koa();
-
     this.cfg = {
       ...HTTP_SERVER_IO_CONFIG_DEFAULTS,
       ...cfg,
@@ -76,12 +74,12 @@ export class HttpServerIo
     server.on('error', (err: Error) =>
       this.events.emit(HttpServerEvent.serverError, serverId, String(err))
     );
-    server.on('close', () =>
-      this.events.emit(HttpServerEvent.serverClose, serverId)
-    );
-    server.on('listening', () => this.handleServerStartListening(serverId));
     server.on('request', (req: IncomingMessage, res: ServerResponse) =>
       this.handleIncomeRequest(serverId, req, res)
+    );
+    server.on('listening', () => this.handleServerStartListening(serverId));
+    server.on('close', () =>
+      this.events.emit(HttpServerEvent.serverClose, serverId)
     );
 
     server.listen(props.port, props.host);
