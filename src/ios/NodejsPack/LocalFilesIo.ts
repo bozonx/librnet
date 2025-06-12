@@ -209,9 +209,12 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     return this.chown(pathTo);
   }
 
-  // TODO: test
   readlink(pathTo: string): Promise<string> {
     return fs.readlink(pathTo);
+  }
+
+  async realpath(pathTo: string): Promise<string> {
+    return fs.realpath(pathTo);
   }
 
   async symlink(target: string, pathTo: string): Promise<void> {
@@ -219,7 +222,6 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     await this.chown(pathTo);
   }
 
-  // TODO: add review
   private async chown(pathTo: string) {
     if (!this.ioSet.env.FILES_UID && !this.ioSet.env.FILES_GID) {
       // if noting to change - just return
@@ -233,12 +235,12 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
       );
     }
     // else load stats to resolve lack of params
-    const stat: Stats = await fs.lstat(pathTo);
+    const stat: Stats = await fs.stat(pathTo);
 
     await fs.chown(
       pathTo,
-      !this.ioSet.env.FILES_UID ? stat.uid : this.ioSet.env.FILES_UID,
-      !this.ioSet.env.FILES_GID ? stat.gid : this.ioSet.env.FILES_GID
+      this.ioSet.env.FILES_UID || stat.uid,
+      this.ioSet.env.FILES_GID || stat.gid
     );
   }
 }

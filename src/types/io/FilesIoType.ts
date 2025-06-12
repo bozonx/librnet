@@ -1,7 +1,5 @@
 import type { BinTypes, BinTypesNames } from '../types';
 
-// TODO: Add lutimes, utimes
-
 export interface StatsSimplified {
   // in bytes
   size: number;
@@ -180,15 +178,26 @@ export default interface FilesIoType {
 
   /**
    * You should pass only symlink. Resolve it by using stat().
-   * It returns an absolute path to target file
+   * It returns an absolute path to target file.
+   * Encoding is UTF-8
+   * @param pathTo
+   * @returns path to target file which is set in symlink (can be relative)
    */
   readlink(pathTo: string): Promise<string>;
 
   /**
+   * Resolve path to real path through symlinks
+   * Encoding is UTF-8
+   * @param pathTo
+   * @returns absolute path to deeply linked target file
+   */
+  realpath(pathTo: string): Promise<string>;
+
+  /**
    * Create symlink.
    * On windows type file or dir are automatically detected
-   * @param target - target path
-   * @param pathTo - path to symlink
+   * @param target - target path (source file)
+   * @param pathTo - path to place symlink
    * @returns
    */
   symlink(target: string, pathTo: string): Promise<void>;

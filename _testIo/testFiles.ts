@@ -162,5 +162,22 @@ const tmpDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'tmp');
   }
   await filesIo.rm([path.join(tmpDir, 'testBin.bin')]);
 
-  // readlink, createLink
+  //////////////////////
+  // symlink
+  await filesIo.writeFile(path.join(tmpDir, 'testSymlink.txt'), 'test');
+  await filesIo.symlink(
+    path.join(tmpDir, 'testSymlink.txt'),
+    path.join(tmpDir, 'testSymlink2.txt')
+  );
+  if (!(await filesIo.stat(path.join(tmpDir, 'testSymlink2.txt')))) {
+    throw new Error('Symlink is not created');
+  }
+  const readlink = await filesIo.readlink(
+    path.join(tmpDir, 'testSymlink2.txt')
+  );
+  if (readlink !== path.join(tmpDir, 'testSymlink.txt')) {
+    throw new Error('Readlink is not correct');
+  }
+  await filesIo.rm([path.join(tmpDir, 'testSymlink2.txt')]);
+  await filesIo.rm([path.join(tmpDir, 'testSymlink.txt')]);
 })();
