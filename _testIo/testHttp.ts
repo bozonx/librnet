@@ -5,10 +5,12 @@ import { PackageContext } from '../src/system/context/PackageContext.js';
 import { IoSetBase } from '../src/system/base/IoSetBase.js';
 import { HttpServerEvent } from '../src/types/io/HttpServerIoType.js';
 
-// TODO: повторно возможно запустить сервер?
+// TODO: повторно возможно запустить сервер
+// TODO: пока работает сервер нельзя запустить его снова
 // TODO: test error handling
 // TODO: test binary
 // TODO: test timeout
+// TODO:  test https
 
 class TestIoSet extends IoSetBase {
   type = 'testIoSet';

@@ -1,6 +1,6 @@
 import { createServer, IncomingMessage, Server, ServerResponse } from 'http';
 import { IndexedEvents, makeUniqNumber, callPromised } from 'squidlet-lib';
-import type { HttpRequest, HttpResponse } from 'squidlet-lib';
+import type { HttpMethods, HttpRequest, HttpResponse } from 'squidlet-lib';
 import { HttpServerEvent } from '../../types/io/HttpServerIoType.js';
 import type {
   HttpServerIoType,
@@ -180,7 +180,7 @@ export class HttpServerIo
       complete: req.complete,
       rawHeaders: req.rawHeaders,
       // method of http request is in upper case format
-      method: (req.method || 'get').toLowerCase() as any,
+      method: (req.method || 'GET').toUpperCase() as HttpMethods,
       url: req.url || '',
 
       destroyed: req.destroyed,
