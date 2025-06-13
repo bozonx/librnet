@@ -65,6 +65,12 @@ export class HttpServerIo
     return this.responseEvent.emit(requestId, response);
   }
 
+  async isServerListening(serverId: string): Promise<boolean> {
+    const serverItem = this.servers[serverId];
+
+    return serverItem?.[ITEM_POSITION.listeningState] ?? false;
+  }
+
   protected startServer(serverId: string, props: HttpServerProps): ServerItem {
     const server: Server = createServer({
       // timeout of entire request in ms
