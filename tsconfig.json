@@ -24,7 +24,8 @@
     "_old-before-2025/squidletctl",
     "_old-before-2025/MemStorageDriver",
     "test",
-    "_old-before-2025/CtrlService"
+    "_old-before-2025/CtrlService",
+    "_old-before-2025/HttpServerIo-httpByNode.ts"
   ],
   "exclude": [
     "src/starters/AndroidStarter",

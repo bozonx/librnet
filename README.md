@@ -16,6 +16,7 @@ Test IO
 
 ```bash
 npx tsx ./_testIo/testFiles.ts
+npx tsx ./_testIo/testHttp.ts
 ```
 
 
