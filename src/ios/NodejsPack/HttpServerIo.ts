@@ -133,34 +133,28 @@ export class HttpServerIo
   ) {
     if (!this.servers[serverId]) return;
 
-    let waitTimeout: any;
     const requestId: number = makeUniqNumber();
     const httpRequest: HttpRequest = this.makeRequestObject(req);
 
-    const handlerIndex = this.responseEvent.addListener(
-      (receivedRequestId: number, response: HttpResponse) => {
-        // listen only expected requestId
-        if (receivedRequestId !== requestId) return;
-
-        clearTimeout(waitTimeout);
-        this.responseEvent.removeListener(handlerIndex);
-
+    this.responseEvent
+      .wait(
+        (reqId: number) => reqId === requestId,
+        this.cfg.requestTimeoutSec * 1000
+      )
+      .then(([, response]) => {
         this.setupResponse(response, res);
-      }
-    );
-
-    waitTimeout = setTimeout(() => {
-      this.responseEvent.removeListener(handlerIndex);
-      this.events.emit(
-        HttpServerEvent.serverError,
-        serverId,
-        `HttpServerIo: Wait for response: Timeout has been exceeded. ` +
-          `Server ${serverId}. ${req.method} ${req.url}`
-      );
-      // send request timeout code
-      res.writeHead(408);
-      res.end();
-    }, this.cfg.requestTimeoutSec * 1000);
+      })
+      .catch(() => {
+        this.events.emit(
+          HttpServerEvent.serverError,
+          serverId,
+          `HttpServerIo: Wait for response: Timeout has been exceeded. ` +
+            `Server ${serverId}. ${req.method} ${req.url}`
+        );
+        // send request timeout code
+        res.writeHead(408);
+        res.end();
+      });
 
     this.events.emit(HttpServerEvent.request, serverId, requestId, httpRequest);
   }
@@ -172,16 +166,29 @@ export class HttpServerIo
     // TODO: если content type бинарный то преобразовать body в Uint8
 
     return {
+      body,
+      headers: req.headers as any,
+      httpVersion: req.httpVersion,
+      httpVersionMajor: req.httpVersionMajor,
+      httpVersionMinor: req.httpVersionMinor,
+      complete: req.complete,
+      rawHeaders: req.rawHeaders,
       // method of http request is in upper case format
       method: (req.method || 'get').toLowerCase() as any,
       url: req.url || '',
-      headers: req.headers as any,
-      body,
+
+      destroyed: req.destroyed,
+      closed: req.closed,
+      errored: req.errored,
     };
   }
 
   private setupResponse(response: HttpResponse, httpRes: ServerResponse) {
-    httpRes.writeHead(response.status, response.headers as Record<string, any>);
+    httpRes.writeHead(
+      response.status,
+      response.statusMessage,
+      response.headers as Record<string, any>
+    );
 
     if (typeof response.body === 'string') {
       httpRes.end(response.body);

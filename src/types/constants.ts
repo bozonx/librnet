@@ -1,6 +1,3 @@
-import type { ioSetLocalPkg } from '@/packages/IoSetLocalPkg';
-import { versions } from 'process';
-
 export const DEFAULT_ENCODE = 'utf-8';
 export const EVENT_DELIMITER = '|';
 //export const VERSIONS_DIR_NAME = '.versions'
@@ -51,8 +48,8 @@ export enum NETWORK_CODES {
 }
 
 export const ENV_MODES = {
-  dev: 'dev',
-  prod: 'prod',
+  development: 'development',
+  production: 'production',
   test: 'test',
 };
 
