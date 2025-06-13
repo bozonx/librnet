@@ -5,12 +5,10 @@ import { PackageContext } from '../src/system/context/PackageContext.js';
 import { IoSetBase } from '../src/system/base/IoSetBase.js';
 import { HttpServerEvent } from '../src/types/io/HttpServerIoType.js';
 
-// TODO: повторно возможно запустить сервер
-// TODO: пока работает сервер нельзя запустить его снова
 // TODO: test error handling
 // TODO: test binary
 // TODO: test timeout
-// TODO:  test https
+// TODO: test https
 
 class TestIoSet extends IoSetBase {
   type = 'testIoSet';
@@ -61,8 +59,41 @@ class TestIoSet extends IoSetBase {
   }
 
   ///////////////////////////
-  // Send request
+  // Try to start the same server again
+  try {
+    await httpServerIo.newServer({
+      port: testPort,
+      host: 'localhost',
+    });
+  } catch (e) {
+    if (!String(e).includes('already exists')) {
+      throw e;
+    }
+  }
 
+  ///////////////////////////
+  // Try to stop and start the server again
+  await httpServerIo.stopServer(serverId);
+  const serverId2 = await httpServerIo.newServer({
+    port: testPort,
+    host: 'localhost',
+  });
+  if (serverId2 !== serverId) {
+    throw new Error(`Server id changed: ${serverId2} !== ${serverId}`);
+  }
+  // Wait for server to start listening
+  await new Promise<void>((resolve, reject) => {
+    handler = (eventName, serverId) => {
+      if (serverId !== testServerId) {
+        reject(`Wrong server id: ${serverId}`);
+      } else if (eventName === HttpServerEvent.listening) {
+        resolve();
+      } else reject(`Din't receive listening event`);
+    };
+  });
+
+  ///////////////////////////
+  // Send request
   await new Promise<void>(async (resolve, reject) => {
     handler = (eventName, serverId, requestId, request) => {
       if (serverId !== testServerId) {
