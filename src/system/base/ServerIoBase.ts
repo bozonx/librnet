@@ -41,7 +41,11 @@ export abstract class ServerIoBase<ServerItem, Props> extends IoBase {
   }
 
   async stopServer(serverId: string): Promise<void> {
-    await this.destroyServer(serverId);
+    if (!this.servers[serverId]) return;
+
+    const serverItem = this.getServerItem(serverId);
+
+    await this.destroyServer(serverItem);
 
     delete this.servers[serverId];
   }
@@ -56,7 +60,7 @@ export abstract class ServerIoBase<ServerItem, Props> extends IoBase {
     return this.servers[serverId];
   }
 
-  protected abstract destroyServer(serverId: string): Promise<void>;
+  protected abstract destroyServer(serverItem: ServerItem): Promise<void>;
   protected abstract makeServerId(props: Props): string;
   protected abstract startServer(serverId: string, props: Props): ServerItem;
 }

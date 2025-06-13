@@ -97,19 +97,13 @@ export class HttpServerIo
     ];
   }
 
-  protected async destroyServer(serverId: string) {
-    if (!this.servers[serverId]) return;
-
-    const serverItem = this.getServerItem(serverId);
-
-    // TODO: НЕ должно при этом подняться событие close или должно???
+  protected async destroyServer(serverItem: ServerItem) {
+    // it will emit serverClose event
     await callPromised(
       serverItem[ITEM_POSITION.server].close.bind(
         serverItem[ITEM_POSITION.server]
       )
     );
-
-    delete this.servers[serverId];
   }
 
   protected makeServerId(props: HttpServerProps): string {

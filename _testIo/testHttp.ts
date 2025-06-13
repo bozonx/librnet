@@ -19,12 +19,10 @@ class TestIoSet extends IoSetBase {
 (async () => {
   const testPort = 48765;
   const testServerId = `localhost:${testPort}`;
-
   const httpClientIo = new HttpClientIo(
     new TestIoSet({} as PackageContext, {}),
     new IoContext({} as PackageContext)
   );
-
   const httpServerIo = new HttpServerIo(
     new TestIoSet({} as PackageContext, {}),
     new IoContext({} as PackageContext)
