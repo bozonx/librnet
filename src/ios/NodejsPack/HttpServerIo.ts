@@ -141,22 +141,14 @@ export class HttpServerIo
       .then(([, response]) => {
         this.setupResponse(response, res);
       })
-      .rejected((e: Error) => {
-        console.log('responsePromised.rejected');
-
-        const errorMsg = `HttpServerIo: Emit request event: ${e}`;
-
-        res.writeHead(500, 'Internal Server Error', {
-          'Content-Type': 'text/json',
-        });
-
-        res.end(JSON.stringify({ errorMsg }));
+      .rejected((e) => {
+        this.setup500Response(String(e), res);
       })
       .onExceeded(() => {
         const errorMsg =
           `HttpServerIo: Wait for response: Timeout has been exceeded. ` +
           `Server ${serverId}. ${req.method} ${req.url}`;
-        this.events.emit(HttpServerEvent.serverError, serverId, errorMsg);
+        // this.events.emit(HttpServerEvent.serverError, serverId, errorMsg);
         // send request timeout code
         res.writeHead(408, 'Request Timeout', {
           'Content-Type': 'text/json',
@@ -165,7 +157,16 @@ export class HttpServerIo
       });
 
     // emit request event which driver has to responce
-    this.events.emit(HttpServerEvent.request, serverId, requestId, httpRequest);
+    try {
+      await this.events.emitSync(
+        HttpServerEvent.request,
+        serverId,
+        requestId,
+        httpRequest
+      );
+    } catch (e) {
+      this.setup500Response(String(e), res);
+    }
   }
 
   private makeRequestObject(req: IncomingMessage): HttpRequest {
@@ -204,5 +205,13 @@ export class HttpServerIo
     } else {
       // TODO: support of Buffer - convert from Uint8Arr to Buffer
     }
+  }
+
+  private async setup500Response(errorMsg: string, res: ServerResponse) {
+    res.writeHead(500, 'Internal Server Error', {
+      'Content-Type': 'text/json',
+    });
+
+    res.end(JSON.stringify({ errorMsg }));
   }
 }

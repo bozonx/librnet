@@ -129,22 +129,22 @@ class TestIoSet extends IoSetBase {
 
   ///////////////////////////
   // Error handling
-  // await new Promise<void>(async (resolve, reject) => {
-  //   handler = (eventName, serverId, requestId, request) => {
-  //     throw new Error('test error');
-  //   };
+  await new Promise<void>(async (resolve, reject) => {
+    handler = (eventName, serverId, requestId, request) => {
+      throw new Error('test error');
+    };
 
-  //   const res = await httpClientIo.request({
-  //     url: `http://${testServerId}`,
-  //     method: 'GET',
-  //   });
+    const res = await httpClientIo.request({
+      url: `http://${testServerId}`,
+      method: 'GET',
+    });
 
-  //   if (res.status === 500) {
-  //     resolve();
-  //   } else {
-  //     reject(`Should receive 500 status code`);
-  //   }
-  // });
+    if (res.status === 500) {
+      resolve();
+    } else {
+      reject(`Should receive 500 status code`);
+    }
+  });
 
   ///////////////////////////
   // Send request with timeout
