@@ -142,18 +142,19 @@ export class HttpServerIo
         this.setupResponse(response, res);
       })
       .rejected((e) => {
-        this.setup500Response(String(e), res);
+        this.setupErrorResponse(
+          500,
+          `HttpServerIo: Error while waiting for response: ${String(e)}`,
+          res
+        );
       })
       .onExceeded(() => {
-        const errorMsg =
-          `HttpServerIo: Wait for response: Timeout has been exceeded. ` +
-          `Server ${serverId}. ${req.method} ${req.url}`;
-        // this.events.emit(HttpServerEvent.serverError, serverId, errorMsg);
-        // send request timeout code
-        res.writeHead(408, 'Request Timeout', {
-          'Content-Type': 'text/json',
-        });
-        res.end(JSON.stringify({ errorMsg }));
+        this.setupErrorResponse(
+          408,
+          'HttpServerIo: Timeout has been exceeded, ' +
+            `Server ${serverId}. ${req.method} ${req.url}`,
+          res
+        );
       });
 
     // emit request event which driver has to responce
@@ -165,7 +166,11 @@ export class HttpServerIo
         httpRequest
       );
     } catch (e) {
-      this.setup500Response(String(e), res);
+      this.setupErrorResponse(
+        500,
+        `HttpServerIo: Error of one of handlers: ${String(e)}`,
+        res
+      );
     }
   }
 
@@ -207,8 +212,23 @@ export class HttpServerIo
     }
   }
 
-  private async setup500Response(errorMsg: string, res: ServerResponse) {
-    res.writeHead(500, 'Internal Server Error', {
+  private async setupErrorResponse(
+    statusCode: number,
+    errorMsg: string,
+    res: ServerResponse
+  ) {
+    let statusMessage;
+
+    switch (statusCode) {
+      case 408:
+        statusMessage = 'Request Timeout';
+        break;
+      case 500:
+        statusMessage = 'Internal Server Error';
+        break;
+    }
+
+    res.writeHead(statusCode, statusMessage, {
       'Content-Type': 'text/json',
     });
 
