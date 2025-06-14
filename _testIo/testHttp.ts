@@ -5,7 +5,6 @@ import { PackageContext } from '../src/system/context/PackageContext.js';
 import { IoSetBase } from '../src/system/base/IoSetBase.js';
 import { HttpServerEvent } from '../src/types/io/HttpServerIoType.js';
 
-// TODO: test error handling
 // TODO: test binary
 // TODO: test https
 
@@ -27,8 +26,10 @@ class TestIoSet extends IoSetBase {
 
   let handler;
 
-  await httpServerIo.on((...args) => {
-    handler(...args);
+  // ‼️ Чтобы правильно обрабатывались ошибки в коде обработчиков
+  //    важно сделать функцию асинхронной
+  await httpServerIo.on(async (...args) => {
+    await handler(...args);
   });
 
   ///////////////////////////
@@ -130,7 +131,11 @@ class TestIoSet extends IoSetBase {
   ///////////////////////////
   // Error handling
   await new Promise<void>(async (resolve, reject) => {
-    handler = (eventName, serverId, requestId, request) => {
+    handler = async (eventName, serverId, requestId, request) => {
+      if (eventName !== HttpServerEvent.request) {
+        return;
+      }
+
       throw new Error('test error');
     };
 

@@ -39,6 +39,11 @@ export const HttpServerIoIndex: IoIndex = (
   return new HttpServerIo(ioSet, ctx);
 };
 
+/**
+ * HttpServerIo is a server that listens for incoming HTTP requests
+ * and sends responses back to the client.
+ * ‼️ to handle errors in handlers you have to make them async
+ */
 export class HttpServerIo
   extends ServerIoBase<ServerItem, HttpServerProps>
   implements HttpServerIoType
@@ -166,11 +171,7 @@ export class HttpServerIo
         httpRequest
       );
     } catch (e) {
-      this.setupErrorResponse(
-        500,
-        `HttpServerIo: Error of one of handlers: ${String(e)}`,
-        res
-      );
+      responsePromised.reject(e as Error);
     }
   }
 
