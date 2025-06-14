@@ -126,7 +126,7 @@ export class HttpServerIo
    * @param res
    * @private
    */
-  private handleIncomeRequest(
+  private async handleIncomeRequest(
     serverId: string,
     req: IncomingMessage,
     res: ServerResponse
@@ -136,26 +136,35 @@ export class HttpServerIo
     const requestId: number = makeUniqNumber();
     const httpRequest: HttpRequest = this.makeRequestObject(req);
 
-    this.responseEvent
-      .wait(
-        (reqId: number) => reqId === requestId,
-        this.cfg.requestTimeoutSec * 1000
-      )
+    const responsePromised = this.responseEvent
+      .wait(([reqId]) => reqId === requestId, this.cfg.requestTimeoutSec * 1000)
       .then(([, response]) => {
         this.setupResponse(response, res);
       })
-      .catch(() => {
-        this.events.emit(
-          HttpServerEvent.serverError,
-          serverId,
+      .rejected((e: Error) => {
+        console.log('responsePromised.rejected');
+
+        const errorMsg = `HttpServerIo: Emit request event: ${e}`;
+
+        res.writeHead(500, 'Internal Server Error', {
+          'Content-Type': 'text/json',
+        });
+
+        res.end(JSON.stringify({ errorMsg }));
+      })
+      .onExceeded(() => {
+        const errorMsg =
           `HttpServerIo: Wait for response: Timeout has been exceeded. ` +
-            `Server ${serverId}. ${req.method} ${req.url}`
-        );
+          `Server ${serverId}. ${req.method} ${req.url}`;
+        this.events.emit(HttpServerEvent.serverError, serverId, errorMsg);
         // send request timeout code
-        res.writeHead(408);
-        res.end();
+        res.writeHead(408, 'Request Timeout', {
+          'Content-Type': 'text/json',
+        });
+        res.end(JSON.stringify({ errorMsg }));
       });
 
+    // emit request event which driver has to responce
     this.events.emit(HttpServerEvent.request, serverId, requestId, httpRequest);
   }
 

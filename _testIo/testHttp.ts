@@ -7,7 +7,6 @@ import { HttpServerEvent } from '../src/types/io/HttpServerIoType.js';
 
 // TODO: test error handling
 // TODO: test binary
-// TODO: test timeout
 // TODO: test https
 
 class TestIoSet extends IoSetBase {
@@ -125,6 +124,47 @@ class TestIoSet extends IoSetBase {
     const body = await res.body;
     if (body !== 'Hello, world!') {
       reject(`Wrong response body: ${body}`);
+    }
+  });
+
+  ///////////////////////////
+  // Error handling
+  // await new Promise<void>(async (resolve, reject) => {
+  //   handler = (eventName, serverId, requestId, request) => {
+  //     throw new Error('test error');
+  //   };
+
+  //   const res = await httpClientIo.request({
+  //     url: `http://${testServerId}`,
+  //     method: 'GET',
+  //   });
+
+  //   if (res.status === 500) {
+  //     resolve();
+  //   } else {
+  //     reject(`Should receive 500 status code`);
+  //   }
+  // });
+
+  ///////////////////////////
+  // Send request with timeout
+  await new Promise<void>(async (resolve, reject) => {
+    httpServerIo.init &&
+      (await httpServerIo.init({
+        requestTimeoutSec: 0.3,
+      }));
+
+    handler = (eventName, serverId, requestId, request) => {};
+
+    const res = await httpClientIo.request({
+      url: `http://${testServerId}`,
+      method: 'GET',
+    });
+
+    if (res.status === 408) {
+      resolve();
+    } else {
+      reject(`Should receive 408 status code`);
     }
   });
 
