@@ -19,7 +19,11 @@ npx tsx ./_testIo/testFiles.ts
 npx tsx ./_testIo/testHttp.ts
 ```
 
+### App backendd standalone dev mode
 
+```bash
+npx tsx ./src/packages/AppsSubsystemPkg/standalone.ts
+```
 
 
 
