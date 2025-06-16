@@ -1,12 +1,12 @@
-export const NOT_ALLOWED_APP_PROPS = [
-  'myName',
-  'requireDriver',
-  'constructor',
-  '$setCtx',
-  'init',
-  'destroy',
-  'getApi',
-];
+// export const NOT_ALLOWED_APP_PROPS = [
+//   'myName',
+//   'requireDriver',
+//   'constructor',
+//   '$setCtx',
+//   'init',
+//   'destroy',
+//   'getApi',
+// ];
 
 import type { AppContext } from '../context/AppContext.js';
 
@@ -17,6 +17,48 @@ export abstract class AppBase {
   private uiApi: Record<string, any> = {};
   private systemApi: Record<string, any> = {};
   private sharedApi: Record<string, any> = {};
+
+  getUiApi(): Record<string, any> {
+    return this.uiApi;
+  }
+
+  getSystemApi(): Record<string, any> {
+    return this.systemApi;
+  }
+
+  getSharedApi(): Record<string, any> {
+    return this.sharedApi;
+  }
+
+  // returns a db instance
+  get localDb(dbName: string) {
+    return this.ctx.localDb.getDb(dbName);
+  }
+
+  // returns a db instance
+  get syncDb(dbName: string) {
+    return this.ctx.syncDb.getDb(dbName);
+  }
+
+  // returns a files driver instance
+  get localFiles() {
+    return this.ctx.localFiles;
+  }
+
+  // returns a files driver instance
+  get syncFiles() {
+    return this.ctx.syncFiles;
+  }
+
+  // returns a config wrapper instance
+  get localConfig() {
+    return this.ctx.localConfig;
+  }
+
+  // returns a config wrapper instance
+  get syncConfig() {
+    return this.ctx.syncConfig;
+  }
 
   constructor() {}
 
@@ -31,18 +73,6 @@ export abstract class AppBase {
 
   start?(cfg?: Record<string, any>): Promise<void>;
   stop?(): Promise<void>;
-
-  getUiApi(): Record<string, any> {
-    return this.uiApi;
-  }
-
-  getSystemApi(): Record<string, any> {
-    return this.systemApi;
-  }
-
-  getSharedApi(): Record<string, any> {
-    return this.sharedApi;
-  }
 
   /**
    * Api which is accessible on the UI
