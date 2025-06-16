@@ -39,6 +39,7 @@ export abstract class ServiceBase {
    */
   getApi?(): any;
 
+  // TODO: send signal
   abstract start(): Promise<void>;
   abstract stop(force?: boolean): Promise<void>;
 }
