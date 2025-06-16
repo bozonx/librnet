@@ -3,7 +3,9 @@ import { trimChar, splitFirstElement } from 'squidlet-lib';
 export interface RequestCatcherContext {
   // This is path to function of channel, not the full path of request
   path: string;
+  // full path of request including channel name
   fullPath: string;
+  // arguments of the function
   args?: any[];
   meta?: Record<string, string>;
   data?: any | Uint8Array;
@@ -15,6 +17,7 @@ export interface RequestCatcherContext {
     // success result
     result?: any | Uint8Array;
   };
+  catcher?: RequestCatcher;
 }
 
 export class RequestCatcher {
@@ -33,7 +36,11 @@ export class RequestCatcher {
     };
 
     for (const middleware of this.middlewares[pathChannel] || []) {
-      await middleware(channelContext);
+      try {
+        await middleware(channelContext);
+      } catch (error) {
+        channelContext.response.errors = [String(error)];
+      }
     }
   }
 

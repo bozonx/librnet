@@ -14,7 +14,7 @@ app.use(async (ctx: Context) => {
       ? JSON.parse(ctx.request.header['Request-meta'] as string)
       : undefined,
     // TODO: support binary body
-    data: JSON.stringify(ctx.body),
+    data: typeof ctx.body === 'string' ? JSON.parse(ctx.body) : ctx.body,
     response: {
       status: ctx.status,
       statusMessage: ctx.statusMessage,
