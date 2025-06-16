@@ -35,9 +35,9 @@ export class PackageContext {
     this.system.services.useService(serviceIndex);
   }
 
-  // useApp(appIndex: AppIndex) {
-  //   this.system.apps.useApp(appIndex)
-  // }
+  useApp(appIndex: AppIndex) {
+    this.system.apps.useApp(appIndex);
+  }
 
   // useApi() {
   //   // TODO: add
