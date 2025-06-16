@@ -5,23 +5,23 @@ import { RequestCatcher, type RequestCatcherContext } from './RequestCatcher';
 const app = new Koa();
 
 app.use(async (ctx: Context) => {
-  const context: RequestCatcherContext = {
-    request: {
-      method: ctx.request.method,
-      url: ctx.request.url,
-      header: ctx.request.header,
-      body: ctx.request.body,
-    },
+  const context: Omit<RequestCatcherContext, 'path'> = {
+    fullPath: ctx.request.url,
+    query: ctx.request.query,
+    meta: ctx.request.header,
+    body: ctx.request.body,
     response: {
       status: ctx.status,
-      message: ctx.message,
-      header: ctx.response.header,
+      statusMessage: ctx.statusMessage,
+      meta: ctx.response.header,
+      errors: ctx.response.errors,
+      body: ctx.response.body,
     },
   };
 
-  const requestCatcher = new RequestCatcher(context);
+  const requestCatcher = new RequestCatcher();
 
-  await requestCatcher.run();
+  await requestCatcher.run(context);
 
   ctx.body = context.response.body;
 });
