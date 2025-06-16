@@ -4,17 +4,16 @@ export interface RequestCatcherContext {
   // This is path to function of channel, not the full path of request
   path: string;
   fullPath: string;
-  query: Record<string, string>;
-  meta: Record<string, string>;
-  // TODO: supoort binary body
-  body?: string | Uint8Array | undefined;
+  args?: any[];
+  meta?: Record<string, string>;
+  data?: any | Uint8Array;
   response: {
     status: number;
-    statusMessage: string;
-    meta: Record<string, string>;
+    statusMessage?: string;
+    meta?: Record<string, string>;
     errors?: string[];
-    // TODO: supoort binary body
-    body?: string | Uint8Array | undefined;
+    // success result
+    result?: any | Uint8Array;
   };
 }
 

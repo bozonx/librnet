@@ -1,5 +1,5 @@
 import Koa from 'koa';
-import type { Context } from 'vm';
+import type { Context } from 'koa';
 import { RequestCatcher, type RequestCatcherContext } from './RequestCatcher';
 
 const app = new Koa();
@@ -7,15 +7,17 @@ const app = new Koa();
 app.use(async (ctx: Context) => {
   const context: Omit<RequestCatcherContext, 'path'> = {
     fullPath: ctx.request.url,
-    query: ctx.request.query,
-    meta: ctx.request.header,
-    body: ctx.request.body,
+    args: ctx.request.query.args
+      ? JSON.parse(ctx.request.query.args as string)
+      : undefined,
+    meta: ctx.request.header['Request-meta']
+      ? JSON.parse(ctx.request.header['Request-meta'] as string)
+      : undefined,
+    // TODO: support binary body
+    data: JSON.stringify(ctx.body),
     response: {
       status: ctx.status,
       statusMessage: ctx.statusMessage,
-      meta: ctx.response.header,
-      errors: ctx.response.errors,
-      body: ctx.response.body,
     },
   };
 
@@ -23,7 +25,21 @@ app.use(async (ctx: Context) => {
 
   await requestCatcher.run(context);
 
-  ctx.body = context.response.body;
+  if (context.response.errors) {
+    ctx.body = JSON.stringify(context.response.errors);
+  } else if (context.response.result instanceof Uint8Array) {
+    // TODO: support binary body
+    ctx.body = context.response.result;
+  } else {
+    ctx.body = JSON.stringify(context.response.result);
+  }
+
+  ctx.response.status = context.response.status;
+  ctx.response.message = context.response.statusMessage || '';
+  ctx.response.header = {
+    'Content-Type': 'application/json',
+    'Request-meta': context.meta ? JSON.stringify(context.meta) : undefined,
+  };
 });
 
 app.listen(3003);
