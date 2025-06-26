@@ -81,7 +81,7 @@ export interface WsServerIoType {
       eventName: WsServerEvent.connectionError,
       serverId: string,
       connectionId: string,
-      err: Error
+      err: string
     ) => void
   ): Promise<number>;
   on(

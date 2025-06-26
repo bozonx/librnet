@@ -16,6 +16,7 @@ import { ServerIoBase } from '../../system/base/ServerIoBase.js';
 import type { IoIndex } from '../../types/types.js';
 import type { IoContext } from '../../system/context/IoContext.js';
 import type { IoSetBase } from '@/system/base/IoSetBase.js';
+import { SERVFAIL } from 'dns';
 
 // TODO: нужно делать пинг на соединение и удалять если нет ответа
 
@@ -107,16 +108,6 @@ export class WsServerIo
     // TODO: проверить не будет ли ошибки если соединение уже закрыто
   }
 
-  stopServer = async (serverId: string): Promise<void> => {
-    const serverItem = this.getServerItem(serverId);
-    const server = serverItem[ITEM_POSITION.wsServer];
-
-    // TODO: проверить закроются ли соединения
-    await callPromised(server.close.bind(server));
-
-    delete this.servers[serverId];
-  };
-
   async destroyConnection(
     serverId: string,
     connectionId: string
@@ -176,6 +167,12 @@ export class WsServerIo
     );
   }
 
+  protected async destroyServer(serverItem: ServerItem): Promise<void> {
+    const server = serverItem[ITEM_POSITION.wsServer];
+    // TODO: проверить закроются ли соединения
+    await callPromised(server.close.bind(server));
+  }
+
   private handleServerStartListening = (serverId: string) => {
     const serverItem = this.getServerItem(serverId);
 
@@ -202,7 +199,7 @@ export class WsServerIo
         WsServerEvent.connectionError,
         serverId,
         connectionId,
-        err
+        String(err)
       );
     });
 
@@ -221,7 +218,7 @@ export class WsServerIo
 
       if (typeof data === 'string') {
         resolvedData = data;
-      } else if (!Buffer.isBuffer(data)) {
+      } else if (Buffer.isBuffer(data)) {
         resolvedData = new Uint8Array(data);
       } else {
         this.events.emit(

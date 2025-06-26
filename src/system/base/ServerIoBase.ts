@@ -9,7 +9,7 @@ export abstract class ServerIoBase<ServerItem, Props> extends IoBase {
 
   destroy = async () => {
     for (const serverId of Object.keys(this.servers)) {
-      await this.destroyServer(serverId);
+      await this.destroyServer(this.getServerItem(serverId));
 
       delete this.servers[serverId];
     }
