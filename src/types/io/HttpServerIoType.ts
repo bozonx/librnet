@@ -12,12 +12,20 @@ export enum HttpServerEvent {
 export type HttpRequestHandler = (requestId: number, request: HttpRequest) => void;
 
 export interface HttpServerProps {
-  host: string
-  port: number
+  host: string;
+  port: number;
+  // TODO: path разве нельзя передать
 }
 
 
 export interface HttpServerIoType {
+  /**
+   * when server starts listening
+   */
+  on(
+    cb: (eventName: HttpServerEvent.listening, serverId: string) => void
+  ): Promise<number>;
+
   /**
    * on server close. Depend on http server close
    */
@@ -34,13 +42,6 @@ export interface HttpServerIoType {
       serverId: string,
       err: string
     ) => void
-  ): Promise<number>;
-
-  /**
-   * when server starts listening
-   */
-  on(
-    cb: (eventName: HttpServerEvent.listening, serverId: string) => void
   ): Promise<number>;
 
   /**

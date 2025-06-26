@@ -6,16 +6,11 @@ export const WS_SERVER_CONNECTION_TIMEOUT_SEC = 20
 
 export enum WsServerEvent {
   // when server starts listening
-  serverStarted,
+  listening,
   serverClosed,
   // TODO: в какой момент возникает, может лучше с промисом отдать или с событием
   serverError,
   newConnection,
-  // connectionClose,
-  // incomeMessage,
-  // connectionError,
-  // TODO: review
-  //clientUnexpectedResponse,
 
   connectionClose,
   connectionMessage,
@@ -23,32 +18,51 @@ export enum WsServerEvent {
   connectionUnexpectedResponse,
 }
 
-
 export interface WsServerProps {
   // The hostname where to bind the server
-  host: string
+  host: string;
   // The port where to bind the server
-  port: number
+  port: number;
+  path?: string;
 }
 
+// TODO: review
 interface CommonHeaders {
-  Authorization?: string
-  Cookie?: string
-  'Set-Cookie'?: string
-  'User-Agent'?: string
+  Authorization?: string;
+  Cookie?: string;
+  'Set-Cookie'?: string;
+  'User-Agent'?: string;
 }
 
+// TODO: review
 export interface WsServerConnectionParams {
-  url: string
-  method: string
+  url: string;
+  // TODO: разве там есть метод?
+  method: string;
   // TODO: а это будет? это же запрос а не ответ
-  statusCode: number
-  statusMessage: string
-  headers: CommonHeaders
+  statusCode: number;
+  // TODO: review
+  statusMessage: string;
+  headers: CommonHeaders;
 }
-
 
 export interface WsServerIoType {
+  on(
+    cb: (eventName: WsServerEvent.listening, serverId: string) => void
+  ): Promise<number>;
+
+  on(
+    cb: (eventName: WsServerEvent.serverClosed, serverId: string) => void
+  ): Promise<number>;
+
+  on(
+    cb: (
+      eventName: WsServerEvent.serverError,
+      serverId: string,
+      error: string
+    ) => void
+  ): Promise<number>;
+
   /**
    * When new client is connected
    */
@@ -58,19 +72,6 @@ export interface WsServerIoType {
       serverId: string,
       connectionId: string,
       params: WsServerConnectionParams
-    ) => void
-  ): Promise<number>;
-  on(
-    cb: (eventName: WsServerEvent.serverClosed, serverId: string) => void
-  ): Promise<number>;
-  on(
-    cb: (eventName: WsServerEvent.serverStarted, serverId: string) => void
-  ): Promise<number>;
-  on(
-    cb: (
-      eventName: WsServerEvent.serverError,
-      serverId: string,
-      error: string
     ) => void
   ): Promise<number>;
 
@@ -97,7 +98,7 @@ export interface WsServerIoType {
       eventName: WsServerEvent.connectionMessage,
       serverId: string,
       connectionId: string,
-      data: Uint8Array
+      data: string | Uint8Array
     ) => void
   ): Promise<number>;
   on(
@@ -134,7 +135,11 @@ export interface WsServerIoType {
    * Send message from server to the client.
    * It waits while message has been sent but it doesn't wait for response.
    */
-  send(serverId: string, connectionId: string, data: Uint8Array): Promise<void>;
+  send(
+    serverId: string,
+    connectionId: string,
+    data: string | Uint8Array
+  ): Promise<void>;
 
   closeConnection(
     serverId: string,

@@ -27,7 +27,7 @@ enum ITEM_POSITION {
 export interface HttpServerIoConfig {
   requestTimeoutSec: number;
 }
-
+// TODO: это можно передавать в параметрах а не в конфиге
 const HTTP_SERVER_IO_CONFIG_DEFAULTS = {
   requestTimeoutSec: 60,
 };
@@ -50,10 +50,10 @@ export class HttpServerIo
 {
   name = 'HttpServerIo';
 
+  private cfg: HttpServerIoConfig = HTTP_SERVER_IO_CONFIG_DEFAULTS;
   private responseEvent = new IndexedEvents<
     (requestId: number, response: HttpResponse) => void
   >();
-  private cfg: HttpServerIoConfig = HTTP_SERVER_IO_CONFIG_DEFAULTS;
 
   init = async (cfg?: HttpServerIoConfig) => {
     this.cfg = {
@@ -62,18 +62,18 @@ export class HttpServerIo
     };
   };
 
+  async isServerListening(serverId: string): Promise<boolean> {
+    const serverItem = this.servers[serverId];
+
+    return serverItem?.[ITEM_POSITION.listeningState] ?? false;
+  }
+
   /**
    * Receive response to request and after that
    * send response back to client of it request and close request.
    */
   async sendResponse(requestId: number, response: HttpResponse): Promise<void> {
     return this.responseEvent.emit(requestId, response);
-  }
-
-  async isServerListening(serverId: string): Promise<boolean> {
-    const serverItem = this.servers[serverId];
-
-    return serverItem?.[ITEM_POSITION.listeningState] ?? false;
   }
 
   protected startServer(serverId: string, props: HttpServerProps): ServerItem {
@@ -85,14 +85,14 @@ export class HttpServerIo
     server.on('error', (err: Error) =>
       this.events.emit(HttpServerEvent.serverError, serverId, String(err))
     );
-    server.on('request', (req: IncomingMessage, res: ServerResponse) =>
-      this.handleIncomeRequest(serverId, req, res)
-    );
-    server.on('listening', () => this.handleServerStartListening(serverId));
     server.on('close', () =>
       this.events.emit(HttpServerEvent.serverClose, serverId)
     );
-
+    server.on('listening', () => this.handleServerStartListening(serverId));
+    server.on('request', (req: IncomingMessage, res: ServerResponse) =>
+      this.handleIncomeRequest(serverId, req, res)
+    );
+    // start server
     server.listen(props.port, props.host);
 
     return [

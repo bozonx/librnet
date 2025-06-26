@@ -2,6 +2,8 @@ import type { ServiceIndex } from '@/types/types.js';
 import type { ServiceContext } from '@/system/context/ServiceContext.js';
 import { ServiceBase } from '@/system/base/ServiceBase.js';
 
+// TODO: может это драйвер потому что он имеет доступ к системе
+
 export const UiApiServiceIndex: ServiceIndex = (
   ctx: ServiceContext
 ): ServiceBase => {

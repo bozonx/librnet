@@ -1,13 +1,23 @@
 import WebSocket, { WebSocketServer } from 'ws'
 import type {ClientRequest, IncomingMessage} from 'http'
-import {callPromised, convertBufferToUint8Array} from 'squidlet-lib'
-import {WsServerEvent} from '../../types/io/WsServerIoType.js'
-import type {WsServerConnectionParams, WsServerIoType, WsServerProps} from '../../types/io/WsServerIoType.js'
-import type {WsCloseStatus} from '../../types/io/WsClientIoType.js'
+import {
+  callPromised,
+  convertBufferToUint8Array,
+  trimCharStart,
+} from 'squidlet-lib';
+import { WsServerEvent } from '../../types/io/WsServerIoType.js';
+import type {
+  WsServerConnectionParams,
+  WsServerIoType,
+  WsServerProps,
+} from '../../types/io/WsServerIoType.js';
+import type { WsCloseStatus } from '../../types/io/WsClientIoType.js';
 import { ServerIoBase } from '../../system/base/ServerIoBase.js';
-import type {IoIndex} from '../../types/types.js'
-import type {IoContext} from '../../system/context/IoContext.js'
+import type { IoIndex } from '../../types/types.js';
+import type { IoContext } from '../../system/context/IoContext.js';
 import type { IoSetBase } from '@/system/base/IoSetBase.js';
+
+// TODO: нужно делать пинг на соединение и удалять если нет ответа
 
 type ServerItem = [
   // server instance
@@ -24,14 +34,6 @@ enum ITEM_POSITION {
   connections,
   listeningState,
 }
-
-export interface WsServerIoConfig {
-  // requestTimeoutSec: number;
-}
-
-const WS_SERVER_IO_CONFIG_DEFAULTS = {
-  // requestTimeoutSec: 60,
-};
 
 export const WsServerIoIndex: IoIndex = (ioSet: IoSetBase, ctx: IoContext) => {
   return new WsServerIo(ioSet, ctx);
@@ -59,14 +61,12 @@ export class WsServerIo
   implements WsServerIoType
 {
   name = 'WsServerIo';
-  cfg: WsServerIoConfig = WS_SERVER_IO_CONFIG_DEFAULTS;
 
-  init = async (cfg?: WsServerIoConfig) => {
-    this.cfg = {
-      ...WS_SERVER_IO_CONFIG_DEFAULTS,
-      ...cfg,
-    };
-  };
+  async isServerListening(serverId: string): Promise<boolean> {
+    const serverItem = this.servers[serverId];
+
+    return serverItem?.[ITEM_POSITION.listeningState] ?? false;
+  }
 
   async send(
     serverId: string,
@@ -74,12 +74,13 @@ export class WsServerIo
     data: string | Uint8Array
   ): Promise<void> {
     // TODO: is it need support of null or undefined, number, boolean ???
-
+    // TODO: review как работает binary
     if (typeof data !== 'string' && !(data instanceof Uint8Array)) {
       throw new Error(`Unsupported type of data: "${JSON.stringify(data)}"`);
     }
 
     const serverItem = this.getServerItem(serverId);
+    // TODO: handle undefined
     const socket = serverItem[ITEM_POSITION.connections][Number(connectionId)];
 
     // TODO: а может ли быть socket закрытый??? и быть undefined???
@@ -104,32 +105,43 @@ export class WsServerIo
     delete serverItem[ITEM_POSITION.connections][Number(connectionId)];
 
     // TODO: проверить не будет ли ошибки если соединение уже закрыто
-    // TODO: нужно ли отписываться от навешанных колбэков - open, close etc ???
   }
 
   stopServer = async (serverId: string): Promise<void> => {
-    // const serverItem = this.getServerItem(serverId);
-    // const server = serverItem[ITEM_POSITION.wsServer];
-    // await callPromised(server.close.bind(server));
+    const serverItem = this.getServerItem(serverId);
+    const server = serverItem[ITEM_POSITION.wsServer];
+
+    // TODO: проверить закроются ли соединения
+    await callPromised(server.close.bind(server));
+
+    delete this.servers[serverId];
   };
 
   async destroyConnection(
     serverId: string,
     connectionId: string
   ): Promise<void> {
-    // TODO: удалить обработчики событий close на это connection
-    // TODO: закрыть
+    const serverItem = this.getServerItem(serverId);
+    const connectionItem =
+      serverItem?.[ITEM_POSITION.connections]?.[Number(connectionId)];
+
+    if (!connectionItem) return;
+
+    connectionItem.close();
   }
 
   protected startServer(serverId: string, props: WsServerProps): ServerItem {
-    const server = new WebSocketServer(props);
+    // server will automatically started
+    const server = new WebSocketServer({
+      ...props,
+      autoPong: true,
+    });
 
-    server.on('close', () =>
-      // TODO: а разве код и reason не должны прийти???
-      this.events.emit(WsServerEvent.serverClosed, serverId)
-    );
     server.on('error', (err) =>
       this.events.emit(WsServerEvent.serverError, serverId, String(err))
+    );
+    server.on('close', () =>
+      this.events.emit(WsServerEvent.serverClosed, serverId)
     );
     server.on('listening', () => this.handleServerStartListening(serverId));
     server.on('connection', (socket: WebSocket, request: IncomingMessage) =>
@@ -138,27 +150,30 @@ export class WsServerIo
 
     return [
       server,
-      // an empty connections
+      // empty connections
       [],
       // not listening at the moment
       false,
     ];
   }
 
-  protected async destroyServer(serverId: string) {
-    // TODO: он не закрывает соединения
+  // protected async destroyServer(serverId: string) {
+  //   // TODO: он не закрывает соединения
 
-    if (!this.servers[serverId]) return;
+  //   if (!this.servers[serverId]) return;
 
-    // call server close
-    // TODO: если раскоментировать то будет ошибка при дестрое
-    //await callPromised(server.close.bind(server));
+  //   // call server close
+  //   // TODO: если раскоментировать то будет ошибка при дестрое
+  //   //await callPromised(server.close.bind(server));
 
-    delete this.servers[serverId];
-  }
+  //   delete this.servers[serverId];
+  // }
 
   protected makeServerId(props: WsServerProps): string {
-    return `${props.host}:${props.port}`;
+    return (
+      `${props.host}:${props.port}` +
+      (props.path ? `/${trimCharStart(props.path, '/')}` : '')
+    );
   }
 
   private handleServerStartListening = (serverId: string) => {
@@ -166,7 +181,7 @@ export class WsServerIo
 
     serverItem[ITEM_POSITION.listeningState] = true;
 
-    this.events.emit(WsServerEvent.serverStarted, serverId);
+    this.events.emit(WsServerEvent.listening, serverId);
   };
 
   private handleIncomeConnection(
@@ -191,7 +206,6 @@ export class WsServerIo
       );
     });
 
-    // TODO: что если соединение само закроется???
     socket.on('close', (code: number, reason: string) => {
       this.events.emit(
         WsServerEvent.connectionClose,
@@ -203,18 +217,22 @@ export class WsServerIo
     });
 
     socket.on('message', (data: string | Buffer) => {
-      if (!Buffer.isBuffer(data)) {
+      let resolvedData: string | Uint8Array;
+
+      if (typeof data === 'string') {
+        resolvedData = data;
+      } else if (!Buffer.isBuffer(data)) {
+        resolvedData = new Uint8Array(data);
+      } else {
         this.events.emit(
           WsServerEvent.connectionError,
           serverId,
           connectionId,
-          `Income data isn't a buffer`
+          `Income data isn't a buffer or string`
         );
 
         return;
       }
-
-      let resolvedData: Uint8Array = convertBufferToUint8Array(data);
 
       this.events.emit(
         WsServerEvent.connectionMessage,
@@ -231,6 +249,7 @@ export class WsServerIo
           WsServerEvent.connectionUnexpectedResponse,
           serverId,
           connectionId,
+          // TODO: review
           makeConnectionParams(response)
         );
       }
