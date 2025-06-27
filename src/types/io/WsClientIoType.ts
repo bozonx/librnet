@@ -1,4 +1,4 @@
-import type {WsServerConnectionParams} from './WsServerIoType.js'
+import type { HttpResponse } from 'squidlet-lib';
 
 export enum WsClientEvent {
   open,
@@ -22,7 +22,7 @@ export type OnMessageHandler = (data: string | Uint8Array) => void;
 
 export interface WebSocketClientProps {
   url: string;
-  headers?: {[index: string]: string};
+  headers?: { [index: string]: string };
 }
 
 export interface WsClientIoType {
@@ -43,7 +43,7 @@ export interface WsClientIoType {
     cb: (
       eventName: WsClientEvent.unexpectedResponse,
       connectionId: string,
-      res: WsServerConnectionParams
+      res: HttpResponse
     ) => void
   ): Promise<number>;
   on(

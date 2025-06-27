@@ -57,6 +57,14 @@ export const WsServerIoIndex: IoIndex = (ioSet: IoSetBase, ctx: IoContext) => {
 //   };
 // }
 
+export function makeWsResponseObject(res: IncomingMessage): HttpResponse {
+  return {
+    headers: res.headers as Record<string, string>,
+    statusMessage: res.statusMessage,
+    statusCode: res.statusCode ?? 0,
+  };
+}
+
 export class WsServerIo
   extends ServerIoBase<ServerItem, WsServerProps>
   implements WsServerIoType
@@ -191,8 +199,6 @@ export class WsServerIo
     const connectionId: string = String(connections.length);
     const requestParams: HttpRequest = makeRequestObject(request);
 
-    console.log('111', request);
-
     connections.push(socket);
 
     socket.on('error', (err: Error) => {
@@ -247,18 +253,7 @@ export class WsServerIo
           WsServerEvent.connectionUnexpectedResponse,
           serverId,
           connectionId,
-          {
-            headers: response.headers,
-            httpVersion: response.httpVersion,
-            httpVersionMajor: response.httpVersionMajor,
-            httpVersionMinor: response.httpVersionMinor,
-            statusMessage: response.statusMessage,
-            complete: response.complete,
-            rawHeaders: response.rawHeaders,
-            method: response.method,
-            url: response.url,
-            statusCode: response.statusCode,
-          } as HttpResponse
+          makeWsResponseObject(response)
         );
       }
     );

@@ -4,10 +4,10 @@ import {callPromised, convertBufferToUint8Array, IndexedEvents, omitObj} from 's
 import {WsCloseStatus, WsClientEvent} from '../../types/io/WsClientIoType.js'
 import type {WsClientIoType, WebSocketClientProps} from '../../types/io/WsClientIoType.js'
 import { IoBase } from '../../system/base/IoBase.js';
-import {makeConnectionParams} from './WsServerIo.js'
-import type {IoIndex} from '../../types/types.js'
-import type {IoContext} from '../../system/context/IoContext.js'
+import type { IoIndex } from '../../types/types.js';
+import type { IoContext } from '../../system/context/IoContext.js';
 import type { IoSetBase } from '@/system/base/IoSetBase.js';
+import { makeWsResponseObject } from './WsServerIo.js';
 
 export const WsClientIoIndex: IoIndex = (ioSet: IoSetBase, ctx: IoContext) => {
   return new WsClientIo(ioSet, ctx);
@@ -120,7 +120,7 @@ export class WsClientIo extends IoBase implements WsClientIoType {
         this.events.emit(
           WsClientEvent.unexpectedResponse,
           connectionId,
-          makeConnectionParams(res)
+          makeWsResponseObject(res)
         )
     );
     client.on('message', (data: string | Buffer) => {
