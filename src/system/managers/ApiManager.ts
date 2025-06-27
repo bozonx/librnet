@@ -5,10 +5,10 @@ export type ApiSet = Record<string, (...args: any[]) => any | Promise<any>>;
 export class ApiManager {
   private readonly system: System;
   private uiApiSet: Record<string, ApiSet> = {};
-  private appNetworkApiSet: Record<string, ApiSet> = {};
-  private serviceNetworkApiSet: Record<string, ApiSet> = {};
-  private appExposedApiSet: Record<string, ApiSet> = {};
-  private serviceExposedApiSet: Record<string, ApiSet> = {};
+  private appIntranetApiSet: Record<string, ApiSet> = {};
+  private serviceIntranetApiSet: Record<string, ApiSet> = {};
+  private appExternalApiSet: Record<string, ApiSet> = {};
+  private serviceExternalApiSet: Record<string, ApiSet> = {};
 
   constructor(system: System) {
     this.system = system;
@@ -26,19 +26,19 @@ export class ApiManager {
     this.uiApiSet[appName] = apiSet;
   }
 
-  registerAppNetworkApi(appName: string, apiSet: ApiSet) {
-    this.appNetworkApiSet[appName] = apiSet;
+  registerAppIntranetApi(appName: string, apiSet: ApiSet) {
+    this.appIntranetApiSet[appName] = apiSet;
   }
 
-  registerServiceNetworkApi(serviceName: string, apiSet: ApiSet) {
-    this.serviceNetworkApiSet[serviceName] = apiSet;
+  registerServiceIntranetApi(serviceName: string, apiSet: ApiSet) {
+    this.serviceIntranetApiSet[serviceName] = apiSet;
   }
 
-  registerAppExposedApi(appName: string, apiSet: ApiSet) {
-    this.appExposedApiSet[appName] = apiSet;
+  registerAppExternalApi(appName: string, apiSet: ApiSet) {
+    this.appExternalApiSet[appName] = apiSet;
   }
 
-  registerServiceExposedApi(serviceName: string, apiSet: ApiSet) {
-    this.serviceExposedApiSet[serviceName] = apiSet;
+  registerServiceExternalApi(serviceName: string, apiSet: ApiSet) {
+    this.serviceExternalApiSet[serviceName] = apiSet;
   }
 }

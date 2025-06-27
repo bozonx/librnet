@@ -1,8 +1,6 @@
 import type { System } from '../System.js';
 import { AppContext } from '../context/AppContext.js';
 import type { AppIndex, EntityItem, AppMain } from '../../types/types.js';
-import { pathJoin } from 'squidlet-lib';
-import { APP_SUB_DIRS, ROOT_DIRS } from '@/types/constants.js';
 
 export interface AppItem extends EntityItem, AppMain {
   ctx: AppContext;
@@ -154,48 +152,6 @@ export class AppsManager {
 
     app.status = 'stopped';
   }
-
-  // /**
-  //  * Install app from package to system.
-  //  * @param appName - app name.
-  //  * @param packagePath - path to app package.
-  //  */
-  // async installApp(appName: string, packagePath: string): Promise<void> {
-  //   // TODO: add timeout
-
-  //   const appDestDir = pathJoin(
-  //     this.system.configs.systemCfg.rootDir,
-  //     ROOT_DIRS.system,
-  //     SYSTEM_SUB_DIRS.apps,
-  //     appName
-  //   );
-  //   const appDataDir = pathJoin(
-  //     this.system.configs.systemCfg.rootDir,
-  //     ROOT_DIRS.appsData,
-  //     appName
-  //   );
-
-  //   const filesDriver = this.system.drivers.getDriver<
-  //     FilesDriverType & DriverBase
-  //   >(DRIVER_NAMES.FilesDriver);
-
-  //   if (await filesDriver.isExists(appDestDir)) {
-  //     throw new Error(`App "${appName}" already installed`);
-  //   }
-
-  //   // TODO: copy from archive
-  //   //await filesDriver?.copyDirContent(srcDir, appDestDir);
-
-  //   // create app data dirs
-  //   for (const subDir of Object.values(APP_SUB_DIRS)) {
-  //     await filesDriver.mkDirP(pathJoin(appDataDir, subDir));
-  //   }
-
-  //   const app = this.apps[appName];
-  //   if (app.afterInstall) {
-  //     app.afterInstall(false);
-  //   }
-  // }
 
   /**
    * Register app in the system in development mode.
