@@ -1,19 +1,16 @@
-import { pathJoin, pathBasename, pathDirname} from 'squidlet-lib'
-import type {StatsSimplified} from '../types/io/FilesIoType.js'
+import { pathJoin, pathBasename, pathDirname } from 'squidlet-lib';
+import type { StatsSimplified } from '../types/io/FilesIoType.js';
 import { FilesDriver } from '../packages/SystemCommonPkg/FilesDriver/FilesDriver.js';
-import {DriversManager} from '../system/managers/DriversManager.js'
-import {FilesWrapper} from './wrappers/FilesWrapper.js'
-import type {FilesDriverType} from '../types/FilesDriverType.js'
-
+import { DriversManager } from '../system/managers/DriversManager.js';
+import { FilesWrapper } from./wrappers/FilesWrapper.jsjs';
+import type { FilesDriverType } from '../types/FilesDriverType.js';
 
 export class VersionedWrapper {
-  private readonly files: FilesDriverType
-
+  private readonly files: FilesDriverType;
 
   constructor(files: FilesDriverType) {
-    this.files = files
+    this.files = files;
   }
-
 
   // async appendFile(pathTo: string, data: string | Uint8Array) {
   //   const fullPath = pathJoin(this.rootDir, pathTo)
@@ -167,5 +164,4 @@ export class VersionedWrapper {
   // async isFileUtf8(pathTo: string): Promise<boolean> {
   //   return this.driver.isFileUtf8(pathJoin(this.rootDir, pathTo))
   // }
-
 }

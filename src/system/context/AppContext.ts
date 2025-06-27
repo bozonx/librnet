@@ -1,12 +1,9 @@
-import { IndexedEventEmitter, pathJoin } from 'squidlet-lib';
-import {
-  DRIVER_NAMES,
-  HOME_SUB_DIRS,
-  ROOT_DIRS,
-} from '../../types/constants.js';
+import { pathJoin } from 'squidlet-lib';
+import { DRIVER_NAMES, ROOT_DIRS } from '../../types/constants.js';
 import type { System } from '../System.js';
 import { EntityBaseContext } from './EntityBaseContext.js';
 import type { AppManifest } from '../../types/types.js';
+import type { ApiSet } from '../managers/ApiManager.js';
 
 // export const NOT_ALLOWED_CTX_PROPS: string[] = [
 //   'appName',
@@ -42,25 +39,26 @@ export class AppContext extends EntityBaseContext {
   // readonly files of package of this app
   // readonly packageFiles;
   // local data of this app. Only for local machine
-  readonly appDataLocal;
+  readonly localData;
   // app's syncronized data of this app between all the hosts
-  readonly appDataSynced;
+  readonly syncedData;
   // TODO: use db key-value storage for cache
   // readonly cacheLocal;
   // config files for this app. It manages them by it self
-  readonly cfgLocal;
-  readonly cfgSynced;
-  // data bases for this app
-  readonly db;
-  // log files of this app
-  readonly filesLog;
+  // readonly localConfigs;
+  // readonly syncedConfigs;
   // for temporary files of this app
-  readonly tmpLocal;
-  readonly appUserData;
-  readonly homeDownloads;
-  readonly home;
-  // access to external dir
-  readonly external;
+  readonly tmp;
+  // // data bases for this app
+  // readonly db;
+  // // log files of this app
+  // readonly filesLog;
+
+  // readonly appUserData;
+  // readonly homeDownloads;
+  // readonly home;
+  // // access to external dir
+  // readonly external;
 
   // TODO: add !!!!
   // memStorage only for this app
@@ -81,48 +79,51 @@ export class AppContext extends EntityBaseContext {
     //   filesDriver,
     //   pathJoin('/', ROOT_DIRS.packages, appName)
     // );
-    this.appDataLocal = new FilesWrapper(
+    this.localData = new FilesWrapper(
       filesDriver,
-      pathJoin('/', ROOT_DIRS.appDataLocal, appName)
+      pathJoin('/', ROOT_DIRS.localData, this.manifest.name)
     );
-    this.appDataSynced = new FilesWrapper(
+    this.syncedData = new FilesWrapper(
       filesDriver,
-      pathJoin('/', ROOT_DIRS.appDataSynced, appName)
+      pathJoin('/', ROOT_DIRS.syncedData, this.manifest.name)
     );
 
-    this.cfgLocal = new FilesWrapper(
-      filesDriver,
-      pathJoin('/', ROOT_DIRS.cfgLocal, appName)
-    );
-    this.cfgSynced = new FilesWrapper(
-      filesDriver,
-      pathJoin('/', ROOT_DIRS.cfgSynced, appName)
-    );
-    this.db = new FilesDb(
-      this.system.drivers,
-      pathJoin('/', ROOT_DIRS.db, appName)
-    );
-    this.filesLog = new FilesLog(
-      filesDriver,
-      pathJoin('/', ROOT_DIRS.log, appName)
-    );
-    this.tmpLocal = new FilesWrapper(
-      filesDriver,
-      pathJoin('/', ROOT_DIRS.tmpLocal, appName)
-    );
-    this.appUserData = new FilesWrapper(
-      filesDriver,
-      pathJoin('/', ROOT_DIRS.home, HOME_SUB_DIRS._Apps, appName)
-    );
-    this.homeDownloads = new FilesWrapper(
-      filesDriver,
-      pathJoin('/', ROOT_DIRS.home, HOME_SUB_DIRS._Downloads)
-    );
-    this.home = new FilesHome(filesDriver, pathJoin('/', ROOT_DIRS.home));
-    this.external = new FilesWrapper(
-      filesDriver,
-      pathJoin('/', EXTERNAL_ROOT_DIR)
-    );
+    // TODO: только 1 файл конфига
+
+    // this.cfgLocal = new FilesWrapper(
+    //   filesDriver,
+    //   pathJoin('/', ROOT_DIRS.cfgLocal, this.manifest.name)
+    // );
+    // this.cfgSynced = new FilesWrapper(
+    //   filesDriver,
+    //   pathJoin('/', ROOT_DIRS.cfgSynced, this.manifest.name)
+    // );
+
+    // this.db = new FilesDb(
+    //   this.system.drivers,
+    //   pathJoin('/', ROOT_DIRS.db, appName)
+    // );
+    // this.filesLog = new FilesLog(
+    //   filesDriver,
+    //   pathJoin('/', ROOT_DIRS.log, appName)
+    // );
+    // this.tmpLocal = new FilesWrapper(
+    //   filesDriver,
+    //   pathJoin('/', ROOT_DIRS.tmpLocal, appName)
+    // );
+    // this.appUserData = new FilesWrapper(
+    //   filesDriver,
+    //   pathJoin('/', ROOT_DIRS.home, HOME_SUB_DIRS._Apps, appName)
+    // );
+    // this.homeDownloads = new FilesWrapper(
+    //   filesDriver,
+    //   pathJoin('/', ROOT_DIRS.home, HOME_SUB_DIRS._Downloads)
+    // );
+    // this.home = new FilesHome(filesDriver, pathJoin('/', ROOT_DIRS.home));
+    // this.external = new FilesWrapper(
+    //   filesDriver,
+    //   pathJoin('/', EXTERNAL_ROOT_DIR)
+    // );
 
     //this.memStorage = new RestrictedMemStorage(this.system, appName)
   }
@@ -135,7 +136,15 @@ export class AppContext extends EntityBaseContext {
     //
   }
 
-  registerAppUi(appName: string, staticFilesPaths: string[]) {
-    this.system.appsUi.registerUi(appName, staticFilesPaths);
+  registerUiApi(apiSet: ApiSet) {
+    this.system.api.registerAppUiApi(this.manifest.name, apiSet);
+  }
+
+  registerIntranetApi(apiSet: ApiSet) {
+    this.system.api.registerAppIntranetApi(this.manifest.name, apiSet);
+  }
+
+  registerExternalApi(apiSet: ApiSet) {
+    this.system.api.registerServiceIntranetApi(this.manifest.name, apiSet);
   }
 }

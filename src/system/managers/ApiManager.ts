@@ -4,7 +4,7 @@ export type ApiSet = Record<string, (...args: any[]) => any | Promise<any>>;
 
 export class ApiManager {
   private readonly system: System;
-  private uiApiSet: Record<string, ApiSet> = {};
+  private appUiApiSet: Record<string, ApiSet> = {};
   private appIntranetApiSet: Record<string, ApiSet> = {};
   private serviceIntranetApiSet: Record<string, ApiSet> = {};
   private appExternalApiSet: Record<string, ApiSet> = {};
@@ -22,8 +22,8 @@ export class ApiManager {
     //
   }
 
-  registerUiApi(appName: string, apiSet: ApiSet) {
-    this.uiApiSet[appName] = apiSet;
+  registerAppUiApi(appName: string, apiSet: ApiSet) {
+    this.appUiApiSet[appName] = apiSet;
   }
 
   registerAppIntranetApi(appName: string, apiSet: ApiSet) {
