@@ -105,7 +105,7 @@ class TestIoSet extends IoSetBase {
       } else reject(`Din't receive request event`);
 
       httpServerIo.sendResponse(requestId, {
-        status: 200,
+        statusCode: 200,
         headers: {
           'Content-Type': 'text/plain',
         },
@@ -118,8 +118,8 @@ class TestIoSet extends IoSetBase {
       method: 'GET',
     });
 
-    if (res.status !== 200) {
-      reject(`Request failed with status ${res.status}`);
+    if (res.statusCode !== 200) {
+      reject(`Request failed with status ${res.statusCode}`);
     }
 
     const body = await res.body;
@@ -144,7 +144,7 @@ class TestIoSet extends IoSetBase {
       method: 'GET',
     });
 
-    if (res.status === 500) {
+    if (res.statusCode === 500) {
       resolve();
     } else {
       reject(`Should receive 500 status code`);
@@ -166,7 +166,7 @@ class TestIoSet extends IoSetBase {
       method: 'GET',
     });
 
-    if (res.status === 408) {
+    if (res.statusCode === 408) {
       resolve();
     } else {
       reject(`Should receive 408 status code`);

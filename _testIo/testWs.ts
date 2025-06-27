@@ -97,12 +97,27 @@ class TestIoSet extends IoSetBase {
   // New connection
   await new Promise<void>(async (resolve, reject) => {
     handler = (eventName, serverId, connectionId, params) => {
+      console.log('handler', eventName, serverId, connectionId, params);
       if (serverId !== testServerId) {
         reject(`Wrong server id: ${serverId}`);
-      } else if (eventName === WsServerEvent.newConnection) {
+      } else if (eventName !== WsServerEvent.newConnection) {
+        reject(`Din't receive new connection event`);
+      } else if (connectionId !== '0') {
+        reject(`Wrong connection id: ${connectionId}`);
+      }
+      // TODO: check params
+      else if (params.url !== `/ws`) {
+        reject(`Wrong url: ${params.url}`);
+      } else {
         resolve();
-      } else reject(`Din't receive new connection event`);
+      }
     };
+
+    const connectionId = await wsClientIo.newConnection({
+      url: `ws://localhost:${testPort}/ws`,
+    });
+
+    console.log('connectionId', connectionId);
   });
 
   ///////////////////////////

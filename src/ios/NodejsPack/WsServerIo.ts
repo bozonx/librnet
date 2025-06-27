@@ -1,9 +1,13 @@
 import WebSocket, { WebSocketServer } from 'ws'
 import type {ClientRequest, IncomingMessage} from 'http'
-import { callPromised, trimCharStart } from 'squidlet-lib';
+import {
+  callPromised,
+  trimCharStart,
+  type HttpRequest,
+  type HttpResponse,
+} from 'squidlet-lib';
 import { WsServerEvent } from '../../types/io/WsServerIoType.js';
 import type {
-  WsServerConnectionParams,
   WsServerIoType,
   WsServerProps,
 } from '../../types/io/WsServerIoType.js';
@@ -12,7 +16,7 @@ import { ServerIoBase } from '../../system/base/ServerIoBase.js';
 import type { IoIndex } from '../../types/types.js';
 import type { IoContext } from '../../system/context/IoContext.js';
 import type { IoSetBase } from '@/system/base/IoSetBase.js';
-import { SERVFAIL } from 'dns';
+import { makeRequestObject } from './HttpServerIo.js';
 
 // TODO: нужно делать пинг на соединение и удалять если нет ответа
 
@@ -37,21 +41,21 @@ export const WsServerIoIndex: IoIndex = (ioSet: IoSetBase, ctx: IoContext) => {
 };
 
 // TODO: review
-export function makeConnectionParams(
-  request: IncomingMessage
-): WsServerConnectionParams {
-  return {
-    url: request.url as string,
-    method: request.method as string,
-    statusCode: request.statusCode as number,
-    statusMessage: request.statusMessage as string,
-    headers: {
-      Authorization: request.headers.authorization,
-      Cookie: request.headers.cookie,
-      'User-Agent': request.headers['user-agent'],
-    },
-  };
-}
+// export function makeConnectionParams(
+//   request: IncomingMessage
+// ): WsServerConnectionParams {
+//   return {
+//     url: request.url as string,
+//     method: request.method as string,
+//     statusCode: request.statusCode as number,
+//     statusMessage: request.statusMessage as string,
+//     headers: {
+//       Authorization: request.headers.authorization,
+//       Cookie: request.headers.cookie,
+//       'User-Agent': request.headers['user-agent'],
+//     },
+//   };
+// }
 
 export class WsServerIo
   extends ServerIoBase<ServerItem, WsServerProps>
@@ -185,8 +189,9 @@ export class WsServerIo
     const serverItem = this.getServerItem(serverId);
     const connections = serverItem[ITEM_POSITION.connections];
     const connectionId: string = String(connections.length);
-    const requestParams: WsServerConnectionParams =
-      makeConnectionParams(request);
+    const requestParams: HttpRequest = makeRequestObject(request);
+
+    console.log('111', request);
 
     connections.push(socket);
 
@@ -242,8 +247,18 @@ export class WsServerIo
           WsServerEvent.connectionUnexpectedResponse,
           serverId,
           connectionId,
-          // TODO: review
-          makeConnectionParams(response)
+          {
+            headers: response.headers,
+            httpVersion: response.httpVersion,
+            httpVersionMajor: response.httpVersionMajor,
+            httpVersionMinor: response.httpVersionMinor,
+            statusMessage: response.statusMessage,
+            complete: response.complete,
+            rawHeaders: response.rawHeaders,
+            method: response.method,
+            url: response.url,
+            statusCode: response.statusCode,
+          } as HttpResponse
         );
       }
     );

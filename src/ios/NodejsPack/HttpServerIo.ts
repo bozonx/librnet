@@ -39,6 +39,30 @@ export const HttpServerIoIndex: IoIndex = (
   return new HttpServerIo(ioSet, ctx);
 };
 
+export function makeRequestObject(req: IncomingMessage): HttpRequest {
+  const bodyBuff: Buffer | null = req.read();
+  const body: string | undefined = bodyBuff?.toString(DEFAULT_ENCODE);
+
+  // TODO: если content type бинарный то преобразовать body в Uint8
+
+  return {
+    body,
+    headers: req.headers as any,
+    httpVersion: req.httpVersion,
+    httpVersionMajor: req.httpVersionMajor,
+    httpVersionMinor: req.httpVersionMinor,
+    complete: req.complete,
+    rawHeaders: req.rawHeaders,
+    // method of http request is in upper case format
+    method: (req.method || 'GET').toUpperCase() as HttpMethods,
+    url: req.url || '',
+
+    destroyed: req.destroyed,
+    closed: req.closed,
+    errored: req.errored,
+  };
+}
+
 /**
  * HttpServerIo is a server that listens for incoming HTTP requests
  * and sends responses back to the client.
@@ -139,7 +163,7 @@ export class HttpServerIo
     if (!this.servers[serverId]) return;
 
     const requestId: number = makeUniqNumber();
-    const httpRequest: HttpRequest = this.makeRequestObject(req);
+    const httpRequest: HttpRequest = makeRequestObject(req);
 
     const responsePromised = this.responseEvent
       .wait(([reqId]) => reqId === requestId, this.cfg.requestTimeoutSec * 1000)
@@ -175,33 +199,9 @@ export class HttpServerIo
     }
   }
 
-  private makeRequestObject(req: IncomingMessage): HttpRequest {
-    const bodyBuff: Buffer | null = req.read();
-    const body: string | undefined = bodyBuff?.toString(DEFAULT_ENCODE);
-
-    // TODO: если content type бинарный то преобразовать body в Uint8
-
-    return {
-      body,
-      headers: req.headers as any,
-      httpVersion: req.httpVersion,
-      httpVersionMajor: req.httpVersionMajor,
-      httpVersionMinor: req.httpVersionMinor,
-      complete: req.complete,
-      rawHeaders: req.rawHeaders,
-      // method of http request is in upper case format
-      method: (req.method || 'GET').toUpperCase() as HttpMethods,
-      url: req.url || '',
-
-      destroyed: req.destroyed,
-      closed: req.closed,
-      errored: req.errored,
-    };
-  }
-
   private setupResponse(response: HttpResponse, httpRes: ServerResponse) {
     httpRes.writeHead(
-      response.status,
+      response.statusCode,
       response.statusMessage,
       response.headers as Record<string, any>
     );

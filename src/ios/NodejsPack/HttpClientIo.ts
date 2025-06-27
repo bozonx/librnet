@@ -24,7 +24,7 @@ export class HttpClientIo extends IoBase implements HttpClientIoType {
 
     return {
       headers: res.headers as Record<string, any>,
-      status: res.status,
+      statusCode: res.status,
       statusMessage: res.statusText,
       // TODO: support binary body
       body: await res.text(),

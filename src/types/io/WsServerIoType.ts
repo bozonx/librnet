@@ -1,8 +1,8 @@
 // TODO: лучше брать из конфига. И это не соединение а старт сервера
 import type { IoBase } from '../../system/base/IoBase.js';
+import type { HttpRequest, HttpResponse } from 'squidlet-lib';
 
-export const WS_SERVER_CONNECTION_TIMEOUT_SEC = 20
-
+export const WS_SERVER_CONNECTION_TIMEOUT_SEC = 20;
 
 export enum WsServerEvent {
   // when server starts listening
@@ -27,24 +27,24 @@ export interface WsServerProps {
 }
 
 // TODO: review
-interface CommonHeaders {
-  Authorization?: string;
-  Cookie?: string;
-  'Set-Cookie'?: string;
-  'User-Agent'?: string;
-}
+// interface CommonHeaders {
+//   Authorization?: string;
+//   Cookie?: string;
+//   'Set-Cookie'?: string;
+//   'User-Agent'?: string;
+// }
 
 // TODO: review
-export interface WsServerConnectionParams {
-  url: string;
-  // TODO: разве там есть метод?
-  method: string;
-  // TODO: а это будет? это же запрос а не ответ
-  statusCode: number;
-  // TODO: review
-  statusMessage: string;
-  headers: CommonHeaders;
-}
+// export interface WsServerConnectionParams {
+//   url: string;
+//   // TODO: разве там есть метод?
+//   method: string;
+//   // TODO: а это будет? это же запрос а не ответ
+//   statusCode: number;
+//   // TODO: review
+//   statusMessage: string;
+//   headers: CommonHeaders;
+// }
 
 export interface WsServerIoType {
   on(
@@ -71,7 +71,7 @@ export interface WsServerIoType {
       eventName: WsServerEvent.newConnection,
       serverId: string,
       connectionId: string,
-      params: WsServerConnectionParams
+      request: HttpRequest
     ) => void
   ): Promise<number>;
 
@@ -106,7 +106,7 @@ export interface WsServerIoType {
       eventName: WsServerEvent.connectionUnexpectedResponse,
       serverId: string,
       connectionId: string,
-      params: WsServerConnectionParams
+      response: HttpResponse
     ) => void
   ): Promise<number>;
 
