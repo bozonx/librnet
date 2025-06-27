@@ -40,23 +40,6 @@ export const WsServerIoIndex: IoIndex = (ioSet: IoSetBase, ctx: IoContext) => {
   return new WsServerIo(ioSet, ctx);
 };
 
-// TODO: review
-// export function makeConnectionParams(
-//   request: IncomingMessage
-// ): WsServerConnectionParams {
-//   return {
-//     url: request.url as string,
-//     method: request.method as string,
-//     statusCode: request.statusCode as number,
-//     statusMessage: request.statusMessage as string,
-//     headers: {
-//       Authorization: request.headers.authorization,
-//       Cookie: request.headers.cookie,
-//       'User-Agent': request.headers['user-agent'],
-//     },
-//   };
-// }
-
 export function makeWsResponseObject(res: IncomingMessage): HttpResponse {
   return {
     headers: res.headers as Record<string, string>,
@@ -156,18 +139,6 @@ export class WsServerIo
     ];
   }
 
-  // protected async destroyServer(serverId: string) {
-  //   // TODO: он не закрывает соединения
-
-  //   if (!this.servers[serverId]) return;
-
-  //   // call server close
-  //   // TODO: если раскоментировать то будет ошибка при дестрое
-  //   //await callPromised(server.close.bind(server));
-
-  //   delete this.servers[serverId];
-  // }
-
   protected makeServerId(props: WsServerProps): string {
     return (
       `${props.host}:${props.port}` +
@@ -177,7 +148,7 @@ export class WsServerIo
 
   protected async destroyServer(serverItem: ServerItem): Promise<void> {
     const server = serverItem[ITEM_POSITION.wsServer];
-    // TODO: проверить закроются ли соединения
+
     await callPromised(server.close.bind(server));
   }
 

@@ -33,7 +33,8 @@ export class WsClientIo extends IoBase implements WsClientIoType {
       await this.close(connectionId, WsCloseStatus.closeGoingAway, 'destroy');
     }
 
-    this.events.destroy();
+    // TODO: нужно дождаться закрытия всех соединений
+    // this.events.destroy();
   };
 
   async on(cb: (...p: any[]) => void): Promise<number> {
@@ -77,13 +78,7 @@ export class WsClientIo extends IoBase implements WsClientIoType {
 
     if (!connection) return;
 
-    await callPromised(
-      connection[CONNECTION_POSITION.client].close.bind(
-        connection[CONNECTION_POSITION.client]
-      ),
-      code,
-      reason
-    );
+    connection[CONNECTION_POSITION.client].close(code, reason);
 
     delete this.connections[Number(connectionId)];
   }

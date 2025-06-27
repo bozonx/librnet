@@ -9,6 +9,7 @@ import { PackageManager } from './managers/PackageManager.js';
 import { DriversManager } from './managers/DriversManager.js';
 import { afterInstall } from './afterInstall.js';
 import { AppsManager } from './managers/AppsManager.js';
+import { ApiManager } from './managers/ApiManager.js';
 
 export class System {
   readonly events = new IndexedEventEmitter();
@@ -26,15 +27,16 @@ export class System {
   // readonly permissions = new PermissionsManager(this);
   readonly io = new IoManager(this);
   readonly drivers = new DriversManager(this);
+  readonly api = new ApiManager(this);
   readonly services = new ServicesManager(this);
   readonly apps = new AppsManager(this);
 
   get isDevMode() {
-    return this.ENV_MODE === ENV_MODES.dev;
+    return this.ENV_MODE === ENV_MODES.development;
   }
 
   get isProdMode() {
-    return this.ENV_MODE === ENV_MODES.prod;
+    return this.ENV_MODE === ENV_MODES.production;
   }
 
   get isTestMode() {
@@ -42,7 +44,7 @@ export class System {
   }
 
   constructor(
-    ENV_MODE: EnvMode = ENV_MODES.prod as EnvMode,
+    ENV_MODE: EnvMode = ENV_MODES.production as EnvMode,
     ROOT_DIR: string,
     EXT_DIRS?: string[],
     JUST_INSTALLED: boolean = false
@@ -62,6 +64,7 @@ export class System {
       await this.packageManager.loadInstalled();
       await this.io.initIos();
       await this.drivers.init();
+      await this.api.init();
 
       if (this.JUST_INSTALLED) {
         await afterInstall(this);
@@ -89,6 +92,7 @@ export class System {
         this.services.destroy(),
         this.packageManager.destroy(),
         // destroyWrapper(this.permissions.destroy.bind(this.permissions)),
+        this.api.destroy(),
         this.drivers.destroy(),
         this.io.destroy(),
       ]);

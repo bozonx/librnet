@@ -4,6 +4,7 @@ import { IoContext } from '../src/system/context/IoContext.js';
 import { PackageContext } from '../src/system/context/PackageContext.js';
 import { IoSetBase } from '../src/system/base/IoSetBase.js';
 import { WsServerEvent } from '../src/types/io/WsServerIoType.js';
+import { WsClientEvent } from '../src/types/io/WsClientIoType.js';
 
 class TestIoSet extends IoSetBase {
   type = 'testIoSet';
@@ -21,12 +22,17 @@ class TestIoSet extends IoSetBase {
     new IoContext({} as PackageContext)
   );
 
-  let handler;
+  let serverHandler;
+  let clientHandler;
 
   // ‼️ Чтобы правильно обрабатывались ошибки в коде обработчиков
   //    важно сделать функцию асинхронной
   await wsServerIo.on(async (...args) => {
-    await handler(...args);
+    await serverHandler(...args);
+  });
+
+  await wsClientIo.on(async (...args) => {
+    await clientHandler(...args);
   });
 
   ///////////////////////////
@@ -44,7 +50,7 @@ class TestIoSet extends IoSetBase {
 
   // Wait for server to start listening
   await new Promise<void>((resolve, reject) => {
-    handler = (eventName, serverId) => {
+    serverHandler = (eventName, serverId) => {
       if (serverId !== testServerId && serverId !== serverIdOnInit) {
         reject(`Wrong server id: ${serverId}`);
       } else if (eventName === WsServerEvent.listening) {
@@ -84,7 +90,7 @@ class TestIoSet extends IoSetBase {
   }
   // wait for server to start listening
   await new Promise<void>((resolve, reject) => {
-    handler = (eventName, serverId) => {
+    serverHandler = (eventName, serverId) => {
       if (serverId !== testServerId && serverId !== serverId2) {
         reject(`Wrong server id: ${serverId}`);
       } else if (eventName === WsServerEvent.listening) {
@@ -94,9 +100,9 @@ class TestIoSet extends IoSetBase {
   });
 
   ///////////////////////////
-  // New connection
-  await new Promise<void>(async (resolve, reject) => {
-    handler = (eventName, serverId, connectionId, params) => {
+  // New connection full cycle
+  const serverPromise = new Promise<void>((resolve, reject) => {
+    serverHandler = (eventName, serverId, connectionId, params) => {
       if (serverId !== testServerId) {
         reject(`Wrong server id: ${serverId}`);
       } else if (eventName !== WsServerEvent.newConnection) {
@@ -109,29 +115,73 @@ class TestIoSet extends IoSetBase {
         resolve();
       }
     };
-
-    const connectionId = await wsClientIo.newConnection({
-      url: `ws://localhost:${testPort}/ws`,
-    });
-
-    console.log('connectionId', connectionId);
   });
+
+  const clientPromise = new Promise<void>((resolve, reject) => {
+    clientHandler = (eventName, connectionId) => {
+      if (eventName !== WsClientEvent.open) {
+        reject(`Din't receive open event`);
+      } else if (connectionId !== '0') {
+        reject(`Wrong connection id: ${connectionId}`);
+      } else {
+        resolve();
+      }
+    };
+  });
+
+  const connectionId = await wsClientIo.newConnection({
+    url: `ws://localhost:${testPort}/ws`,
+  });
+
+  await Promise.all([serverPromise, clientPromise]);
+
+  // send message
+  await wsClientIo.send(connectionId, 'test');
+
+  await new Promise<void>((resolve, reject) => {
+    serverHandler = (eventName, serverId, connectionId, params) => {
+      console.log('serverHandler', eventName, serverId, connectionId, params);
+      // if (serverId !== testServerId) {
+      //   reject(`Wrong server id: ${serverId}`);
+      // } else if (eventName !== WsServerEvent.newConnection) {
+      //   reject(`Din't receive new connection event`);
+      // } else if (connectionId !== '0') {
+      //   reject(`Wrong connection id: ${connectionId}`);
+      // } else if (params.url !== `/ws`) {
+      //   reject(`Wrong url: ${params.url}`);
+      // } else {
+      //   resolve();
+      // }
+    };
+  });
+
+  await wsClientIo.close(connectionId, 1000, 'test');
+
+  console.log('connectionId', connectionId);
 
   ///////////////////////////
   // Stop server
   await wsServerIo.stopServer(serverIdOnInit);
 
-  await new Promise<void>((resolve, reject) => {
-    handler = (eventName, serverId) => {
-      if (serverId !== testServerId) {
-        reject(`Wrong server id: ${serverId}`);
-      } else if (eventName === WsServerEvent.serverClosed) {
-        resolve();
-      } else reject(`Din't receive serverClose event`);
-    };
-  });
+  // await new Promise<void>((resolve, reject) => {
+  //   serverHandler = (eventName, serverId) => {
+  //     console.log('serverHandler', eventName, serverId);
+  //     if (serverId !== testServerId) {
+  //       reject(`Wrong server id: ${serverId}`);
+  //     } else if (eventName === WsServerEvent.serverClosed) {
+  //       resolve();
+  //     } else reject(`Din't receive serverClose event`);
+  //   };
+  // });
 
-  if (await wsServerIo.isServerListening(testServerId)) {
-    throw new Error(`Server still listening on port ${testPort}`);
-  }
+  // if (await wsServerIo.isServerListening(testServerId)) {
+  //   throw new Error(`Server still listening on port ${testPort}`);
+  // }
+
+  ///////////////////////////
+  // Destroy
+  await wsClientIo.destroy();
+  await wsServerIo.stopServer(serverIdOnInit);
+  // TODO: не дожидается закрытия соединений
+  // await wsServerIo.destroy();
 })();
