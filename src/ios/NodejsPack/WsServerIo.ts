@@ -1,10 +1,6 @@
 import WebSocket, { WebSocketServer } from 'ws'
 import type {ClientRequest, IncomingMessage} from 'http'
-import {
-  callPromised,
-  convertBufferToUint8Array,
-  trimCharStart,
-} from 'squidlet-lib';
+import { callPromised, trimCharStart } from 'squidlet-lib';
 import { WsServerEvent } from '../../types/io/WsServerIoType.js';
 import type {
   WsServerConnectionParams,

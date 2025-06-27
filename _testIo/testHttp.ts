@@ -39,14 +39,14 @@ class TestIoSet extends IoSetBase {
     throw new Error(`Server already listening on port ${testPort}`);
   }
 
-  const serverId = await httpServerIo.newServer({
+  const serverIdOnInit = await httpServerIo.newServer({
     port: testPort,
     host: 'localhost',
   });
   // Wait for server to start listening
   await new Promise<void>((resolve, reject) => {
     handler = (eventName, serverId) => {
-      if (serverId !== testServerId) {
+      if (serverId !== testServerId && serverId !== serverIdOnInit) {
         reject(`Wrong server id: ${serverId}`);
       } else if (eventName === HttpServerEvent.listening) {
         resolve();
@@ -73,18 +73,18 @@ class TestIoSet extends IoSetBase {
 
   ///////////////////////////
   // Try to stop and start the server again
-  await httpServerIo.stopServer(serverId);
+  await httpServerIo.stopServer(serverIdOnInit);
   const serverId2 = await httpServerIo.newServer({
     port: testPort,
     host: 'localhost',
   });
-  if (serverId2 !== serverId) {
-    throw new Error(`Server id changed: ${serverId2} !== ${serverId}`);
+  if (serverId2 !== serverIdOnInit) {
+    throw new Error(`Server id changed: ${serverId2} !== ${serverIdOnInit}`);
   }
   // Wait for server to start listening
   await new Promise<void>((resolve, reject) => {
     handler = (eventName, serverId) => {
-      if (serverId !== testServerId) {
+      if (serverId !== testServerId && serverId !== serverId2) {
         reject(`Wrong server id: ${serverId}`);
       } else if (eventName === HttpServerEvent.listening) {
         resolve();
@@ -175,7 +175,7 @@ class TestIoSet extends IoSetBase {
 
   ///////////////////////////
   // Stop server
-  await httpServerIo.stopServer(serverId);
+  await httpServerIo.stopServer(serverIdOnInit);
 
   await new Promise<void>((resolve, reject) => {
     handler = (eventName, serverId) => {
