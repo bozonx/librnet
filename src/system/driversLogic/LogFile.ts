@@ -1,6 +1,6 @@
 import { pathDirname, pathJoin } from 'squidlet-lib';
 import type { LogLevel } from 'squidlet-lib';
-import { FilesWrapper } from './FilesWrapper.js';
+import { FilesWrapper } from './RestrictedDir.js';
 
 export class FilesLog extends FilesWrapper {
   // /**

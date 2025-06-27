@@ -23,22 +23,34 @@ export class ApiManager {
   }
 
   registerAppUiApi(appName: string, apiSet: ApiSet) {
-    this.appUiApiSet[appName] = apiSet;
+    this.appUiApiSet[appName] = { ...this.appUiApiSet[appName], ...apiSet };
   }
 
   registerAppIntranetApi(appName: string, apiSet: ApiSet) {
-    this.appIntranetApiSet[appName] = apiSet;
+    this.appIntranetApiSet[appName] = {
+      ...this.appIntranetApiSet[appName],
+      ...apiSet,
+    };
   }
 
   registerServiceIntranetApi(serviceName: string, apiSet: ApiSet) {
-    this.serviceIntranetApiSet[serviceName] = apiSet;
+    this.serviceIntranetApiSet[serviceName] = {
+      ...this.serviceIntranetApiSet[serviceName],
+      ...apiSet,
+    };
   }
 
   registerAppExternalApi(appName: string, apiSet: ApiSet) {
-    this.appExternalApiSet[appName] = apiSet;
+    this.appExternalApiSet[appName] = {
+      ...this.appExternalApiSet[appName],
+      ...apiSet,
+    };
   }
 
   registerServiceExternalApi(serviceName: string, apiSet: ApiSet) {
-    this.serviceExternalApiSet[serviceName] = apiSet;
+    this.serviceExternalApiSet[serviceName] = {
+      ...this.serviceExternalApiSet[serviceName],
+      ...apiSet,
+    };
   }
 }

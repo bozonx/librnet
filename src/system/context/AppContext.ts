@@ -4,12 +4,12 @@ import type { AppManifest } from '../../types/types.js';
 import type { ApiSet } from '../managers/ApiManager.js';
 
 export class AppContext extends EntityBaseContext {
-  manifest: AppManifest;
+  get appManifest(): AppManifest {
+    return this.manifest as AppManifest;
+  }
 
   constructor(system: System, manifest: AppManifest) {
-    super(system);
-
-    this.manifest = manifest;
+    super(system, manifest);
   }
 
   async init() {
