@@ -94,5 +94,32 @@ class TestIoSet extends IoSetBase {
   });
 
   ///////////////////////////
-  // Send request
+  // New connection
+  await new Promise<void>(async (resolve, reject) => {
+    handler = (eventName, serverId, connectionId, params) => {
+      if (serverId !== testServerId) {
+        reject(`Wrong server id: ${serverId}`);
+      } else if (eventName === WsServerEvent.newConnection) {
+        resolve();
+      } else reject(`Din't receive new connection event`);
+    };
+  });
+
+  ///////////////////////////
+  // Stop server
+  await wsServerIo.stopServer(serverIdOnInit);
+
+  await new Promise<void>((resolve, reject) => {
+    handler = (eventName, serverId) => {
+      if (serverId !== testServerId) {
+        reject(`Wrong server id: ${serverId}`);
+      } else if (eventName === WsServerEvent.serverClosed) {
+        resolve();
+      } else reject(`Din't receive serverClose event`);
+    };
+  });
+
+  if (await wsServerIo.isServerListening(testServerId)) {
+    throw new Error(`Server still listening on port ${testPort}`);
+  }
 })();
