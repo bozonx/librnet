@@ -1,20 +1,16 @@
 import type { System } from '../System.js';
 import { AppContext } from '../context/AppContext.js';
-import type { AppBase } from '../base/AppBase.js';
-import type { AppIndex } from '../../types/types.js';
+import type { AppIndex, EntityItem, AppMain } from '../../types/types.js';
 import { pathJoin } from 'squidlet-lib';
-import {
-  APP_SUB_DIRS,
-  DRIVER_NAMES,
-  ROOT_DIRS,
-  SYSTEM_SUB_DIRS,
-} from '@/types/constants.js';
-import type { FilesDriverType } from '@/types/FilesDriverType.js';
-import type { DriverBase } from '@/system/base/DriverBase.js';
+import { APP_SUB_DIRS, ROOT_DIRS } from '@/types/constants.js';
+
+export interface AppItem extends EntityItem, AppMain {
+  ctx: AppContext;
+}
 
 export class AppsManager {
   private readonly system: System;
-  private apps: Record<string, AppBase> = {};
+  private apps: Record<string, AppItem> = {};
 
   constructor(system: System) {
     this.system = system;
@@ -26,16 +22,13 @@ export class AppsManager {
     }
 
     for (const appName of Object.keys(this.apps)) {
-      const app = this.apps[appName];
-
-      await this._initApp(app, appName);
+      await this.initApp(appName);
     }
   }
 
   async startAll() {
     for (const appName of Object.keys(this.apps)) {
-      const app = this.apps[appName];
-      await this._initApp(app, appName);
+      await this.startApp(appName);
     }
   }
 
@@ -43,14 +36,15 @@ export class AppsManager {
     for (const appName of Object.keys(this.apps)) {
       const app = this.apps[appName];
 
-      if (app.stop) {
-        this.system.log.debug(`AppManager: stopping the app "${appName}"`);
-
+      if (app.onDestroy) {
+        this.system.log.debug(`AppManager: destroying the app "${appName}"`);
+        app.status = 'destroying';
         // TODO: добавить таймаут дестроя
-
         try {
-          await app.stop();
+          await app.onDestroy(app.ctx);
           await app.ctx.destroy();
+
+          delete this.apps[appName];
         } catch (e) {
           this.system.log.error(`App "${appName} stopping with error: ${e}"`);
           // then ignore an error
@@ -59,132 +53,170 @@ export class AppsManager {
     }
   }
 
-  // $getApp<T extends AppBase>(appName: string): T | undefined {
-  //   return this.apps[appName] as T;
-  // }
-
-  // getAppApi<T = Record<string, any>>(appName: string): T | undefined {
-  //   return this.apps[appName]?.getApi?.();
-  // }
-
   getAppNames(): string[] {
     return Object.keys(this.apps);
   }
 
-  startApp(appName: string) {
-    // TODO: add timeout
-    // TODO: check status of app
-    // TODO: import app code or get from this.apps
+  getAppItem(appName: string): AppItem | undefined {
+    return this.apps[appName];
+  }
+
+  async initApp(appName: string) {
     const app = this.apps[appName];
-    if (app.start) {
-      app.start();
-    }
-  }
 
-  stopApp(appName: string) {
-    // TODO: add timeout
-    // TODO: check status of app
-    const app = this.apps[appName];
-    if (app.stop) {
-      app.stop();
-    }
-  }
+    // if (app.requireDriver) {
+    //   const found: string[] = this.system.drivers.getNames().filter((el) => {
+    //     if (app.requireDriver?.includes(el)) return true;
+    //   });
 
-  /**
-   * Install app from package to system.
-   * @param appName - app name.
-   * @param packagePath - path to app package.
-   */
-  async installApp(appName: string, packagePath: string): Promise<void> {
-    // TODO: add timeout
+    //   if (found.length !== app.requireDriver.length) {
+    //     this.system.log.warn(
+    //       `Application "${appName}" hasn't meet a dependency drivers "${app.requireDriver.join(
+    //         ', '
+    //       )}"`
+    //     );
+    //     // do not register the app if it doesn't meet his dependencies
+    //     delete this.apps[appName];
 
-    const appDestDir = pathJoin(
-      this.system.configs.systemCfg.rootDir,
-      ROOT_DIRS.system,
-      SYSTEM_SUB_DIRS.apps,
-      appName
-    );
-    const appDataDir = pathJoin(
-      this.system.configs.systemCfg.rootDir,
-      ROOT_DIRS.appsData,
-      appName
-    );
+    //     return;
+    //   }
+    // }
 
-    const filesDriver = this.system.drivers.getDriver<
-      FilesDriverType & DriverBase
-    >(DRIVER_NAMES.FilesDriver);
+    if (app.onInit) {
+      this.system.log.debug(`AppManager: initializing app "${appName}"`);
 
-    if (await filesDriver.isExists(appDestDir)) {
-      throw new Error(`App "${appName}" already installed`);
-    }
-
-    // TODO: copy from archive
-    //await filesDriver?.copyDirContent(srcDir, appDestDir);
-
-    // create app data dirs
-    for (const subDir of Object.values(APP_SUB_DIRS)) {
-      await filesDriver.mkDirP(pathJoin(appDataDir, subDir));
-    }
-
-    const app = this.apps[appName];
-    if (app.afterInstall) {
-      app.afterInstall(false);
-    }
-  }
-
-  /**
-   * Register app in system in development mode.
-   * @param appIndex - app index function.
-   */
-  useApp(appIndex: AppIndex) {
-    const appInstance = appIndex();
-    const appName: string = appInstance.myName;
-
-    if (this.apps[appName]) {
-      throw new Error(
-        `Can't register app "${appName}" because it has already registered`
-      );
-    }
-
-    const appContext = new AppContext(this.system, appName);
-
-    appInstance.$setCtx(appContext);
-
-    this.apps[appName] = appInstance;
-  }
-
-  async _initApp(app: AppBase, appName: string) {
-    if (app.requireDriver) {
-      const found: string[] = this.system.drivers.getNames().filter((el) => {
-        if (app.requireDriver?.includes(el)) return true;
-      });
-
-      if (found.length !== app.requireDriver.length) {
-        this.system.log.warn(
-          `Application "${appName}" hasn't meet a dependency drivers "${app.requireDriver.join(
-            ', '
-          )}"`
-        );
-        // do not register the app if it doesn't meet his dependencies
-        delete this.apps[appName];
-
-        return;
-      }
-    }
-
-    if (app.start) {
-      this.system.log.debug(`AppManager: starting app "${appName}"`);
+      app.status = 'initializing';
 
       try {
         await app.ctx.init();
-        await app.start();
+        await app.onInit(app.ctx);
       } catch (e) {
         this.system.log.error(
           `AppManager: app's "${appName}" start error: ${e}`
         );
 
+        app.status = 'initError';
+
+        return;
+      }
+
+      app.status = 'initialized';
+    }
+  }
+
+  async startApp(appName: string) {
+    this.system.log.debug(`AppManager: starting app "${appName}"`);
+
+    // TODO: add timeout
+    // TODO: import app code or get from this.apps
+    const app = this.apps[appName];
+
+    app.status = 'starting';
+
+    if (app.onStart) {
+      try {
+        await app.onStart(app.ctx);
+      } catch (e) {
+        this.system.log.error(
+          `AppManager: app's "${appName}" start error: ${e}`
+        );
+
+        app.status = 'initError';
+
         return;
       }
     }
+
+    app.status = 'started';
+  }
+
+  async stopApp(appName: string) {
+    this.system.log.debug(`AppManager: stopping app "${appName}"`);
+
+    // TODO: add timeout
+    const app = this.apps[appName];
+
+    app.status = 'stopping';
+
+    if (app.onStop) {
+      try {
+        await app.onStop(app.ctx);
+      } catch (e) {
+        this.system.log.error(
+          `AppManager: app's "${appName}" stop error: ${e}`
+        );
+
+        app.status = 'stopError';
+
+        return;
+      }
+    }
+
+    app.status = 'stopped';
+  }
+
+  // /**
+  //  * Install app from package to system.
+  //  * @param appName - app name.
+  //  * @param packagePath - path to app package.
+  //  */
+  // async installApp(appName: string, packagePath: string): Promise<void> {
+  //   // TODO: add timeout
+
+  //   const appDestDir = pathJoin(
+  //     this.system.configs.systemCfg.rootDir,
+  //     ROOT_DIRS.system,
+  //     SYSTEM_SUB_DIRS.apps,
+  //     appName
+  //   );
+  //   const appDataDir = pathJoin(
+  //     this.system.configs.systemCfg.rootDir,
+  //     ROOT_DIRS.appsData,
+  //     appName
+  //   );
+
+  //   const filesDriver = this.system.drivers.getDriver<
+  //     FilesDriverType & DriverBase
+  //   >(DRIVER_NAMES.FilesDriver);
+
+  //   if (await filesDriver.isExists(appDestDir)) {
+  //     throw new Error(`App "${appName}" already installed`);
+  //   }
+
+  //   // TODO: copy from archive
+  //   //await filesDriver?.copyDirContent(srcDir, appDestDir);
+
+  //   // create app data dirs
+  //   for (const subDir of Object.values(APP_SUB_DIRS)) {
+  //     await filesDriver.mkDirP(pathJoin(appDataDir, subDir));
+  //   }
+
+  //   const app = this.apps[appName];
+  //   if (app.afterInstall) {
+  //     app.afterInstall(false);
+  //   }
+  // }
+
+  /**
+   * Register app in the system in development mode.
+   * @param appIndex - app index function.
+   */
+  useApp(appIndex: AppIndex) {
+    const appMain = appIndex();
+    const appName: string = appMain.manifest.name;
+
+    if (this.apps[appName]) {
+      this.system.log.warn(
+        `Can't register app "${appName}" because it has been already registered`
+      );
+
+      return;
+    }
+
+    this.apps[appName] = {
+      ...appMain,
+      ctx: new AppContext(this.system, appName),
+      status: 'none',
+    };
   }
 }
