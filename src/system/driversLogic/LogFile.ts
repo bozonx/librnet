@@ -1,7 +1,6 @@
-import {pathDirname, pathJoin} from 'squidlet-lib'
-import type {LogLevel} from 'squidlet-lib'
-import {FilesWrapper} from './FilesWrapper.js'
-
+import { pathDirname, pathJoin } from 'squidlet-lib';
+import type { LogLevel } from 'squidlet-lib';
+import { FilesWrapper } from './FilesWrapper.js';
 
 export class FilesLog extends FilesWrapper {
   // /**
@@ -30,5 +29,4 @@ export class FilesLog extends FilesWrapper {
   //   // TODO: файл может быть большой - считывать только указанное количество строк с конца
   //   return this.driver.readTextFile(pathJoin(this.rootDir, clearRelPathLeft(pathTo)))
   // }
-
 }
