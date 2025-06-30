@@ -2,7 +2,7 @@ import type {IndexedEventEmitter, Logger} from 'squidlet-lib'
 import type {System} from '../System.js'
 import type { DriverIndex, ServiceIndex } from '../../types/types.js';
 import type { IoSetBase } from '../base/IoSetBase.js';
-import type { SystemConfigsManager } from '../managers/SystemConfigsManager.js';
+import type { SystemConfigsManager } from '../managers/ConfigsManager.js';
 
 export class PackageContext {
   private readonly system;
