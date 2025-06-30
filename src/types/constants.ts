@@ -67,8 +67,10 @@ export const ROOT_DIRS = {
   home: 'home',
 };
 export const LOCAL_DATA_SUB_DIRS = {
-  // Local data of io, drivers, services and apps
-  programData: 'programData',
+  // Local data files of services and apps
+  data: 'data',
+  // Databases of services and apps
+  db: 'db',
   configs: 'configs',
   logs: 'logs',
   cache: 'cache',
@@ -76,7 +78,8 @@ export const LOCAL_DATA_SUB_DIRS = {
 };
 export const SYNCED_DATA_SUB_DIRS = {
   // Synced data of io, drivers, services and apps
-  programData: 'programData',
+  data: 'data',
+  db: 'db',
   configs: 'configs',
   logs: 'logs',
   trash: 'trash',
@@ -88,10 +91,7 @@ export const HOME_SUB_DIRS = {
   Documents: 'Documents',
   Media: 'Media',
 };
-export const APP_SUB_DIRS = {
-  files: 'files',
-  db: 'db',
-};
+
 
 //// virtual local device root dir
 // export const DEVICE_ROOT_DIR = 'Device';

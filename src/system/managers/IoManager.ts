@@ -100,7 +100,11 @@ export class IoManager {
     if (!io) throw new Error(`Can't find IO "${ioName}"`);
     if (!io.init) return;
 
-    const cfg = await this.system.configs.loadIoConfig(ioName);
+    const cfg = {
+      local: await this.system.configs.loadEntityConfig(ioName, false),
+      synced: await this.system.configs.loadEntityConfig(ioName, true),
+    };
+
     const promised = new Promised();
 
     try {

@@ -62,6 +62,7 @@ export interface IoSetEnv {
   // EXT_DIRS?: string;
 }
 
+// for Io and Driver
 export interface EntityCfg {
   local?: Record<string, any>;
   synced?: Record<string, any>;

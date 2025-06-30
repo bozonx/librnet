@@ -1,47 +1,59 @@
 import { pathJoin } from 'squidlet-lib';
-import { ROOT_DIRS } from '../../types/constants.js';
+import {
+  ROOT_DIRS,
+  LOCAL_DATA_SUB_DIRS,
+  SYNCED_DATA_SUB_DIRS,
+  CFG_FILE_EXT,
+} from '../../types/constants.js';
 import type { Logger } from 'squidlet-lib';
 import type { System } from '../System';
 import { RestrictedDir } from '../driversLogic/RestrictedDir.js';
 import type { EntityManifest } from '@/types/types.js';
 import { RootFiles } from '../driversLogic/RootFiles.js';
+import { EntityConfig } from '../driversLogic/EntityConfig.js';
+
+// TODO: add register api and crud api
 
 export class EntityBaseContext {
-  protected readonly system: System;
-  readonly manifest: EntityManifest;
-
-  // readonly files of package of this app
+  // readonly files of package relative to the app
   readonly packageFiles;
   // local data of this app. Only for local machine
   readonly localData;
-  // app's syncronized data of this app between all the hosts
+  // syncronized data of this app between all the hosts
   readonly syncedData;
-  // for temporary files of this app
+  // temporary files of this app
   readonly tmp;
-  // access to root files of the system using permissions of this app
-  readonly rootFiles;
+  // local config files of this app
+  readonly localConfigs;
+  // synced config files of this app
+  readonly syncedConfigs;
+  // local files log of this app
+  readonly localLog;
+  // synced files log of this app
+  readonly syncedLog;
+
+  get consoleLog(): Logger {
+    return {
+      debug: (msg: string) => `[${this.manifest.name}]: ${msg}`,
+      info: (msg: string) => `[${this.manifest.name}]: ${msg}`,
+      warn: (msg: string) => `[${this.manifest.name}]: ${msg}`,
+      error: (msg: string) => `[${this.manifest.name}]: ${msg}`,
+      log: (msg: string) => `[${this.manifest.name}]: ${msg}`,
+    };
+  }
 
   // TODO: Downloads - наверное все приложения имеют туда полный доступ
 
   // TODO: use db key-value storage for cache
   // readonly cacheLocal;
-  // config files for this app. It manages them by it self
-  // readonly localConfigs;
-  // readonly syncedConfigs;
   // // data bases for this app
   // readonly db;
-  // // log files of this app
-  // readonly filesLog;
 
-  // TODO: add logger to the context
-  get log(): Logger {
-    return this.system.log;
-  }
-
-  constructor(system: System, manifest: EntityManifest) {
-    this.system = system;
-    this.manifest = manifest;
-
+  // TODO: manifent of packager or app?
+  constructor(
+    protected readonly system: System,
+    readonly manifest: EntityManifest
+  ) {
     // const filesDriver = this.system.drivers.getDriver<FilesDriver>(
     //   DRIVER_NAMES.FilesDriver
     // );
@@ -64,6 +76,9 @@ export class EntityBaseContext {
       pathJoin('/', ROOT_DIRS.tmp, this.manifest.name)
     );
     this.rootFiles = new RootFiles();
+
+    this.localConfigs = new EntityConfig(this.system, this.manifest, false);
+    this.syncedConfigs = new EntityConfig(this.system, this.manifest, true);
 
     // TODO: только 1 файл конфига
 
