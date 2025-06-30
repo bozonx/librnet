@@ -14,7 +14,7 @@ import {
 } from '../../types/constants.js';
 import type { LocalFilesIo } from '@/ios/NodejsPack/LocalFilesIo.js';
 
-export class SystemConfigsManager {
+export class ConfigsManager {
   systemCfg!: SystemCfg;
 
   private get filesIo(): LocalFilesIo {

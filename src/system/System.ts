@@ -2,7 +2,7 @@ import { IndexedEventEmitter, LogPublisher} from 'squidlet-lib'
 import { ENV_MODES, SystemEvents, type EnvMode } from '../types/constants.js';
 import { IoManager } from './managers/IoManager.js';
 import { ServicesManager } from './managers/ServicesManager.js';
-import { SystemConfigsManager } from './managers/ConfigsManager.js';
+import { ConfigsManager } from './managers/ConfigsManager.js';
 import { PermissionsManager } from './managers/PermissionsManager.js';
 import type { PackageIndex } from '../types/types.js';
 import { PackageManager } from './managers/PackageManager.js';
@@ -24,7 +24,7 @@ export class System {
   );
   // managers
   readonly packageManager = new PackageManager(this);
-  readonly configs = new SystemConfigsManager(this);
+  readonly configs = new ConfigsManager(this);
   readonly fileLogs = new FileLogsManager(this);
   // readonly permissions = new PermissionsManager(this);
   readonly io = new IoManager(this);

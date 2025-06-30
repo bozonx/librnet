@@ -5,7 +5,7 @@ import { ConsoleLoggerPkg } from '@/packages/ConsoleLoggerPkg/index.js';
 import { SystemCommonPkg } from '@/packages/SystemCommonPkg/index.js';
 import { ioSetLocalPkg } from '@/packages/IoSetLocalPkg/index.js';
 import { FilesIoIndex } from '@/ios/NodejsPack/LocalFilesIo.js';
-import { SysInfoIoIndex } from '@/ios/NodejsLinuxPack/SysInfoIo.js';
+import { SysInfoIoIndex } from '@/_not_used/ios/NodejsLinuxPack/SysInfoIo.js';
 import { HttpClientIoIndex } from '@/ios/NodejsPack/HttpClientIo.js';
 import { HttpServerIoIndex } from '@/ios/NodejsPack/HttpServerIo.js';
 import { WsClientIoIndex } from '@/ios/NodejsPack/WsClientIo.js';

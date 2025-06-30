@@ -28,11 +28,11 @@
     "_old-before-2025/HttpServerIo-httpByNode.ts"
   ],
   "exclude": [
-    "src/starters/AndroidStarter",
-    "src/starters/DockerArmStarter",
-    "src/starters/DockerX86Starter",
-    "src/starters/FirefoxStarter",
-    "src/starters/RpiStarter",
+    "src/_not_used/starters/AndroidStarter",
+    "src/_not_used/starters/DockerArmStarter",
+    "src/_not_used/starters/DockerX86Starter",
+    "src/_not_used/starters/FirefoxStarter",
+    "src/_not_used/starters/RpiStarter",
     "distr",
     "__old-composition",
     "build",
