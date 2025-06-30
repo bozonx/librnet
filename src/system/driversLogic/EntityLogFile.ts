@@ -9,9 +9,7 @@ export class EntityLogFile {
     private readonly isSynced: boolean
   ) {}
 
-  /**
-   * Append to existent file or create it if doesn't exists
-   */
+
   async writeLog(pathToLog: string, msg: string, logLevel: LogLevel) {
     return this.system.fileLogs.writeLog(
       this.manifest.name,

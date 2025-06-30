@@ -2,8 +2,7 @@ import type { DriverContext } from '../context/DriverContext.js';
 
 export class DriverBase {
   // put name of the driver here if it not the same as class name
-  readonly myName?: string;
-  readonly requireIo?: string[];
+  readonly name?: string;
 
   protected readonly ctx: DriverContext;
 

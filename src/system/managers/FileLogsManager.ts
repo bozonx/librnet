@@ -17,6 +17,9 @@ export class FileLogsManager {
 
   constructor(private readonly system: System) {}
 
+  /**
+   * Append to existent file or create it if doesn't exists
+   */
   async writeLog(
     entityName: string,
     isSynced: boolean,

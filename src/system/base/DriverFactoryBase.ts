@@ -21,25 +21,27 @@ export default abstract class DriverFactoryBase<
   Instance extends DriverInstanceBase,
   Props extends Record<string, any> = Record<string, any>
 > extends DriverBase {
+  readonly requireIo?: string[];
+
   // there instances are kept
-  protected instances: Record<string, Instance> = {}
+  protected instances: Record<string, Instance> = {};
   // Specify your sub driver class. It's required.
-  protected abstract SubDriverClass: new (DriverInstanceParams: any) => Instance
-  protected cfg?: Record<string, any>
+  protected abstract SubDriverClass: new (
+    DriverInstanceParams: any
+  ) => Instance;
+  protected cfg?: Record<string, any>;
 
-  private instanceUses: Record<string, number> = {}
-
+  private instanceUses: Record<string, number> = {};
 
   async init(cfg?: Record<string, any>) {
-    this.cfg = cfg
+    this.cfg = cfg;
   }
 
   async destroy() {
     for (const instanceId of Object.keys(this.instances)) {
-      await this.destroyInstance(instanceId, true)
+      await this.destroyInstance(instanceId, true);
     }
   }
-
 
   /**
    * Get existent or create a new sub driver instance.
@@ -50,31 +52,31 @@ export default abstract class DriverFactoryBase<
     //const props = mergeDeepObjects(instanceProps, this.definition.props) as Props
     //await this.validateInstanceProps(instanceProps, props)
 
-    const instanceId = this.makeInstanceId(instanceProps, this.cfg)
+    const instanceId = this.makeInstanceId(instanceProps, this.cfg);
     // return previously instantiated instance if it exists
     if (this.instances[instanceId]) {
-      this.instanceUses[instanceId]++
+      this.instanceUses[instanceId]++;
 
-      return this.instances[instanceId]
+      return this.instances[instanceId];
     }
     // else create a new instance
-    this.instanceUses[instanceId] = 0
+    this.instanceUses[instanceId] = 0;
 
     const instanceParams: DriverInstanceParams<Props> = {
       ctx: this.ctx,
       instanceId,
       driver: this,
       props: instanceProps,
-      cfg: this.cfg
-    }
+      cfg: this.cfg,
+    };
 
-    const instance = new this.SubDriverClass(instanceParams)
+    const instance = new this.SubDriverClass(instanceParams);
 
-    this.instances[instanceId] = instance
+    this.instances[instanceId] = instance;
 
-    if (instance.init) await instance.init()
+    if (instance.init) await instance.init();
     // return just created instance
-    return this.instances[instanceId]
+    return this.instances[instanceId];
   }
 
   /**
@@ -86,24 +88,23 @@ export default abstract class DriverFactoryBase<
   async destroyInstance(instanceId: string, force: boolean = false) {
     if (force || !this.instanceUses[instanceId]) {
       // really destroy an instance
-      const instance = this.instances[instanceId]
+      const instance = this.instances[instanceId];
 
-      if (instance.$doDestroy) await instance.$doDestroy()
+      if (instance.$doDestroy) await instance.$doDestroy();
 
-      delete this.instances[instanceId]
-      delete this.instanceUses[instanceId]
+      delete this.instances[instanceId];
+      delete this.instanceUses[instanceId];
 
-      return
+      return;
     }
     // decrement uses of instance
-    this.instanceUses[instanceId]--
+    this.instanceUses[instanceId]--;
   }
 
   // Specify it to calculate an id of the new instance of sub driver
   protected makeInstanceId(props: Props, cfg?: Record<string, any>): string {
-    return String(defaultInstanceIdCounter++)
+    return String(defaultInstanceIdCounter++);
   }
-
 }
 
 // private async validateInstanceProps(

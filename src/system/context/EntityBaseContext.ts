@@ -1,4 +1,4 @@
-import { pathJoin } from 'squidlet-lib';
+import { IndexedEventEmitter, pathJoin } from 'squidlet-lib';
 import { ROOT_DIRS } from '../../types/constants.js';
 import type { Logger } from 'squidlet-lib';
 import type { System } from '../System';
@@ -6,18 +6,18 @@ import { RestrictedDir } from '../driversLogic/RestrictedDir.js';
 import type { EntityManifest } from '@/types/types.js';
 import { EntityConfig } from '../driversLogic/EntityConfig.js';
 import { EntityLogFile } from '../driversLogic/EntityLogFile.js';
+import { DriverBase } from '../base/DriverBase.js';
 
 // TODO: add register api and crud api
 
 export class EntityBaseContext {
-  // readonly files of package relative to the app
-  readonly packageFiles;
-  // local data of this app. Only for local machine
-  readonly localData;
-  // syncronized data of this app between all the hosts
-  readonly syncedData;
-  // temporary files of this app
-  readonly tmp;
+  // Server side context
+  // save here custom runtime data eg driver instances
+  readonly context: Record<string, any> = {};
+  // only for server
+  readonly serverEvents = new IndexedEventEmitter();
+  // for server and client
+  readonly commonEvents = new IndexedEventEmitter();
   // local config files of this app
   readonly localConfig = new EntityConfig(this.system, this.manifest, false);
   // synced config files of this app
@@ -26,6 +26,14 @@ export class EntityBaseContext {
   readonly localLog = new EntityLogFile(this.system, this.manifest, false);
   // synced files log of this app
   readonly syncedLog = new EntityLogFile(this.system, this.manifest, true);
+  // readonly files of package relative to the app
+  readonly packageFiles;
+  // local data of this app. Only for local machine
+  readonly localData;
+  // syncronized data of this app between all the hosts
+  readonly syncedData;
+  // temporary files of this app
+  readonly tmp;
 
   get consoleLog(): Logger {
     return {
@@ -46,13 +54,10 @@ export class EntityBaseContext {
 
   // TODO: manifent of packager or app?
   constructor(
-    protected readonly system: System,
-    readonly manifest: EntityManifest
+    private readonly system: System,
+    readonly manifest: EntityManifest,
+    private readonly accessToken: string
   ) {
-    // const filesDriver = this.system.drivers.getDriver<FilesDriver>(
-    //   DRIVER_NAMES.FilesDriver
-    // );
-
     this.packageFiles = new FilesReadOnly(
       filesDriver,
       pathJoin('/', ROOT_DIRS.packages, this.manifest.name),
@@ -70,25 +75,6 @@ export class EntityBaseContext {
       filesDriver,
       pathJoin('/', ROOT_DIRS.tmp, this.manifest.name)
     );
-
-    // TODO: только 1 файл конфига
-
-    // this.cfgLocal = new FilesWrapper(
-    //   filesDriver,
-    //   pathJoin('/', ROOT_DIRS.cfgLocal, this.manifest.name)
-    // );
-    // this.cfgSynced = new FilesWrapper(
-    //   filesDriver,
-    //   pathJoin('/', ROOT_DIRS.cfgSynced, this.manifest.name)
-    // );
-    // this.db = new FilesDb(
-    //   this.system.drivers,
-    //   pathJoin('/', ROOT_DIRS.db, appName)
-    // );
-    // this.filesLog = new FilesLog(
-    //   filesDriver,
-    //   pathJoin('/', ROOT_DIRS.log, appName)
-    // );
   }
 
   async init() {
@@ -97,5 +83,13 @@ export class EntityBaseContext {
 
   async destroy() {
     //
+  }
+
+  async makeDriverInstance<T extends DriverBase>(
+    driverName: string,
+    params: Record<string, any>
+  ): Promise<T> {
+    // TODO: use accessToken to make driver instance
+    // return this.system.drivers.getDriver<T>(driverName);
   }
 }

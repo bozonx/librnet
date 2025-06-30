@@ -14,6 +14,7 @@ export class EntityConfig<Config extends Record<string, any>> {
   ) {}
 
   async init() {
+    // TODO: if not exists,
     this.cfg = await this.system.configs.loadEntityConfig<Config>(
       this.manifest.name,
       this.isSynced
