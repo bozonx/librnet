@@ -17,15 +17,11 @@ import type { LocalFilesIo } from '@/ios/NodejsPack/LocalFilesIo.js';
 export class SystemConfigsManager {
   systemCfg!: SystemCfg;
 
-  private readonly system: System;
-
   private get filesIo(): LocalFilesIo {
     return this.system.io.getIo(IO_NAMES.LocalFilesIo);
   }
 
-  constructor(system: System) {
-    this.system = system;
-  }
+  constructor(private readonly system: System) {}
 
   async init() {
     this.systemCfg = {
@@ -102,53 +98,3 @@ export class SystemConfigsManager {
     return Boolean(await this.filesIo.stat(pathTo));
   }
 }
-
-  // async loadIoConfig(ioName: string): Promise<Record<string, any>> {
-  //   return this.loadEntityConfig(ioName);
-  // }
-
-  // async loadDriverConfig(driverName: string): Promise<Record<string, any>> {
-  //   return this.loadEntityConfig(driverName);
-  // }
-
-  // async loadServiceConfig(serviceName: string): Promise<Record<string, any>> {
-  //   return this.loadEntityConfig(serviceName);
-  // }
-
-  // async saveIoConfig(ioName: string, newConfig: EntityCfg) {
-  //   await this.saveEntityConfig(ioName, newConfig);
-  // }
-
-  // async saveDriverConfig(driverName: string, newConfig: EntityCfg) {
-  //   await this.saveEntityConfig(driverName, newConfig);
-  // }
-
-  // async saveServiceConfig(serviceName: string, newConfig: EntityCfg) {
-  //   await this.saveEntityConfig(serviceName, newConfig);
-  // }
-
-
-  // private async loadEntityConfig(entityName: string): Promise<EntityCfg> {
-  //   const localCfgPath = pathJoin(
-  //     '/',
-  //     ROOT_DIRS.localData,
-  //     LOCAL_DATA_SUB_DIRS.configs,
-  //     `${entityName}.${CFG_FILE_EXT}`
-  //   );
-  //   const syncedCfgPath = pathJoin(
-  //     '/',
-  //     ROOT_DIRS.syncedData,
-  //     SYNCED_DATA_SUB_DIRS.configs,
-  //     `${entityName}.${CFG_FILE_EXT}`
-  //   );
-  //   const cfg: EntityCfg = {};
-
-  //   if (await this.isFileExists(localCfgPath)) {
-  //     cfg.local = JSON.parse(await this.filesIo.readTextFile(localCfgPath));
-  //   }
-  //   if (await this.isFileExists(syncedCfgPath)) {
-  //     cfg.synced = JSON.parse(await this.filesIo.readTextFile(syncedCfgPath));
-  //   }
-
-  //   return cfg;
-  // }

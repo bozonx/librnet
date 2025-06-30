@@ -10,6 +10,7 @@ import { DriversManager } from './managers/DriversManager.js';
 import { afterInstall } from './afterInstall.js';
 import { AppsManager } from './managers/AppsManager.js';
 import { ApiManager } from './managers/ApiManager.js';
+import { FileLogsManager } from './managers/FileLogsManager.js';
 
 export class System {
   readonly events = new IndexedEventEmitter();
@@ -24,6 +25,7 @@ export class System {
   // managers
   readonly packageManager = new PackageManager(this);
   readonly configs = new SystemConfigsManager(this);
+  readonly fileLogs = new FileLogsManager(this);
   // readonly permissions = new PermissionsManager(this);
   readonly io = new IoManager(this);
   readonly drivers = new DriversManager(this);

@@ -1,16 +1,11 @@
 import { pathJoin } from 'squidlet-lib';
-import {
-  ROOT_DIRS,
-  LOCAL_DATA_SUB_DIRS,
-  SYNCED_DATA_SUB_DIRS,
-  CFG_FILE_EXT,
-} from '../../types/constants.js';
+import { ROOT_DIRS } from '../../types/constants.js';
 import type { Logger } from 'squidlet-lib';
 import type { System } from '../System';
 import { RestrictedDir } from '../driversLogic/RestrictedDir.js';
 import type { EntityManifest } from '@/types/types.js';
-import { RootFiles } from '../driversLogic/RootFiles.js';
 import { EntityConfig } from '../driversLogic/EntityConfig.js';
+import { EntityLogFile } from '../driversLogic/EntityLogFile.js';
 
 // TODO: add register api and crud api
 
@@ -24,13 +19,13 @@ export class EntityBaseContext {
   // temporary files of this app
   readonly tmp;
   // local config files of this app
-  readonly localConfigs;
+  readonly localConfig = new EntityConfig(this.system, this.manifest, false);
   // synced config files of this app
-  readonly syncedConfigs;
+  readonly syncedConfig = new EntityConfig(this.system, this.manifest, true);
   // local files log of this app
-  readonly localLog;
+  readonly localLog = new EntityLogFile(this.system, this.manifest, false);
   // synced files log of this app
-  readonly syncedLog;
+  readonly syncedLog = new EntityLogFile(this.system, this.manifest, true);
 
   get consoleLog(): Logger {
     return {
@@ -75,10 +70,6 @@ export class EntityBaseContext {
       filesDriver,
       pathJoin('/', ROOT_DIRS.tmp, this.manifest.name)
     );
-    this.rootFiles = new RootFiles();
-
-    this.localConfigs = new EntityConfig(this.system, this.manifest, false);
-    this.syncedConfigs = new EntityConfig(this.system, this.manifest, true);
 
     // TODO: только 1 файл конфига
 
