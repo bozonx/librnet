@@ -84,9 +84,9 @@ export class EntityBaseContext {
 
   // TODO: manifent of packager or app?
   constructor(
-    private readonly system: System,
+    protected readonly system: System,
     readonly manifest: EntityManifest,
-    private readonly accessToken: string
+    protected readonly accessToken: string
   ) {
     this.packageFiles = new DirTrap(
       this.system,
