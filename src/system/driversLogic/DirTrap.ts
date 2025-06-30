@@ -1,85 +1,83 @@
-import type { FilesDriver } from '@/packages/SystemCommonPkg/FilesDriver/FilesDriver.js';
 import type { FilesDriverType } from '../../types/FilesDriverType.js';
 import type { StatsSimplified } from '../../types/io/FilesIoType.js';
-import { pathJoin } from 'squidlet-lib';
+import { pathJoin, trimCharStart } from 'squidlet-lib';
+import { IO_NAMES } from '../../types/constants.js';
+import { LocalFilesIo } from '../../packages/SystemCommonPkg/io/LocalFilesIo.js';
+import { System } from '../System.js';
 
 /**
  * This is implementation of files driver which is
  *  restricting access to the files ony in the dir
  */
-export class RestrictedDir implements FilesDriverType {
-  readonly rootDir: string;
-  protected readonly filesDriver: FilesDriver;
-  readonly readonly: boolean;
-
-  constructor(
-    filesDriver: FilesDriver,
-    rootDir: string,
-    readonly: boolean = false
-  ) {
-    this.filesDriver = filesDriver;
-    this.rootDir = rootDir;
-    this.readonly = readonly;
+export class DirTrap implements FilesDriverType {
+  private get filesIo(): LocalFilesIo {
+    return this.system.io.getIo(IO_NAMES.LocalFilesIo);
   }
 
+  constructor(
+    private readonly system: System,
+    private readonly rootDir: string,
+    private readonly readOnly: boolean = false
+  ) {}
+
   async readDir(pathTo: string): Promise<string[]> {
-    return this.filesDriver.readDir(this.preparePath(pathTo));
+    return this.filesIo.readDir(this.preparePath(pathTo));
   }
 
   async readTextFile(pathTo: string): Promise<string> {
-    return this.filesDriver.readTextFile(this.preparePath(pathTo));
+    return this.filesIo.readTextFile(this.preparePath(pathTo));
   }
 
   async readBinFile(pathTo: string): Promise<Uint8Array> {
-    return this.filesDriver.readBinFile(this.preparePath(pathTo));
+    return this.filesIo.readBinFile(this.preparePath(pathTo));
   }
 
   async readlink(pathTo: string): Promise<string> {
-    return this.filesDriver.readlink(this.preparePath(pathTo));
+    return this.filesIo.readlink(this.preparePath(pathTo));
   }
 
   async stat(pathTo: string): Promise<StatsSimplified | undefined> {
-    return this.filesDriver.stat(this.preparePath(pathTo));
+    return this.filesIo.stat(this.preparePath(pathTo));
   }
 
   async isDir(pathToDir: string): Promise<boolean> {
-    return this.filesDriver.isDir(this.preparePath(pathToDir));
+    return this.filesIo.isDir(this.preparePath(pathToDir));
   }
 
   async isFile(pathToFile: string): Promise<boolean> {
-    return this.filesDriver.isFile(this.preparePath(pathToFile));
+    return this.filesIo.isFile(this.preparePath(pathToFile));
   }
 
   async isExists(pathToFileOrDir: string): Promise<boolean> {
-    return this.filesDriver.isExists(this.preparePath(pathToFileOrDir));
+    return this.filesIo.isExists(this.preparePath(pathToFileOrDir));
   }
 
   async isFileUtf8(pathTo: string): Promise<boolean> {
-    return this.filesDriver.isFileUtf8(this.preparePath(pathTo));
+    return this.filesIo.isFileUtf8(this.preparePath(pathTo));
   }
 
   async appendFile(pathTo: string, data: string | Uint8Array) {
-    return this.filesDriver.appendFile(this.preparePath(pathTo), data);
+    return this.filesIo.appendFile(this.preparePath(pathTo), data);
   }
 
   async mkdir(pathTo: string) {
-    return this.filesDriver.mkdir(this.preparePath(pathTo));
+    return this.filesIo.mkdir(this.preparePath(pathTo));
   }
 
   async rmdir(pathTo: string) {
-    return this.filesDriver.rmdir(this.preparePath(pathTo));
+    return this.filesIo.rmdir(this.preparePath(pathTo));
   }
 
   async unlink(pathTo: string) {
-    return this.filesDriver.unlink(this.preparePath(pathTo));
+    return this.filesIo.unlink(this.preparePath(pathTo));
   }
 
   async writeFile(pathTo: string, data: string | Uint8Array) {
-    return this.filesDriver.writeFile(this.preparePath(pathTo), data);
+    return this.filesIo.writeFile(this.preparePath(pathTo), data);
   }
 
   async copyFiles(files: [string, string][]) {
-    return this.filesDriver.copyFiles(
+    return this.filesIo.copyFiles(
       files.map(([src, dest]) => {
         return [this.preparePath(src), this.preparePath(dest)];
       })
@@ -87,7 +85,7 @@ export class RestrictedDir implements FilesDriverType {
   }
 
   async renameFiles(files: [string, string][]) {
-    return this.filesDriver.copyFiles(
+    return this.filesIo.copyFiles(
       files.map(([src, dest]) => {
         return [this.preparePath(src), this.preparePath(dest)];
       })
@@ -95,17 +93,17 @@ export class RestrictedDir implements FilesDriverType {
   }
 
   async rmdirR(pathToDir: string): Promise<void> {
-    return this.filesDriver.rmdirR(this.preparePath(pathToDir));
+    return this.filesIo.rmdirR(this.preparePath(pathToDir));
   }
 
   async mkDirP(pathToDir: string): Promise<void> {
-    return this.filesDriver.mkDirP(this.preparePath(pathToDir));
+    return this.filesIo.mkDirP(this.preparePath(pathToDir));
   }
 
   ////////// ADDITIONAL
 
   async rm(pathToFileOrDir: string) {
-    return this.filesDriver.rm(this.preparePath(pathToFileOrDir));
+    return this.filesIo.rm(this.preparePath(pathToFileOrDir));
   }
 
   async cp(src: string | string[], destDir: string): Promise<void> {
@@ -114,7 +112,7 @@ export class RestrictedDir implements FilesDriverType {
         ? this.preparePath(src)
         : src.map((el) => this.preparePath(el));
 
-    return this.filesDriver.cp(fixedSrc, this.preparePath(destDir));
+    return this.filesIo.cp(fixedSrc, this.preparePath(destDir));
   }
 
   async mv(src: string | string[], destDir: string): Promise<void> {
@@ -123,11 +121,11 @@ export class RestrictedDir implements FilesDriverType {
         ? this.preparePath(src)
         : src.map((el) => this.preparePath(el));
 
-    return this.filesDriver.mv(fixedSrc, this.preparePath(destDir));
+    return this.filesIo.mv(fixedSrc, this.preparePath(destDir));
   }
 
   async rename(pathToFileOrDir: string, newName: string): Promise<void> {
-    return this.filesDriver.rename(this.preparePath(pathToFileOrDir), newName);
+    return this.filesIo.rename(this.preparePath(pathToFileOrDir), newName);
   }
 
   private preparePath(pathTo: string): string {

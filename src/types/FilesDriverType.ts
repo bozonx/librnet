@@ -1,6 +1,5 @@
 import type {StatsSimplified} from './io/FilesIoType.js'
 
-
 export interface ReadOnlyFilesDriverType {
   readDir(pathTo: string): Promise<string[]>
   readTextFile(pathTo: string): Promise<string>
