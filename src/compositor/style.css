@@ -16,8 +16,8 @@ body {
 
 #top-tile {
   width: 100%;
-  height: 48px;
   background-color: red;
+  overflow: hidden;
 }
 
 #middle-tile {
@@ -29,24 +29,36 @@ body {
 
 #bottom-tile {
   width: 100%;
-  height: 48px;
   background-color: red;
+  overflow: hidden;
 }
 
 #left-tile {
-  width: 100px;
   height: 100%;
   background-color: blue;
+  overflow: hidden;
 }
 
 #right-tile {
-  width: 100px;
   height: 100%;
   background-color: blue;
+  overflow: hidden;
 }
 
 #main-tile {
   flex: 1;
   height: 100%;
   background-color: green;
+}
+
+#top-iframe,
+#bottom-iframe,
+#left-iframe,
+#right-iframe,
+#main-iframe {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0 none;
 }
