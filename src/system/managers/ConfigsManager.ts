@@ -12,13 +12,14 @@ import {
   ROOT_DIRS,
   SYNCED_DATA_SUB_DIRS,
 } from '../../types/constants.js';
-import type { LocalFilesIo } from '@/ios/NodejsPack/LocalFilesIo.js';
+import type { FilesIoType } from '@/types/io/FilesIoType.js';
+import type { IoBase } from '../base/IoBase.js';
 
 export class ConfigsManager {
   systemCfg!: SystemCfg;
 
-  private get filesIo(): LocalFilesIo {
-    return this.system.io.getIo(IO_NAMES.LocalFilesIo);
+  private get filesIo(): FilesIoType & IoBase {
+    return this.system.io.getIo<FilesIoType & IoBase>(IO_NAMES.LocalFilesIo);
   }
 
   constructor(private readonly system: System) {}

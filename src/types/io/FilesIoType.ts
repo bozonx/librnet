@@ -78,7 +78,7 @@ export interface MkdirOptions {
  * FilesIo works with absolute paths like /envSet/..., /varData/... and /tmp/...
  * But actually it joins these paths with workDir and result will be like /workdir/envSet/...
  */
-export default interface FilesIoType {
+export interface FilesIoType {
   /**
    * Read text file and return it as string
    * @param pathTo
