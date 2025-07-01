@@ -1,13 +1,19 @@
 import type { FilesDriverType } from '../../types/FilesDriverType.js';
 import type {
   CopyOptions,
+  ReaddirOptions,
   ReadTextFileOptions,
   RmOptions,
   StatsSimplified,
   WriteFileOptions,
 } from '../../types/io/FilesIoType.js';
 import type { MkdirOptions } from '../../types/io/FilesIoType.js';
-import { pathJoin, trimCharStart } from 'squidlet-lib';
+import {
+  clearRelPath,
+  pathDirname,
+  pathJoin,
+  trimCharStart,
+} from 'squidlet-lib';
 import { IO_NAMES } from '../../types/constants.js';
 import { System } from '../System.js';
 import type { FilesIoType } from '../../types/io/FilesIoType.js';
@@ -32,22 +38,22 @@ export class DirTrap implements FilesDriverType {
     pathTo: string,
     options?: ReadTextFileOptions
   ): Promise<string> {
-    return this.filesIo.readTextFile(this.preparePath(pathTo));
+    return this.filesIo.readTextFile(this.preparePath(pathTo), options);
   }
 
   async readBinFile(
     pathTo: string,
     returnType?: BinTypesNames
   ): Promise<BinTypes> {
-    return this.filesIo.readBinFile(this.preparePath(pathTo));
+    return this.filesIo.readBinFile(this.preparePath(pathTo), returnType);
   }
 
   async stat(pathTo: string): Promise<StatsSimplified | undefined> {
     return this.filesIo.stat(this.preparePath(pathTo));
   }
 
-  async readdir(pathTo: string): Promise<string[]> {
-    return this.filesIo.readdir(this.preparePath(pathTo));
+  async readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]> {
+    return this.filesIo.readdir(this.preparePath(pathTo), options);
   }
 
   async readlink(pathTo: string): Promise<string> {
@@ -59,19 +65,27 @@ export class DirTrap implements FilesDriverType {
   }
 
   async isDir(pathToDir: string): Promise<boolean> {
-    return this.filesIo.isDir(this.preparePath(pathToDir));
+    return (await this.filesIo.stat(this.preparePath(pathToDir)))?.dir ?? false;
   }
 
   async isFile(pathToFile: string): Promise<boolean> {
-    return this.filesIo.isFile(this.preparePath(pathToFile));
+    return !(await this.isDir(pathToFile));
+  }
+
+  async isSymLink(pathToSymLink: string): Promise<boolean> {
+    return (
+      (await this.filesIo.stat(this.preparePath(pathToSymLink)))
+        ?.symbolicLink ?? false
+    );
   }
 
   async isExists(pathToFileOrDir: string): Promise<boolean> {
-    return this.filesIo.isExists(this.preparePath(pathToFileOrDir));
+    return !!(await this.stat(this.preparePath(pathToFileOrDir)));
   }
 
   async isFileUtf8(pathTo: string): Promise<boolean> {
-    return this.filesIo.isFileUtf8(this.preparePath(pathTo));
+    // TODO: implement this
+    // return this.filesIo.isFileUtf8(this.preparePath(pathTo));
   }
 
   ////////// WRITE
@@ -129,32 +143,56 @@ export class DirTrap implements FilesDriverType {
 
   ////////// ADDITIONAL
 
-  async copyToDest(src: string | string[], destDir: string): Promise<void> {
-    return this.filesIo.copyFiles(
+  async copyToDest(
+    src: string | string[],
+    destDir: string,
+    force?: boolean
+  ): Promise<void> {
+    const destPath = this.preparePath(destDir);
+    const srcPaths =
       typeof src === 'string'
-        ? [this.preparePath(src), this.preparePath(destDir)]
-        : src.map((el) => [this.preparePath(el), this.preparePath(destDir)])
+        ? [this.preparePath(src)]
+        : src.map((el) => this.preparePath(el));
+
+    return this.filesIo.cp(
+      // TODO: восстановить полные пути
+      srcPaths.map((el) => [el, destPath]),
+      { recursive: true, force }
     );
   }
 
-  async moveToDest(src: string | string[], destDir: string): Promise<void> {
-    return this.filesIo.moveToDest(
+  async moveToDest(
+    src: string | string[],
+    destDir: string,
+    force?: boolean
+  ): Promise<void> {
+    // TODO: может через копию делать
+
+    return this.filesIo.rename(
       typeof src === 'string'
-        ? [this.preparePath(src), this.preparePath(destDir)]
-        : src.map((el) => [this.preparePath(el), this.preparePath(destDir)])
+        ? [[this.preparePath(src), this.preparePath(destDir)]]
+        : src.map((el) => [this.preparePath(el), this.preparePath(destDir)]),
+      { recursive: true, force }
     );
   }
 
   async renameFile(file: string, newName: string): Promise<void> {
-    return this.filesIo.rename(this.preparePath(file), newName);
+    const oldPath = this.preparePath(file);
+    const newPath = pathJoin(pathDirname(oldPath), newName);
+
+    return this.filesIo.rename([[oldPath, newPath]]);
   }
 
   async rmRf(pathToFileOrDir: string): Promise<void> {
-    return this.filesIo.rm(this.preparePath(pathToFileOrDir));
+    return this.filesIo.rm([this.preparePath(pathToFileOrDir)], {
+      recursive: true,
+      force: true,
+    });
   }
 
   async mkDirP(pathToDir: string): Promise<void> {
-    return this.filesIo.mkDirP(this.preparePath(pathToDir));
+    // TODO: если директория уже существует, будет ли ошибка?
+    return this.filesIo.mkdir(this.preparePath(pathToDir), { recursive: true });
   }
 
   private preparePath(pathTo: string): string {

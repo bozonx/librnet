@@ -20,6 +20,7 @@ export interface ReadOnlyFilesDriverType {
   ////////// ADDITIONAL
   isDir(pathToDir: string): Promise<boolean>;
   isFile(pathToFile: string): Promise<boolean>;
+  isSymLink(pathToSymLink: string): Promise<boolean>;
   isExists(pathToFileOrDir: string): Promise<boolean>;
   isFileUtf8(pathTo: string): Promise<boolean>;
 }
@@ -49,7 +50,11 @@ export interface WriteFilesDriverType {
    * @param destDir - destination directory
    * @returns
    */
-  copyToDest(src: string | string[], destDir: string): Promise<void>;
+  copyToDest(
+    src: string | string[],
+    destDir: string,
+    force?: boolean
+  ): Promise<void>;
 
   /**
    * Move files to destination directory recursively
@@ -57,7 +62,11 @@ export interface WriteFilesDriverType {
    * @param destDir - destination directory
    * @returns
    */
-  moveToDest(src: string | string[], destDir: string): Promise<void>;
+  moveToDest(
+    src: string | string[],
+    destDir: string,
+    force?: boolean
+  ): Promise<void>;
 
   /**
    * Rename file
