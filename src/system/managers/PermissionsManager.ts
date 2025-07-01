@@ -1,42 +1,66 @@
-import type {System} from '../System.js'
+import { pathJoin } from 'squidlet-lib';
+import type { FilesIoType } from '../../types/io/FilesIoType.js';
+import type { System } from '../System.js';
+import type { IoBase } from '../base/IoBase.js';
+import {
+  CFG_FILE_EXT,
+  IO_NAMES,
+  ROOT_DIRS,
+  SYNCED_DATA_SUB_DIRS,
+} from '../../types/constants.js';
 
-/*
- Права выдаются:
- files:
-   * root - на полный доступ ко всем файлам
-   * app - для приложения только своя папка в apps, appData, appShared, cache, log
-   * home
-   * external
- DB:
-   * сервис работает только со своим дб
- IoT io:
-   * на доступ к I2C, Bluetooth, Serial и тд
- Внешний интернет:
-   * на доступ к 1 домену
-   * на доступ ко всем доменам
- Api:
-   * доступ к api другого хоста
+const SYSTEM_PERMISSIONS_CFG_NAME = 'system.permissions';
 
- Как получать права:
-   * сервис при первой установке получает сгенерированный ключ доступа
-   * когда он хочет получить доступ к чему-то он передает это ключ доступа
-   * к этому ключу доступа соотносятся определённые права, которые проставляет пользователь
-   * в headless установке можно подключиться через Devices
-     с другого устройства с экраном и разрешить права
- */
+// TODO: use configs manager
 
 export class PermissionsManager {
-  private readonly system: System
+  private permissionsPath: string = pathJoin(
+    '/',
+    ROOT_DIRS.syncedData,
+    SYNCED_DATA_SUB_DIRS.configs,
+    `${SYSTEM_PERMISSIONS_CFG_NAME}.${CFG_FILE_EXT}`
+  );
+  // object like {entityName: {permissionName: permissionValue}}
+  private permissions: Record<string, Record<string, string>> = {};
 
-
-  constructor(system: System) {
-    this.system = system
+  private get filesIo(): FilesIoType & IoBase {
+    return this.system.io.getIo<FilesIoType & IoBase>(IO_NAMES.LocalFilesIo);
   }
+
+  constructor(private readonly system: System) {}
 
   async init() {
+    if (await this.filesIo.stat(this.permissionsPath)) {
+      this.permissions = JSON.parse(
+        await this.filesIo.readTextFile(this.permissionsPath)
+      );
+    }
   }
 
-  async destroy() {
+  async savePermissions(
+    entityName: string,
+    partialPermissions: Record<string, string>
+  ) {
+    this.permissions[entityName] = {
+      ...(this.permissions[entityName] || {}),
+      ...partialPermissions,
+    };
+
+    await this.filesIo.writeFile(
+      this.permissionsPath,
+      JSON.stringify(this.permissions)
+    );
   }
 
+  async deletePermissions(entityName: string, permissionNames: string[]) {
+    permissionNames.forEach((permissionName) => {
+      delete this.permissions[entityName][permissionName];
+    });
+
+    if (Object.keys(this.permissions[entityName]).length === 0) {
+      delete this.permissions[entityName];
+    }
+
+    await this.filesIo.rm([this.permissionsPath]);
+  }
 }

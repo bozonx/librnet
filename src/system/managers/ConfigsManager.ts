@@ -15,6 +15,10 @@ import {
 import type { FilesIoType } from '@/types/io/FilesIoType.js';
 import type { IoBase } from '../base/IoBase.js';
 
+// TODO: запретить создавать файлы начинающиеся с точки и system.
+
+const SYSTEM_MAIN_CFG_NAME = 'system.main';
+
 export class ConfigsManager {
   systemCfg!: SystemCfg;
 
@@ -26,8 +30,14 @@ export class ConfigsManager {
 
   async init() {
     this.systemCfg = {
-      local: await this.loadEntityConfig<SystemLocalCfg>('system', false),
-      synced: await this.loadEntityConfig<SystemSyncedCfg>('system', true),
+      local: await this.loadEntityConfig<SystemLocalCfg>(
+        SYSTEM_MAIN_CFG_NAME,
+        false
+      ),
+      synced: await this.loadEntityConfig<SystemSyncedCfg>(
+        SYSTEM_MAIN_CFG_NAME,
+        true
+      ),
     } as SystemCfg;
   }
 

@@ -138,7 +138,8 @@ export interface FilesIoType {
   rm(paths: string[], options?: RmOptions): Promise<void>;
 
   /**
-   * Get file or directory stats
+   * Get file or directory stats.
+   * If file or directory doesn't exist, it will return undefined.
    * @param pathTo
    * @returns
    */
