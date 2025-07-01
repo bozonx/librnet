@@ -74,9 +74,8 @@ export class DirTrapReadOnly implements ReadOnlyFilesDriverType {
     return !!(await this.stat(this.preparePath(pathToFileOrDir)));
   }
 
-  async isFileUtf8(pathTo: string): Promise<boolean> {
-    // TODO: implement this
-    // return this.filesIo.isFileUtf8(this.preparePath(pathTo));
+  async isTextFileUtf8(pathTo: string): Promise<boolean> {
+    return this.filesIo.isTextFileUtf8(this.preparePath(pathTo));
   }
 
   protected preparePath(pathTo: string): string {

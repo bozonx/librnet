@@ -22,7 +22,7 @@ export interface ReadOnlyFilesDriverType {
   isFile(pathToFile: string): Promise<boolean>;
   isSymLink(pathToSymLink: string): Promise<boolean>;
   isExists(pathToFileOrDir: string): Promise<boolean>;
-  isFileUtf8(pathTo: string): Promise<boolean>;
+  isTextFileUtf8(pathTo: string): Promise<boolean>;
 }
 
 export interface WriteFilesDriverType {

@@ -91,12 +91,12 @@ export class DirTrap extends DirTrapReadOnly implements FilesDriverType {
   ): Promise<void> {
     // TODO: может через копию делать
 
-    return this.filesIo.rename(
-      typeof src === 'string'
-        ? [[this.preparePath(src), this.preparePath(destDir)]]
-        : src.map((el) => [this.preparePath(el), this.preparePath(destDir)]),
-      { recursive: true, force }
-    );
+    // return this.filesIo.rename(
+    //   typeof src === 'string'
+    //     ? [[this.preparePath(src), this.preparePath(destDir)]]
+    //     : src.map((el) => [this.preparePath(el), this.preparePath(destDir)]),
+    //   { recursive: true, force }
+    // );
   }
 
   async renameFile(file: string, newName: string): Promise<void> {
@@ -114,7 +114,6 @@ export class DirTrap extends DirTrapReadOnly implements FilesDriverType {
   }
 
   async mkDirP(pathToDir: string): Promise<void> {
-    // TODO: если директория уже существует, будет ли ошибка?
     return this.filesIo.mkdir(this.preparePath(pathToDir), { recursive: true });
   }
 }

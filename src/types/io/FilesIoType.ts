@@ -177,6 +177,9 @@ export interface FilesIoType {
 
   /**
    * Create directory
+   * If recursive is true, it will create parent directories recursively
+   *   and if destination directory already exists, it will NOT throw an error
+   * But if recursive is false, it will throw an error if destination directory already exists
    * @param pathTo
    * @param options
    * @returns
