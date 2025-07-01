@@ -57,7 +57,8 @@ export interface WriteFilesDriverType {
   ): Promise<void>;
 
   /**
-   * Move files to destination directory recursively
+   * Move files to destination directory recursively.
+   * First it copies files and after thar removes src
    * @param src - source path or array of paths. Glob is supported.
    * @param destDir - destination directory
    * @returns

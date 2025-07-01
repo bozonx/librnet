@@ -96,13 +96,7 @@ export class DirTrap extends DirTrapReadOnly implements FilesDriverType {
         ? [this.preparePath(src)]
         : src.map((el) => this.preparePath(el));
 
-    // TODO: может через копию делать
-    // return this.filesIo.rename(
-    //   typeof src === 'string'
-    //     ? [[this.preparePath(src), this.preparePath(destDir)]]
-    //     : src.map((el) => [this.preparePath(el), this.preparePath(destDir)]),
-    //   { recursive: true, force }
-    // );
+    // TODO: сделать через копию и потом удалить src
   }
 
   async renameFile(file: string, newName: string): Promise<void> {
