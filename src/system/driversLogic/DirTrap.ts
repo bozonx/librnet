@@ -5,7 +5,7 @@ import type {
   WriteFileOptions,
 } from '../../types/io/FilesIoType.js';
 import type { MkdirOptions } from '../../types/io/FilesIoType.js';
-import { pathDirname, pathJoin } from 'squidlet-lib';
+import { pathBasename, pathDirname, pathJoin } from 'squidlet-lib';
 import { DirTrapReadOnly } from './DirTrapReadOnly.js';
 
 /**
@@ -71,6 +71,7 @@ export class DirTrap extends DirTrapReadOnly implements FilesDriverType {
     destDir: string,
     force?: boolean
   ): Promise<void> {
+    // TODO: suport glob
     const destPath = this.preparePath(destDir);
     const srcPaths =
       typeof src === 'string'
@@ -78,8 +79,7 @@ export class DirTrap extends DirTrapReadOnly implements FilesDriverType {
         : src.map((el) => this.preparePath(el));
 
     return this.filesIo.cp(
-      // TODO: восстановить полные пути
-      srcPaths.map((el) => [el, destPath]),
+      srcPaths.map((el) => [el, pathJoin(destPath, pathBasename(el))]),
       { recursive: true, force }
     );
   }
@@ -89,8 +89,14 @@ export class DirTrap extends DirTrapReadOnly implements FilesDriverType {
     destDir: string,
     force?: boolean
   ): Promise<void> {
-    // TODO: может через копию делать
+    // TODO: suport glob
+    const destPath = this.preparePath(destDir);
+    const srcPaths =
+      typeof src === 'string'
+        ? [this.preparePath(src)]
+        : src.map((el) => this.preparePath(el));
 
+    // TODO: может через копию делать
     // return this.filesIo.rename(
     //   typeof src === 'string'
     //     ? [[this.preparePath(src), this.preparePath(destDir)]]

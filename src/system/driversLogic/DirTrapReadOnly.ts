@@ -55,6 +55,8 @@ export class DirTrapReadOnly implements ReadOnlyFilesDriverType {
     return this.filesIo.realpath(this.preparePath(pathTo));
   }
 
+  ////////// ADDITIONAL
+
   async isDir(pathToDir: string): Promise<boolean> {
     return (await this.filesIo.stat(this.preparePath(pathToDir)))?.dir ?? false;
   }
