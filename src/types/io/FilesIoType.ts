@@ -96,6 +96,13 @@ export interface FilesIoType {
   readBinFile(pathTo: string, returnType?: BinTypesNames): Promise<BinTypes>;
 
   /**
+   * Check if file is a valid UTF-8 text file
+   * @param pathTo - path to file to check
+   * @returns true if file is valid UTF-8 text, false otherwise
+   */
+  isTextFileUtf8(pathTo: string): Promise<boolean>;
+
+  /**
    * Append data to file even if it doesn't exist
    * @param pathTo
    * @param data

@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import { open } from 'node:fs/promises';
 import type { Stats } from 'node:fs';
 import type { FilesIoType } from '../../types/io/FilesIoType.js';
 import type {
@@ -63,6 +64,39 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
         return new BigUint64Array(buffer);
       default:
         throw new Error(`Unknown return type: ${returnType}`);
+    }
+  }
+
+  async isTextFileUtf8(pathTo: string): Promise<boolean> {
+    try {
+      // Получаем размер файла
+      const stats = await fs.stat(pathTo);
+
+      // Если файл пустой, считаем его валидным UTF-8
+      if (stats.size === 0) {
+        return true;
+      }
+
+      // Читаем только первые 8KB для проверки UTF-8
+      // Этого достаточно для определения кодировки большинства текстовых файлов
+      const sampleSize = Math.min(8192, stats.size);
+
+      // Открываем файл и читаем только нужную часть
+      const fileHandle = await open(pathTo, 'r');
+      try {
+        const buffer = Buffer.alloc(sampleSize);
+        const { bytesRead } = await fileHandle.read(buffer, 0, sampleSize, 0);
+
+        // Используем нативную функцию Buffer.toString() для проверки UTF-8
+        // Если файл не является валидным UTF-8, toString() выбросит ошибку
+        buffer.subarray(0, bytesRead).toString('utf8');
+      } finally {
+        await fileHandle.close();
+      }
+      return true;
+    } catch (error) {
+      // Если файл не существует или произошла ошибка чтения/декодирования, возвращаем false
+      return false;
     }
   }
 
