@@ -4,6 +4,46 @@
     <title>Left Panel</title>
   </head>
   <body>
-    <h1>Left Panel</h1>
+    <button onclick="callParentFunction()">Вызвать родительскую функцию</button>
+  <div id="result"></div>
+
+  <script>
+    // Уникальный идентификатор для отслеживания запросов
+    let requestId = 0;
+
+    // Функция для вызова родительской функции
+    async function callParentFunction() {
+      const result = await new Promise((resolve, reject) => {
+        const id = requestId++;
+        // Отправка сообщения родителю
+        window.parent.postMessage(
+          { type: 'callFunction', id, data: 'Привет от iframe!' },
+          window.location.origin
+        );
+
+        // Обработчик ответа от родителя
+        const handler = (event) => {
+          if (event.origin !== window.location.origin) return;
+          const { type, id: responseId, result, error } = event.data;
+
+          if (responseId === id) {
+            if (type === 'functionResult') {
+              resolve(result);
+            } else if (type === 'functionError') {
+              reject(new Error(error));
+            }
+            // Удаляем обработчик после получения ответа
+            window.removeEventListener('message', handler);
+          }
+        };
+
+        window.addEventListener('message', handler);
+      });
+      document.getElementById('result').innerText = `Результат: ${result}`;
+    }
+
+    // Пример вызова
+    document.getElementById('result').innerText = 'Ожидание...';
+  </script>
   </body>
 </html>

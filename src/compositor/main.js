@@ -56,6 +56,51 @@
 
   ///////////////////////
 
+  // Функция в родительском документе, возвращающая промис
+  function myParentFunction(data) {
+    return new Promise((resolve, reject) => {
+      // Пример: имитация асинхронной операции
+      setTimeout(() => {
+        if (data) {
+          resolve(`Успех: ${data}`);
+        } else {
+          reject('Ошибка: данные не переданы');
+        }
+      }, 1000);
+    });
+  }
+
+  // Получение iframe
+  const iframe = document.getElementById('left-iframe');
+
+  // Обработчик сообщений от iframe
+  window.addEventListener('message', async (event) => {
+    // Проверка источника сообщения (для безопасности)
+    if (event.origin !== window.location.origin) return;
+
+    const { type, data, id } = event.data;
+
+    if (type === 'callFunction') {
+      try {
+        // Вызов функции и ожидание результата
+        const result = await myParentFunction(data);
+        // Отправка результата обратно в iframe
+        iframe.contentWindow.postMessage(
+          { type: 'functionResult', id, result },
+          event.origin
+        );
+      } catch (error) {
+        // Отправка ошибки в iframe
+        iframe.contentWindow.postMessage(
+          { type: 'functionError', id, error: error.message },
+          event.origin
+        );
+      }
+    }
+  });
+
+  ///////////////////////
+
   // Создаем новое WebSocket-соединение
   const socket = new WebSocket('ws://example.com/socket');
 
