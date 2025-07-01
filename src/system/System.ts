@@ -25,8 +25,8 @@ export class System {
   // managers
   readonly packageManager = new PackageManager(this);
   readonly configs = new ConfigsManager(this);
+  readonly permissions = new PermissionsManager(this);
   readonly fileLogs = new FileLogsManager(this);
-  // readonly permissions = new PermissionsManager(this);
   readonly io = new IoManager(this);
   readonly drivers = new DriversManager(this);
   readonly api = new ApiManager(this);
@@ -63,6 +63,7 @@ export class System {
       await this.io.initIoSetsAndFilesIo();
       // system configs for IO, drivers and services
       await this.configs.init();
+      await this.permissions.init();
       await this.packageManager.loadInstalled();
       await this.io.initIos();
       await this.drivers.init();
@@ -72,7 +73,6 @@ export class System {
         await afterInstall(this);
       }
 
-      // await this.permissions.init();
       await this.services.init();
       await this.apps.init();
       // notify that system is inited
