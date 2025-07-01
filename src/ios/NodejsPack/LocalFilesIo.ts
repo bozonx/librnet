@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import type { Stats } from 'node:fs';
-import type FilesIoType from '../../types/io/FilesIoType.js';
+import type { FilesIoType } from '../../types/io/FilesIoType.js';
 import type {
   CopyOptions,
   MkdirOptions,
