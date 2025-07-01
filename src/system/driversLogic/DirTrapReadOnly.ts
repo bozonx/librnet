@@ -1,31 +1,22 @@
-import type { FilesDriverType } from '../../types/FilesDriverType.js';
+import type { ReadOnlyFilesDriverType } from '../../types/FilesDriverType.js';
 import type {
-  CopyOptions,
   ReaddirOptions,
   ReadTextFileOptions,
-  RmOptions,
   StatsSimplified,
-  WriteFileOptions,
 } from '../../types/io/FilesIoType.js';
-import type { MkdirOptions } from '../../types/io/FilesIoType.js';
-import {
-  clearRelPath,
-  pathDirname,
-  pathJoin,
-  trimCharStart,
-} from 'squidlet-lib';
 import { IO_NAMES } from '../../types/constants.js';
 import { System } from '../System.js';
 import type { FilesIoType } from '../../types/io/FilesIoType.js';
 import type { IoBase } from '../base/IoBase.js';
 import type { BinTypes, BinTypesNames } from '@/types/types.js';
+import { clearRelPath, pathJoin, trimCharStart } from 'squidlet-lib';
 
 /**
- * This is implementation of files driver which is
- *  restricting access to the files ony in the dir
+ * Directory trap read only driver logic.
+ * It does not allow to access files outside of the directory.
  */
-export class DirTrap implements FilesDriverType {
-  private get filesIo(): FilesIoType & IoBase {
+export class DirTrapReadOnly implements ReadOnlyFilesDriverType {
+  protected get filesIo(): FilesIoType & IoBase {
     return this.system.io.getIo<FilesIoType & IoBase>(IO_NAMES.LocalFilesIo);
   }
 
@@ -86,5 +77,9 @@ export class DirTrap implements FilesDriverType {
   async isFileUtf8(pathTo: string): Promise<boolean> {
     // TODO: implement this
     // return this.filesIo.isFileUtf8(this.preparePath(pathTo));
+  }
+
+  protected preparePath(pathTo: string): string {
+    return pathJoin(this.rootDir, trimCharStart(clearRelPath(pathTo), '/'));
   }
 }

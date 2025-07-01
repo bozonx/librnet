@@ -11,6 +11,7 @@ import type { EntityManifest } from '@/types/types.js';
 import { EntityConfig } from '../driversLogic/EntityConfig.js';
 import { EntityLogFile } from '../driversLogic/EntityLogFile.js';
 import { DriverBase } from '../base/DriverBase.js';
+import { DirTrapReadOnly } from '../driversLogic/DirTrapReadOnly.js';
 
 export class EntityBaseContext {
   // Server side context
@@ -75,7 +76,15 @@ export class EntityBaseContext {
     )
   );
   // readonly files of package relative to the app
-  readonly packageFiles;
+  readonly packageFiles = new DirTrapReadOnly(
+    this.system,
+    pathJoin(
+      '/',
+      ROOT_DIRS.packages,
+      // TODO: имя пакета
+      this.manifest.name
+    )
+  );
 
   // TODO: use db key-value storage for cache
   // readonly cacheLocal;
@@ -87,14 +96,7 @@ export class EntityBaseContext {
     protected readonly system: System,
     readonly manifest: EntityManifest,
     protected readonly accessToken: string
-  ) {
-    this.packageFiles = new DirTrap(
-      this.system,
-      // TODO: ввыяснить как получит путь пакета
-      pathJoin('/', ROOT_DIRS.packages, this.manifest.name),
-      true
-    );
-  }
+  ) {}
 
   async init() {
     //
