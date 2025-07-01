@@ -15,8 +15,6 @@ import {
 import type { FilesIoType } from '@/types/io/FilesIoType.js';
 import type { IoBase } from '../base/IoBase.js';
 
-// TODO: запретить создавать файлы начинающиеся с точки и system.
-
 const SYSTEM_MAIN_CFG_NAME = 'system.main';
 
 export class ConfigsManager {

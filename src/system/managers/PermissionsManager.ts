@@ -11,7 +11,7 @@ import {
 
 const SYSTEM_PERMISSIONS_CFG_NAME = 'system.permissions';
 
-// TODO: use configs manager
+// TODO: use configs manager????
 
 export class PermissionsManager {
   private permissionsPath: string = pathJoin(
