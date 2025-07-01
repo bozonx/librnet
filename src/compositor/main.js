@@ -2,8 +2,37 @@
   const app = document.getElementById('app');
   app.innerHTML = '<div id="root-compositor"></div>';
 
-  const rootCompositor = document.getElementById('root-compositor');
-  rootCompositor.innerHTML = 'Hello World';
+  const tiles = {
+    top: {},
+    bottom: {},
+    left: {},
+    right: {},
+  };
+
+  const rootTiles = [];
+  if (tiles.top) {
+    rootTiles.push('<div id="top-tile"></div>');
+  }
+  rootTiles.push('<div id="middle-tile"></div>');
+  if (tiles.bottom) {
+    rootTiles.push('<div id="bottom-tile"></div>');
+  }
+  document.getElementById('root-compositor').innerHTML = rootTiles.join('\n');
+
+  const middleTiles = [];
+  if (tiles.left) {
+    middleTiles.push('<div id="left-tile"></div>');
+  }
+  middleTiles.push('<div id="main-tile"></div>');
+  if (tiles.right) {
+    middleTiles.push('<div id="right-tile"></div>');
+  }
+  document.getElementById('middle-tile').innerHTML = middleTiles.join('\n');
+
+  const mainTile = document.getElementById('main-tile');
+  mainTile.innerHTML = 'Hello World';
+
+  ///////////////////////
 
   // Создаем новое WebSocket-соединение
   const socket = new WebSocket('ws://example.com/socket');

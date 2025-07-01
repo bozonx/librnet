@@ -1,0 +1,52 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#app {
+
+}
+
+#root-compositor {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100dvh;
+}
+
+#top-tile {
+  width: 100%;
+  height: 48px;
+  background-color: red;
+}
+
+#middle-tile {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: calc(100dvh - 96px);
+}
+
+#bottom-tile {
+  width: 100%;
+  height: 48px;
+  background-color: red;
+}
+
+#left-tile {
+  width: 100px;
+  height: 100%;
+  background-color: blue;
+}
+
+#right-tile {
+  width: 100px;
+  height: 100%;
+  background-color: blue;
+}
+
+#main-tile {
+  flex: 1;
+  height: 100%;
+  background-color: green;
+}
