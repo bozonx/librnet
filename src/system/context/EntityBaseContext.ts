@@ -109,4 +109,34 @@ export class EntityBaseContext {
     // TODO: use accessToken to make driver instance
     // return this.system.drivers.getDriver<T>(driverName);
   }
+
+  /**
+   * Access to api of services that registered their api in the system
+   */
+  serviceApi(serviceName: string) {
+    const serviceApi = this.system.api.getServiceApi(serviceName);
+
+    return this.permissionWrapper(serviceName, serviceApi);
+  }
+
+  /**
+   * Access to api of apps that registered their api in the system
+   */
+  appApi(appName: string) {
+    const appApi = this.system.api.getAppApi(appName);
+
+    return this.permissionWrapper(appName, appApi);
+  }
+
+  private permissionWrapper(entityName: string, api: Record<string, any>) {
+    return new Proxy(this, {
+      get: (target, prop) => {
+        this.system.permissions.checkPermissions(entityName, prop);
+
+        if (prop in target) {
+          return target[prop];
+        }
+      },
+    });
+  }
 }
