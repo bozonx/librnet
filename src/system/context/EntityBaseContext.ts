@@ -19,9 +19,9 @@ export class EntityBaseContext {
   readonly context: Record<string, any> = {};
 
   // only for server
-  readonly serverEvents = new IndexedEventEmitter();
-  // for server and client
-  readonly commonEvents = new IndexedEventEmitter();
+  readonly serverSideEvents = new IndexedEventEmitter();
+  // for sending events to client
+  readonly toClientEvents = new IndexedEventEmitter();
 
   // local user's config files of this app
   readonly localConfig = new EntityConfig(this.system, this.manifest, false);
@@ -75,15 +75,10 @@ export class EntityBaseContext {
       this.manifest.name
     )
   );
-  // readonly files of package relative to the app
-  readonly packageFiles = new DirTrapReadOnly(
+  // readonly program and assets files of this app
+  readonly myFiles = new DirTrapReadOnly(
     this.system,
-    pathJoin(
-      '/',
-      ROOT_DIRS.packages,
-      // TODO: имя пакета
-      this.manifest.name
-    )
+    pathJoin('/', ROOT_DIRS.programFiles, this.manifest.name)
   );
 
   // TODO: use db key-value storage for cache
@@ -91,15 +86,16 @@ export class EntityBaseContext {
   // // data bases for this app
   // readonly db;
 
-  // TODO: manifent of packager or app?
   constructor(
     protected readonly system: System,
+    // manifest of the service or app
     readonly manifest: EntityManifest,
     protected readonly accessToken: string
   ) {}
 
   async init() {
-    //
+    this.localConfig.init();
+    this.syncedConfig.init();
   }
 
   async destroy() {

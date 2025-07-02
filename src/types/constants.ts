@@ -58,14 +58,15 @@ export type EnvMode = keyof typeof ENV_MODES;
 
 // root dirs
 export const ROOT_DIRS = {
-  // Installed packages (their code)
-  // Included IO, drivers and services and apps
-  packages: 'packages',
+  // Installed files of IO, drivers, services and apps
+  programFiles: 'programFiles',
   localData: 'localData',
   // Synced only using internal synchronization
   syncedData: 'syncedData',
   // synced home dir using watch
   home: 'home',
+  // mounted filesystems
+  mnt: 'mnt',
 };
 export const LOCAL_DATA_SUB_DIRS = {
   // Local data files of services and apps

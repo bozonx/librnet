@@ -1,6 +1,4 @@
-import { pathJoin } from 'squidlet-lib';
 import { System } from '../System.js';
-import { ROOT_DIRS } from '@/types/constants.js';
 import type { EntityManifest } from '@/types/types.js';
 
 export class EntityConfig<Config extends Record<string, any>> {
@@ -14,7 +12,6 @@ export class EntityConfig<Config extends Record<string, any>> {
   ) {}
 
   async init() {
-    // TODO: if not exists,
     this.cfg = await this.system.configs.loadEntityConfig<Config>(
       this.manifest.name,
       this.isSynced
