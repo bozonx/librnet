@@ -68,20 +68,52 @@ export interface EntityCfg {
   synced?: Record<string, any>;
 }
 
-export interface EntityManifest {
+export interface PackageManifest {
   // Unique name
   name: string;
+  // it can be a main version of all the entities in the package
   version: string;
-  // name in different languages
-  nameLang: Record<string, string>;
   // description in different languages
   description: Record<string, string>;
-  author: string;
-  license: string;
+  author?: string;
+  license?: string;
+  // homepage of the package
   homepage?: string;
   repository?: string;
   bugs?: string;
+  // list of paths to Io dirs relative to package
+  ios?: string[];
+  // list of paths to Driver dirs relative to package
+  drivers?: string[];
+  // list of paths to Service dirs relative to package
+  services?: string[];
+  // list of App names that are required by the package
+  apps?: string[];
+}
+
+// Manifest of a service or app
+export interface EntityManifest {
+  // Unique name
+  name: string;
+  // If not set, it will be the same as the package version
+  version?: string;
+  // name in different languages
+  nameLocale: Record<string, string>;
+  // description in different languages
+  description: Record<string, string>;
+  // If not set, it will be the same as the package author
+  author?: string;
+  // If not set, it will be the same as the package license
+  license?: string;
+  // homepage of the entity
+  homepage?: string;
+  // repository of the entity
+  repository?: string;
+  // bugs of the entity
+  bugs?: string;
   // requireDriver?: string[];
+  // requireService?: string[];
+  // requireApp?: string[];
 }
 
 export interface AppManifest extends EntityManifest {
