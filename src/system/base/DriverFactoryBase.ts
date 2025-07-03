@@ -1,128 +1,91 @@
-import {DriverBase} from './DriverBase.js'
-import type DriverInstanceBase from './DriverInstanceBase.js'
-import type {DriverInstanceParams} from './DriverInstanceBase.js'
-
-
-// this is used to make instance id
-let defaultInstanceIdCounter = 0
-
-// TODO: инстанс должен быть пролойкой. Если его задестроить то сам инстанс не дестроится
-//   если его кто-то исползует
-
+import type { System } from '../System.js';
+import type DriverInstanceBase from './DriverInstanceBase.js';
+import type { DriverInstanceParams } from './DriverInstanceBase.js';
 
 /**
  * This factory creates instances of sub drivers and keeps them in the memory.
- * After the next request of instance it returns previously created one.
+ * The instances are owned by service or appp which uses them.
+ *
  * If the "instanceId" method is set then id of instances of subDriver will be calculated there.
  * If there no "instanceId" method then a new instance will be created each call of "subDriver"
  * and never be saved.
  */
-export default abstract class DriverFactoryBase<
+export abstract class DriverFactoryBase<
   Instance extends DriverInstanceBase,
   Props extends Record<string, any> = Record<string, any>
-> extends DriverBase {
-  readonly requireIo?: string[];
+> {
+  // put name of the driver here
+  abstract readonly name: string;
 
-  // there instances are kept
-  protected instances: Record<string, Instance> = {};
+  // readonly requireIo?: string[];
+
+  protected instances: Instance[] = [];
   // Specify your sub driver class. It's required.
   protected abstract SubDriverClass: new (
-    DriverInstanceParams: any
+    DriverInstanceParams: any,
+    destroyCb: () => Promise<void>
   ) => Instance;
   protected cfg?: Record<string, any>;
 
-  private instanceUses: Record<string, number> = {};
+  constructor(protected readonly system: System) {}
 
   async init(cfg?: Record<string, any>) {
     this.cfg = cfg;
   }
 
   async destroy() {
-    for (const instanceId of Object.keys(this.instances)) {
-      await this.destroyInstance(instanceId, true);
+    for (const instance of this.instances) {
+      // It will call destroyCb to remove instance from this.instances
+      await instance.destroy(true);
     }
   }
 
-  /**
-   * Get existent or create a new sub driver instance.
-   * It subDriver has an id you shouldn't destroy the subDriver.
-   */
-  async subDriver(instanceProps: Props = {} as Props): Promise<Instance> {
-    // combined instance and definition props
-    //const props = mergeDeepObjects(instanceProps, this.definition.props) as Props
-    //await this.validateInstanceProps(instanceProps, props)
+  async makeInstance(instanceProps: Props = {} as Props): Promise<Instance> {
+    await this.validateInstanceProps(instanceProps);
 
-    const instanceId = this.makeInstanceId(instanceProps, this.cfg);
-    // return previously instantiated instance if it exists
-    if (this.instances[instanceId]) {
-      this.instanceUses[instanceId]++;
-
-      return this.instances[instanceId];
-    }
-    // else create a new instance
-    this.instanceUses[instanceId] = 0;
+    const instanceId = this.instances.length;
 
     const instanceParams: DriverInstanceParams<Props> = {
-      ctx: this.ctx,
       instanceId,
       driver: this,
       props: instanceProps,
       cfg: this.cfg,
     };
 
-    const instance = new this.SubDriverClass(instanceParams);
+    const instance = new this.SubDriverClass(
+      instanceParams,
+      this.destroyCb.bind(this, instanceId)
+    );
 
-    this.instances[instanceId] = instance;
+    this.instances.push(instance);
+    await instance.init?.();
 
-    if (instance.init) await instance.init();
-    // return just created instance
-    return this.instances[instanceId];
+    return instance;
   }
 
   /**
-   * If force then instance will be destroyed any way - do not use it in ordinary way.
-   * If not force then instance will be destroyed only if there is no one uses it
+   * Just remove instance from this.instances
    * @param instanceId
-   * @param force
    */
-  async destroyInstance(instanceId: string, force: boolean = false) {
-    if (force || !this.instanceUses[instanceId]) {
-      // really destroy an instance
-      const instance = this.instances[instanceId];
-
-      if (instance.$doDestroy) await instance.$doDestroy();
-
-      delete this.instances[instanceId];
-      delete this.instanceUses[instanceId];
-
-      return;
-    }
-    // decrement uses of instance
-    this.instanceUses[instanceId]--;
+  private async destroyCb(instanceId: number): Promise<void> {
+    this.instances.splice(instanceId, 1);
   }
 
-  // Specify it to calculate an id of the new instance of sub driver
-  protected makeInstanceId(props: Props, cfg?: Record<string, any>): string {
-    return String(defaultInstanceIdCounter++);
+  private async validateInstanceProps(instanceProps: Record<string, any>) {
+    // // TODO: а нужно ли повторно загружать манифест, он же должен быть заружен в drivers manager
+    // const manifest: EntityManifest =
+    //   await this.context.system.envSet.loadManifest(
+    //     'driver',
+    //     this.definition.id
+    //   );
+    // if (!manifest.props) return;
+    // const validationErr: string | undefined =
+    //   validateProps(instanceProps, manifest.props) ||
+    //   validateRequiredProps(mergedProps, manifest.props);
+    // if (validationErr) {
+    //   throw new Error(
+    //     `Props of sub driver "${this.definition.id}" are invalid: ${validationErr}`
+    //   );
+    // }
   }
 }
-
-// private async validateInstanceProps(
-//   instanceProps: {[index: string]: any},
-//   mergedProps: {[index: string]: any}
-// ) {
-//   // TODO: а нужно ли повторно загружать манифест, он же должен быть заружен в drivers manager
-//   const manifest: EntityManifest = await this.context.system.envSet.loadManifest(
-//     'driver',
-//     this.definition.id
-//   );
-//
-//   if (!manifest.props) return;
-//
-//   const validationErr: string | undefined = validateProps(instanceProps, manifest.props)
-//     || validateRequiredProps(mergedProps, manifest.props);
-//
-//   if (validationErr) {
-//     throw new Error(`Props of sub driver "${this.definition.id}" are invalid: ${validationErr}`);
-//   }
-// }

@@ -18,6 +18,11 @@ export const FilesDriverIndex: DriverIndex = (ctx: DriverContext) => {
   return new FilesDriver(ctx);
 };
 
+
+export class FilesDriver extends DriverFactoryBase<FilesDriverInstance> {
+  protected SubDriverClass = FilesDriverInstance;
+}
+
 function prepareSubPath(
   subDirOfRoot: string,
   rootDir?: string,
@@ -103,7 +108,7 @@ export const FilesIoIndex: IoIndex = (ctx: IoContext) => {
  * Files driver
  * Use relative paths
  */
-export class FilesDriver extends DriverBase implements FilesDriverType {
+export class FilesDriverInstance extends DriverBase implements FilesDriverType {
   requireIo = [IO_NAMES.FilesIo];
 
   private get io(): IoBase & FilesIoType {

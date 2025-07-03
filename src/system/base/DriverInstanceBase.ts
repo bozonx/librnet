@@ -1,18 +1,16 @@
-import type { DriverContext } from '../context/DriverContext.js';
-import type DriverFactoryBase from './DriverFactoryBase.js';
+import type { DriverFactoryBase } from './DriverFactoryBase.js';
 
-export interface DriverInstanceParams<
-  Props extends Record<string, any> = Record<string, any>,
-  Driver = DriverFactoryBase<DriverInstanceBase, Props>
-> {
-  ctx: DriverContext;
-  instanceId: string;
-  // base driver instance
-  driver: Driver;
-  // instance props
-  props: Props;
-  cfg?: Record<string, any>;
-}
+// export interface DriverInstanceParams<
+//   Props extends Record<string, any> = Record<string, any>,
+//   Driver = DriverFactoryBase<DriverInstanceBase, Props>
+// > {
+//   instanceId: number;
+//   // base driver instance
+//   driver: Driver;
+//   // instance props
+//   props: Props;
+//   cfg?: Record<string, any>;
+// }
 
 export default class DriverInstanceBase<
   Props extends { [index: string]: any } = any,
@@ -39,7 +37,10 @@ export default class DriverInstanceBase<
   // If you have props you can validate it in this method
   protected validateProps?: (props: Props) => string | undefined;
 
-  constructor(params: DriverInstanceParams<Props, Driver>) {
+  constructor(
+    params: DriverInstanceParams<Props, Driver>,
+    private readonly destroyCb?: () => Promise<void>
+  ) {
     this.params = params;
 
     // if (this.driversDidInit) this.ctx.onDriversInit(this.driversDidInit.bind(this))
@@ -51,11 +52,12 @@ export default class DriverInstanceBase<
 
   // TODO: зачем отдельный метод?
   // destroy logic of instance
-  $doDestroy?(): Promise<void>;
+  // $doDestroy?(): Promise<void>;
   // define this method to destroy entity when system is destroying.
   // Don't call this method in other cases.
-  async destroy(): Promise<void> {
-    await this.params.driver.destroyInstance(this.params.instanceId);
+  async destroy(force: boolean = false): Promise<void> {
+    await this.destroyCb?.();
+    // await this.params.driver.destroyInstance(this.params.instanceId);
   }
 
   // // it will be called after all the entities of entityType have been inited
