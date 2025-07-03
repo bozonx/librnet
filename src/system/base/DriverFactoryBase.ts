@@ -7,10 +7,12 @@ import type DriverInstanceBase from './DriverInstanceBase.js';
  * The instances are owned by service or appp which uses them.
  * By default, the instances are matched by props,
  * if you need more precise match, overload makeMatchString method.
+ * Do not add public methods to the factory because they
+ *   will be available not only for the instances.
  */
 export abstract class DriverFactoryBase<
   Props extends Record<string, any>,
-  Instance extends DriverInstanceBase<Props, DriverFactoryBase<Props, Instance>>
+  Instance extends DriverInstanceBase<Props>
 > {
   // put name of the driver here
   abstract readonly name: string;
