@@ -11,8 +11,12 @@ import type DriverInstanceBase from './DriverInstanceBase.js';
  *   will be available not only for the instances.
  */
 export abstract class DriverFactoryBase<
-  Instance extends DriverInstanceBase<any, any> = DriverInstanceBase<any>,
-  Props extends Record<string, any> = any
+  Instance extends DriverInstanceBase<any, any, any> = DriverInstanceBase<
+    any,
+    any,
+    any
+  >,
+  Props extends Record<string, any> = Record<string, any>
 > {
   // put name of the driver here
   abstract readonly name: string;
@@ -24,7 +28,11 @@ export abstract class DriverFactoryBase<
   protected instances: Instance[] = [];
   // Specify your sub driver class
   protected abstract SubDriverClass: new (
-    ...args: ConstructorParameters<typeof DriverInstanceBase>
+    system: System,
+    driver: DriverFactoryBase<any, any>,
+    props: Props,
+    commonProps: any,
+    destroyCb?: () => Promise<void>
   ) => Instance;
   // Put here common functions and properties for all instances
   protected commonProps: Record<string, any> = {};

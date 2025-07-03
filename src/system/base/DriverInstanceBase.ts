@@ -3,8 +3,9 @@ import type { DriverFactoryBase } from './DriverFactoryBase.js';
 import type { System } from '../System.js';
 
 export default class DriverInstanceBase<
-  Props extends Record<string, any>,
-  CommonProps extends Record<string, any> = Record<string, any>
+  Props extends Record<string, any> = Record<string, any>,
+  CommonProps extends Record<string, any> = Record<string, any>,
+  Driver extends DriverFactoryBase<any, any> = DriverFactoryBase<any, any>
 > {
   get props(): Props {
     return this._props;
@@ -12,10 +13,7 @@ export default class DriverInstanceBase<
 
   constructor(
     protected readonly system: System,
-    protected readonly driver: DriverFactoryBase<
-      DriverInstanceBase<Props, CommonProps>,
-      Props
-    >,
+    protected readonly driver: Driver,
     private readonly _props: Props,
     protected readonly commonProps: CommonProps,
     private readonly destroyCb?: () => Promise<void>

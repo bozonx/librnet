@@ -29,13 +29,11 @@ export const RootFilesDriverIndex: DriverIndex = (system: System) => {
 };
 
 export class RootFilesDriver extends DriverFactoryBase<
-  DriverInstanceBase<RootFilesDriverProps>,
+  RootFilesDriverInstance,
   RootFilesDriverProps
 > {
   readonly name = 'RootFilesDriver';
-  protected SubDriverClass: new (
-    ...args: ConstructorParameters<typeof DriverInstanceBase>
-  ) => DriverInstanceBase<RootFilesDriverProps> = RootFilesDriverInstance;
+  protected SubDriverClass = RootFilesDriverInstance;
 }
 
 export interface RootFilesDriverProps {
@@ -51,7 +49,10 @@ class FilesDriver extends DirTrap {
 /**
  * Acces to the root files of the system
  */
-export class RootFilesDriverInstance extends DriverInstanceBase<RootFilesDriverProps> {
+export class RootFilesDriverInstance extends DriverInstanceBase<
+  RootFilesDriverProps,
+  Record<string, any>
+> {
   private filesDriver = new FilesDriver(this.system, '/');
 
   ////// READ ONLY METHODS
