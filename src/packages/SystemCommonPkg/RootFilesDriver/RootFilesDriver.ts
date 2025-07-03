@@ -42,8 +42,7 @@ export interface RootFilesDriverProps {
 
 class FilesDriver extends DirTrap {
   protected preparePath(pathTo: string): string {
-    // TODO: review
-    return pathJoin(this.rootDir, trimCharStart(clearRelPath(pathTo), '/'));
+    return pathTo;
   }
 }
 
@@ -58,72 +57,94 @@ export class RootFilesDriverInstance extends DriverInstanceBase<RootFilesDriverP
     pathTo: string,
     options?: ReadTextFileOptions
   ): Promise<string> {
-    await this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+    const preparedPath = this.preparePath(pathTo);
 
-    return this.filesDriver.readTextFile(pathTo, options);
+    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.readTextFile(preparedPath, options);
   }
 
   async readBinFile(
     pathTo: string,
     returnType?: BinTypesNames
   ): Promise<BinTypes> {
-    await this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+    const preparedPath = this.preparePath(pathTo);
 
-    return this.filesDriver.readBinFile(pathTo, returnType);
+    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.readBinFile(preparedPath, returnType);
   }
 
   async stat(pathTo: string): Promise<StatsSimplified | undefined> {
-    await this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+    const preparedPath = this.preparePath(pathTo);
 
-    return this.filesDriver.stat(pathTo);
+    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.stat(preparedPath);
   }
 
   async readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]> {
-    await this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+    const preparedPath = this.preparePath(pathTo);
 
-    return this.filesDriver.readdir(pathTo, options);
+    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.readdir(preparedPath, options);
   }
 
   async readlink(pathTo: string): Promise<string> {
-    await this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+    const preparedPath = this.preparePath(pathTo);
 
-    return this.filesDriver.readlink(pathTo);
+    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.readlink(preparedPath);
   }
 
   async realpath(pathTo: string): Promise<string> {
-    await this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+    const preparedPath = this.preparePath(pathTo);
 
-    return this.filesDriver.realpath(pathTo);
+    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.realpath(preparedPath);
   }
 
   async isDir(pathToDir: string): Promise<boolean> {
-    await this.checkPermissions([pathToDir], FILES_PERMISSIONS.read);
+    const preparedPath = this.preparePath(pathToDir);
 
-    return this.filesDriver.isDir(pathToDir);
+    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.isDir(preparedPath);
   }
 
   async isFile(pathToFile: string): Promise<boolean> {
-    await this.checkPermissions([pathToFile], FILES_PERMISSIONS.read);
+    const preparedPath = this.preparePath(pathToFile);
 
-    return this.filesDriver.isFile(pathToFile);
+    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.isFile(preparedPath);
   }
 
   async isSymLink(pathToSymLink: string): Promise<boolean> {
-    await this.checkPermissions([pathToSymLink], FILES_PERMISSIONS.read);
+    const preparedPath = this.preparePath(pathToSymLink);
 
-    return this.filesDriver.isSymLink(pathToSymLink);
+    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.isSymLink(preparedPath);
   }
 
   async isExists(pathToFileOrDir: string): Promise<boolean> {
-    await this.checkPermissions([pathToFileOrDir], FILES_PERMISSIONS.read);
+    const preparedPath = this.preparePath(pathToFileOrDir);
 
-    return this.filesDriver.isExists(pathToFileOrDir);
+    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.isExists(preparedPath);
   }
 
   async isTextFileUtf8(pathTo: string): Promise<boolean> {
-    await this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+    const preparedPath = this.preparePath(pathTo);
 
-    return this.filesDriver.isTextFileUtf8(pathTo);
+    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.isTextFileUtf8(preparedPath);
   }
 
   ////// WRITE METHODS
@@ -132,9 +153,11 @@ export class RootFilesDriverInstance extends DriverInstanceBase<RootFilesDriverP
     data: string,
     options?: WriteFileOptions
   ): Promise<void> {
-    await this.checkPermissions([pathTo], FILES_PERMISSIONS.write);
+    const preparedPath = this.preparePath(pathTo);
 
-    return this.filesDriver.appendFile(pathTo, data, options);
+    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.write);
+
+    return this.filesDriver.appendFile(preparedPath, data, options);
   }
 
   async writeFile(
@@ -142,39 +165,61 @@ export class RootFilesDriverInstance extends DriverInstanceBase<RootFilesDriverP
     data: string | Uint8Array,
     options?: WriteFileOptions
   ): Promise<void> {
-    await this.checkPermissions([pathTo], FILES_PERMISSIONS.write);
+    const preparedPath = this.preparePath(pathTo);
 
-    return this.filesDriver.writeFile(pathTo, data, options);
+    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.write);
+
+    return this.filesDriver.writeFile(preparedPath, data, options);
   }
 
   async rm(paths: string[], options?: RmOptions): Promise<void> {
-    await this.checkPermissions(paths, FILES_PERMISSIONS.write);
+    const preparedPaths = paths.map((path) => this.preparePath(path));
 
-    return this.filesDriver.rm(paths, options);
+    await this.checkPermissions(preparedPaths, FILES_PERMISSIONS.write);
+
+    return this.filesDriver.rm(preparedPaths, options);
   }
 
   async cp(files: [string, string][], options?: CopyOptions): Promise<void> {
-    await this.checkPermissions(files.flat(), FILES_PERMISSIONS.write);
+    const preparedFiles = files.map(([src, dest]) => [
+      this.preparePath(src),
+      this.preparePath(dest),
+    ]);
 
-    return this.filesDriver.cp(files, options);
+    await this.checkPermissions(preparedFiles.flat(), FILES_PERMISSIONS.write);
+
+    return this.filesDriver.cp(preparedFiles, options);
   }
 
   async rename(files: [string, string][]): Promise<void> {
-    await this.checkPermissions(files.flat(), FILES_PERMISSIONS.write);
+    const preparedFiles = files.map(([src, dest]) => [
+      this.preparePath(src),
+      this.preparePath(dest),
+    ]);
 
-    return this.filesDriver.rename(files);
+    await this.checkPermissions(preparedFiles.flat(), FILES_PERMISSIONS.write);
+
+    return this.filesDriver.rename(preparedFiles);
   }
 
   async mkdir(pathTo: string, options?: MkdirOptions): Promise<void> {
-    await this.checkPermissions([pathTo], FILES_PERMISSIONS.write);
+    const preparedPath = this.preparePath(pathTo);
 
-    return this.filesDriver.mkdir(pathTo, options);
+    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.write);
+
+    return this.filesDriver.mkdir(preparedPath, options);
   }
 
   async symlink(target: string, pathTo: string): Promise<void> {
-    await this.checkPermissions([target, pathTo], FILES_PERMISSIONS.write);
+    const preparedTarget = this.preparePath(target);
+    const preparedPathTo = this.preparePath(pathTo);
 
-    return this.filesDriver.symlink(target, pathTo);
+    await this.checkPermissions(
+      [preparedTarget, preparedPathTo],
+      FILES_PERMISSIONS.write
+    );
+
+    return this.filesDriver.symlink(preparedTarget, preparedPathTo);
   }
 
   ////////// ADDITIONAL
@@ -184,12 +229,17 @@ export class RootFilesDriverInstance extends DriverInstanceBase<RootFilesDriverP
     destDir: string,
     force?: boolean
   ): Promise<void> {
+    const preparedSrc = Array.isArray(src)
+      ? src.map((s) => this.preparePath(s))
+      : [this.preparePath(src)];
+    const preparedDestDir = this.preparePath(destDir);
+
     await this.checkPermissions(
-      [...(Array.isArray(src) ? src : [src]), destDir],
+      [...preparedSrc, preparedDestDir],
       FILES_PERMISSIONS.write
     );
 
-    return this.filesDriver.copyToDest(src, destDir, force);
+    return this.filesDriver.copyToDest(preparedSrc, preparedDestDir, force);
   }
 
   async moveToDest(
@@ -197,30 +247,49 @@ export class RootFilesDriverInstance extends DriverInstanceBase<RootFilesDriverP
     destDir: string,
     force?: boolean
   ): Promise<void> {
+    const preparedSrc = Array.isArray(src)
+      ? src.map((s) => this.preparePath(s))
+      : [this.preparePath(src)];
+    const preparedDestDir = this.preparePath(destDir);
+
     await this.checkPermissions(
-      [...(Array.isArray(src) ? src : [src]), destDir],
+      [...preparedSrc, preparedDestDir],
       FILES_PERMISSIONS.write
     );
 
-    return this.filesDriver.moveToDest(src, destDir, force);
+    return this.filesDriver.moveToDest(preparedSrc, preparedDestDir, force);
   }
 
   async renameFile(file: string, newName: string): Promise<void> {
-    await this.checkPermissions([file], FILES_PERMISSIONS.write);
+    const preparedFile = this.preparePath(file);
+    const preparedNewName = this.preparePath(newName);
 
-    return this.filesDriver.renameFile(file, newName);
+    await this.checkPermissions(
+      [preparedFile, preparedNewName],
+      FILES_PERMISSIONS.write
+    );
+
+    return this.filesDriver.renameFile(preparedFile, preparedNewName);
   }
 
   async rmRf(pathToFileOrDir: string): Promise<void> {
-    await this.checkPermissions([pathToFileOrDir], FILES_PERMISSIONS.write);
+    const preparedPath = this.preparePath(pathToFileOrDir);
 
-    return this.filesDriver.rmRf(pathToFileOrDir);
+    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.write);
+
+    return this.filesDriver.rmRf(preparedPath);
   }
 
   async mkDirP(pathToDir: string): Promise<void> {
-    await this.checkPermissions([pathToDir], FILES_PERMISSIONS.write);
+    const preparedPath = this.preparePath(pathToDir);
 
-    return this.filesDriver.mkDirP(pathToDir);
+    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.write);
+
+    return this.filesDriver.mkDirP(preparedPath);
+  }
+
+  protected preparePath(pathTo: string): string {
+    return pathJoin('/', trimCharStart(clearRelPath(pathTo), '/'));
   }
 
   private async checkPermissions(paths: string[], perm: string) {
@@ -229,6 +298,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<RootFilesDriverP
         throw new Error(`Path has to start with "/": ${path}`);
       }
 
+      // TODO: check for parent dir permissions
       if (
         !(await this.system.permissions.checkPermissions(
           this.props.entityWhoAsk,
