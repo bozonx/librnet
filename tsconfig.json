@@ -21,11 +21,7 @@
   },
   "include": [
     "src/**/*",
-    "_old-before-2025/squidletctl",
-    "_old-before-2025/MemStorageDriver",
-    "test",
-    "_old-before-2025/CtrlService",
-    "_old-before-2025/HttpServerIo-httpByNode.ts"
+    "test"
   ],
   "exclude": [
     "src/_not_used/starters/AndroidStarter",

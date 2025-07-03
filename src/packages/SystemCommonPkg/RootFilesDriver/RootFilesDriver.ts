@@ -29,11 +29,13 @@ export const RootFilesDriverIndex: DriverIndex = (system: System) => {
 };
 
 export class RootFilesDriver extends DriverFactoryBase<
-  RootFilesDriverProps,
-  RootFilesDriverInstance
+  DriverInstanceBase<RootFilesDriverProps>,
+  RootFilesDriverProps
 > {
   readonly name = 'RootFilesDriver';
-  protected SubDriverClass = RootFilesDriverInstance;
+  protected SubDriverClass: new (
+    ...args: ConstructorParameters<typeof DriverInstanceBase>
+  ) => DriverInstanceBase<RootFilesDriverProps> = RootFilesDriverInstance;
 }
 
 export interface RootFilesDriverProps {
@@ -49,9 +51,7 @@ class FilesDriver extends DirTrap {
 /**
  * Acces to the root files of the system
  */
-export class RootFilesDriverInstance<
-  Props extends Record<string, any>
-> extends DriverInstanceBase<Props> {
+export class RootFilesDriverInstance extends DriverInstanceBase<RootFilesDriverProps> {
   private filesDriver = new FilesDriver(this.system, '/');
 
   ////// READ ONLY METHODS
@@ -183,7 +183,7 @@ export class RootFilesDriverInstance<
   }
 
   async cp(files: [string, string][], options?: CopyOptions): Promise<void> {
-    const preparedFiles = files.map(([src, dest]) => [
+    const preparedFiles: [string, string][] = files.map(([src, dest]) => [
       this.preparePath(src),
       this.preparePath(dest),
     ]);
@@ -194,7 +194,7 @@ export class RootFilesDriverInstance<
   }
 
   async rename(files: [string, string][]): Promise<void> {
-    const preparedFiles = files.map(([src, dest]) => [
+    const preparedFiles: [string, string][] = files.map(([src, dest]) => [
       this.preparePath(src),
       this.preparePath(dest),
     ]);
