@@ -8,6 +8,7 @@ export const ENTITY_DESTROY_TIMEOUT_SEC = 20;
 export const CFG_FILE_EXT = 'json';
 export const LOG_FILE_EXT = 'log';
 export const LOCAL_HOST = 'localhost';
+export const SYSTEM_ENTITY = 'system';
 // UI port for localhost
 export const DEFAULT_HTTP_LOCAL_PORT = 41808;
 // Secured port for external connections

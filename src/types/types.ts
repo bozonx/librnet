@@ -17,7 +17,7 @@ import type { AppContext } from '@/system/context/AppContext.js';
 // That means very early, before system.init()
 export type PackageIndex = (ctx: PackageContext) => void;
 export type IoIndex = (ioSet: IoSetBase, ctx: IoContext) => IoBase;
-export type DriverIndex = (ctx: DriverContext) => DriverBase;
+export type DriverIndex = (name: string, ctx: DriverContext) => DriverBase;
 export type ServiceIndex = (ctx: ServiceContext) => ServiceBase;
 export type AppIndex = () => AppMain;
 export type ServiceStatus = keyof typeof SERVICE_STATUS;

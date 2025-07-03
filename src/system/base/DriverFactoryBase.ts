@@ -18,11 +18,9 @@ export abstract class DriverFactoryBase<
   >,
   Props extends Record<string, any> = Record<string, any>
 > {
-  // put name of the driver here
-  abstract readonly name: string;
   private _cfg: Record<string, any> = {};
 
-  // TODO: Нужно ли это?
+  // TODO: add this
   // readonly requireIo?: string[];
 
   protected instances: Instance[] = [];
@@ -41,13 +39,17 @@ export abstract class DriverFactoryBase<
     return this._cfg;
   }
 
-  constructor(protected readonly system: System) {}
+  get name(): string {
+    return this._name;
+  }
+
+  constructor(protected readonly system: System, private readonly _name: string) {}
 
   async init(cfg: Record<string, any> = {}) {
     this._cfg = cfg;
   }
 
-  async destroy(destroyReason: DriverDestroyReason) {
+  async destroy(destroyReason: string) {
     for (const instance of this.instances) {
       // It will call destroyCb to remove instance from this.instances
       await instance.destroy(destroyReason);

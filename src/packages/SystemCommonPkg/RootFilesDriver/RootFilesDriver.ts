@@ -24,15 +24,17 @@ import { DirTrap } from '@/system/driversLogic/DirTrap.js';
 
 export const FILE_PERM_DELIMITER = '|';
 
-export const RootFilesDriverIndex: DriverIndex = (system: System) => {
-  return new RootFilesDriver(system);
+export const RootFilesDriverIndex: DriverIndex = (
+  name: string,
+  system: System
+) => {
+  return new RootFilesDriver(system, name);
 };
 
 export class RootFilesDriver extends DriverFactoryBase<
   RootFilesDriverInstance,
   RootFilesDriverProps
 > {
-  readonly name = 'RootFilesDriver';
   protected SubDriverClass = RootFilesDriverInstance;
 }
 

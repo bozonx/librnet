@@ -1,47 +1,53 @@
-import type {System} from '../System.js'
-import type {DriverIndex} from '../../types/types.js'
-import type { DriverBase } from '../base/DriverBase.js';
-import {DriverContext} from '../context/DriverContext.js'
-
+import type { System } from '../System.js';
+import type { DriverIndex } from '../../types/types.js';
+import { DRIVER_DESTROY_REASON } from '@/types/constants.js';
+import type { DriverFactoryBase } from '../base/DriverFactoryBase.js';
 
 export class DriversManager {
   private readonly system: System;
-  private drivers: Record<string, DriverBase> = {};
-  private readonly ctx;
+  private drivers: Record<string, DriverFactoryBase> = {};
 
   constructor(system: System) {
     this.system = system;
-    this.ctx = new DriverContext(this.system);
   }
 
   async init() {
-    for (const driverName of Object.keys(this.drivers)) {
+    for (const driverName of this.getNames()) {
       const driver = this.drivers[driverName];
 
-      if (driver.requireIo) {
-        const found: string[] = this.ctx.io.getNames().filter((el) => {
-          if (driver.requireIo?.includes(el)) return true;
-        });
+      // if (driver.requireIo) {
+      //   const found: string[] = this.ctx.io.getNames().filter((el) => {
+      //     if (driver.requireIo?.includes(el)) return true;
+      //   });
 
-        if (found.length !== driver.requireIo.length) {
-          this.ctx.log.warn(
-            `Driver "${driverName}" hasn't meet a dependency IO "${driver.requireIo.join(
-              ', '
-            )}"`
-          );
-          await driver.destroy?.();
-          // do not register the driver if ot doesn't meet his dependencies
-          delete this.drivers[driverName];
+      //   if (found.length !== driver.requireIo.length) {
+      //     this.ctx.log.warn(
+      //       `Driver "${driverName}" hasn't meet a dependency IO "${driver.requireIo.join(
+      //         ', '
+      //       )}"`
+      //     );
+      //     await driver.destroy?.();
+      //     // do not register the driver if ot doesn't meet his dependencies
+      //     delete this.drivers[driverName];
 
-          continue;
-        }
-      }
-
-      const driverCfg: Record<string, any> | undefined =
-        await this.system.configs.loadDriverConfig(driverName);
+      //     continue;
+      //   }
+      // }
 
       if (driver.init) {
-        this.ctx.log.debug(
+        const localDriverCfg: Record<string, any> | undefined =
+          await this.system.configs.loadEntityConfig(driverName, false);
+
+        const syncedDriverCfg: Record<string, any> | undefined =
+          await this.system.configs.loadEntityConfig(driverName, true);
+
+        // TODO:  revew
+        const driverCfg = {
+          ...localDriverCfg,
+          ...syncedDriverCfg,
+        };
+
+        this.system.log.debug(
           `DriversManager: initializing driver "${driverName}"`
         );
         await driver.init(driverCfg);
@@ -50,17 +56,19 @@ export class DriversManager {
   }
 
   async destroy() {
-    for (const driverName of Object.keys(this.drivers)) {
+    for (const driverName of this.getNames()) {
       const driver = this.drivers[driverName];
 
       if (driver.destroy) {
-        this.ctx.log.debug(`DriversManager: destroying driver "${driverName}"`);
-        await driver.destroy();
+        this.system.log.debug(
+          `DriversManager: destroying driver "${driverName}"`
+        );
+        await driver.destroy(DRIVER_DESTROY_REASON.shutdown);
       }
     }
   }
 
-  getDriver<T extends DriverBase>(driverName: string): T {
+  getDriver<T extends DriverFactoryBase>(driverName: string): T {
     return this.drivers[driverName] as T;
   }
 
@@ -69,14 +77,13 @@ export class DriversManager {
   }
 
   // Register Driver
-  useDriver(driverIndex: DriverIndex) {
-    const driver = driverIndex(this.ctx);
-    const driverName: string = driver.myName || driver.constructor.name;
+  useDriver(driverName: string, driverIndex: DriverIndex) {
+    const driver = driverIndex(driverName, this.system);
 
     if (this.drivers[driverName]) {
       throw new Error(`The same driver "${driverName} is already in use"`);
     }
 
-    this.drivers[driverName] = driver;
+    this.drivers[driver.name] = driver;
   }
 }

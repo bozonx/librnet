@@ -1,4 +1,3 @@
-import type { DriverDestroyReason } from '@/types/constants.js';
 import type { DriverFactoryBase } from './DriverFactoryBase.js';
 import type { System } from '../System.js';
 
@@ -22,7 +21,7 @@ export default class DriverInstanceBase<
   init?(): Promise<void>;
 
   // Use force in shutdown reason
-  async destroy(destroyReason: DriverDestroyReason): Promise<void> {
+  async destroy(destroyReason: string): Promise<void> {
     await this.destroyCb?.();
   }
 }
