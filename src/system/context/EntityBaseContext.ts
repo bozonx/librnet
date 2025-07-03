@@ -103,7 +103,7 @@ export class EntityBaseContext {
     //
   }
 
-  async makeDriverInstance<T extends DriverInstanceBase>(
+  async makeDriverInstance<T extends DriverInstanceBase<any>(
     driverName: string,
     params: Record<string, any>
   ): Promise<T> {

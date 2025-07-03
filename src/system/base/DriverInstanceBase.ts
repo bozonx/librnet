@@ -13,8 +13,8 @@ export default class DriverInstanceBase<
   constructor(
     protected readonly system: System,
     protected readonly driver: DriverFactoryBase<
-      Props,
-      DriverInstanceBase<Props, CommonProps>
+      DriverInstanceBase<Props, CommonProps>,
+      Props
     >,
     private readonly _props: Props,
     protected readonly commonProps: CommonProps,

@@ -11,8 +11,8 @@ import type DriverInstanceBase from './DriverInstanceBase.js';
  *   will be available not only for the instances.
  */
 export abstract class DriverFactoryBase<
-  Props extends Record<string, any>,
-  Instance extends DriverInstanceBase<Props>
+  Instance extends DriverInstanceBase<Props> = DriverInstanceBase<any>,
+  Props extends Record<string, any> = any
 > {
   // put name of the driver here
   abstract readonly name: string;
