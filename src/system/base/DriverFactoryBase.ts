@@ -21,7 +21,9 @@ export abstract class DriverFactoryBase<
 
   protected instances: Instance[] = [];
   // Specify your sub driver class
-  protected abstract SubDriverClass: constructor of Instance;
+  protected abstract SubDriverClass: new (
+    ...args: ConstructorParameters<typeof DriverInstanceBase>
+  ) => Instance;
 
   get cfg(): Record<string, any> {
     return this._cfg;
