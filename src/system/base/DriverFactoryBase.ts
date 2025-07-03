@@ -59,7 +59,6 @@ export abstract class DriverFactoryBase<
     }
 
     const instanceId = this.instances.length;
-    // TODO: Как передать в инстанс дополнительные параметры или функции?
     const instance = new this.SubDriverClass(
       this.system,
       this,
@@ -91,7 +90,11 @@ export abstract class DriverFactoryBase<
     this.instances.splice(instanceId, 1);
   }
 
-  private async validateInstanceProps(instanceProps: Record<string, any>) {
+  /**
+   * Overload this method to validate instance props
+   * @param instanceProps
+   */
+  protected async validateInstanceProps(instanceProps: Props): Promise<void> {
     // TODO: validate using props schema
   }
 }
