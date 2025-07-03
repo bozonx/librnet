@@ -142,19 +142,19 @@ export class RootFilesDriverInstance extends DriverInstanceBase<any> {
   }
 
   async rm(paths: string[], options?: RmOptions): Promise<void> {
-    this.checkPermissions([paths], FILES_PERMISSIONS.write);
+    this.checkPermissions(paths, FILES_PERMISSIONS.write);
 
     return this.filesDriver.rm(paths, options);
   }
 
   async cp(files: [string, string][], options?: CopyOptions): Promise<void> {
-    this.checkPermissions([files], FILES_PERMISSIONS.write);
+    this.checkPermissions(files.flat(), FILES_PERMISSIONS.write);
 
     return this.filesDriver.cp(files, options);
   }
 
   async rename(files: [string, string][]): Promise<void> {
-    this.checkPermissions([files], FILES_PERMISSIONS.write);
+    this.checkPermissions(files.flat(), FILES_PERMISSIONS.write);
 
     return this.filesDriver.rename(files);
   }
@@ -166,7 +166,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<any> {
   }
 
   async symlink(target: string, pathTo: string): Promise<void> {
-    this.checkPermissions([pathTo], FILES_PERMISSIONS.write);
+    this.checkPermissions([target, pathTo], FILES_PERMISSIONS.write);
 
     return this.filesDriver.symlink(target, pathTo);
   }
@@ -178,7 +178,12 @@ export class RootFilesDriverInstance extends DriverInstanceBase<any> {
     destDir: string,
     force?: boolean
   ): Promise<void> {
-    this.checkPermissions([src], FILES_PERMISSIONS.write);
+    this.checkPermissions(
+      [...(Array.isArray(src) ? src : [src]), destDir],
+      FILES_PERMISSIONS.write
+    );
+
+    return this.filesDriver.copyToDest(src, destDir, force);
   }
 
   async moveToDest(
@@ -186,19 +191,30 @@ export class RootFilesDriverInstance extends DriverInstanceBase<any> {
     destDir: string,
     force?: boolean
   ): Promise<void> {
-    this.checkPermissions([src], FILES_PERMISSIONS.write);
+    this.checkPermissions(
+      [...(Array.isArray(src) ? src : [src]), destDir],
+      FILES_PERMISSIONS.write
+    );
+
+    return this.filesDriver.moveToDest(src, destDir, force);
   }
 
   async renameFile(file: string, newName: string): Promise<void> {
     this.checkPermissions([file], FILES_PERMISSIONS.write);
+
+    return this.filesDriver.renameFile(file, newName);
   }
 
   async rmRf(pathToFileOrDir: string): Promise<void> {
     this.checkPermissions([pathToFileOrDir], FILES_PERMISSIONS.write);
+
+    return this.filesDriver.rmRf(pathToFileOrDir);
   }
 
   async mkDirP(pathToDir: string): Promise<void> {
     this.checkPermissions([pathToDir], FILES_PERMISSIONS.write);
+
+    return this.filesDriver.mkDirP(pathToDir);
   }
 
   private checkPermissions(paths: string[], perm: string) {
