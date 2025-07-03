@@ -26,6 +26,8 @@ export abstract class DriverFactoryBase<
   protected abstract SubDriverClass: new (
     ...args: ConstructorParameters<typeof DriverInstanceBase>
   ) => Instance;
+  // Put here common functions and properties for all instances
+  protected commonProps: Record<string, any> = {};
 
   get cfg(): Record<string, any> {
     return this._cfg;
@@ -57,10 +59,12 @@ export abstract class DriverFactoryBase<
     }
 
     const instanceId = this.instances.length;
+    // TODO: Как передать в инстанс дополнительные параметры или функции?
     const instance = new this.SubDriverClass(
       this.system,
       this,
       instanceProps,
+      this.commonProps,
       this.destroyCb.bind(this, instanceId)
     );
 
