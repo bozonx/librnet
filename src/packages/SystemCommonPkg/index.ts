@@ -1,6 +1,6 @@
 import type {PackageContext} from '../../system/context/PackageContext.js'
 import type {PackageIndex} from '../../types/types.js'
-import { FilesDriverIndex } from './FilesDriver/FilesDriver.js';
+import { FilesDriverIndex } from './RootFilesDriver/FilesDriver.js';
 import { HttpServerDriverIndex } from './HttpServerDriver/HttpServerDriver.js';
 import { HttpClientDriverIndex } from './HttpClientDriver/HttpClientDriver.js';
 import { WsClientDriverIndex } from './WsClientDriver/WsClientDriver.js';

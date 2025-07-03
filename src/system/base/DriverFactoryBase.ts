@@ -56,6 +56,7 @@ export abstract class DriverFactoryBase<
 
     const instanceId = this.instances.length;
     const instance = new this.SubDriverClass(
+      this.system,
       this,
       instanceProps,
       this.destroyCb.bind(this, instanceId)

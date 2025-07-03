@@ -1,5 +1,6 @@
 import type { DriverDestroyReason } from '@/types/constants.js';
 import type { DriverFactoryBase } from './DriverFactoryBase.js';
+import type { System } from '../System.js';
 
 export default class DriverInstanceBase<
   Props extends Record<string, any>,
@@ -10,6 +11,7 @@ export default class DriverInstanceBase<
   }
 
   constructor(
+    protected readonly system: System,
     protected readonly driver: Driver,
     private readonly _props: Props,
     private readonly destroyCb?: () => Promise<void>
