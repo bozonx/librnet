@@ -10,19 +10,19 @@ import { DirTrap } from '../driversLogic/DirTrap.js';
 import type { EntityManifest } from '@/types/types.js';
 import { EntityConfig } from '../driversLogic/EntityConfig.js';
 import { EntityLogFile } from '../driversLogic/EntityLogFile.js';
-import { DriverBase } from '../base/DriverBase.js';
 import { DirTrapReadOnly } from '../driversLogic/DirTrapReadOnly.js';
 import { permissionWrapper } from '../helpers/permissionWrapper.js';
+import type DriverInstanceBase from '../base/DriverInstanceBase.js';
 
 export class EntityBaseContext {
   // Server side context
   // save here custom runtime data eg driver instances
   readonly context: Record<string, any> = {};
 
-  // only for server
-  readonly serverSideEvents = new IndexedEventEmitter();
-  // for sending events to client
-  readonly toClientEvents = new IndexedEventEmitter();
+  // Events bus only for server
+  readonly serverSideBus = new IndexedEventEmitter();
+  // Events bus for sending events to client
+  readonly toClientBus = new IndexedEventEmitter();
 
   // local user's config files of this app
   readonly localConfig = new EntityConfig(this.system, this.manifest, false);
@@ -103,7 +103,7 @@ export class EntityBaseContext {
     //
   }
 
-  async makeDriverInstance<T extends DriverBase>(
+  async makeDriverInstance<T extends DriverInstanceBase>(
     driverName: string,
     params: Record<string, any>
   ): Promise<T> {
