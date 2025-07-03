@@ -1,6 +1,5 @@
 import type { System } from '../System.js';
 import type DriverInstanceBase from './DriverInstanceBase.js';
-import type { DriverInstanceParams } from './DriverInstanceBase.js';
 
 /**
  * This factory creates instances of sub drivers and keeps them in the memory.
@@ -12,25 +11,26 @@ import type { DriverInstanceParams } from './DriverInstanceBase.js';
  */
 export abstract class DriverFactoryBase<
   Instance extends DriverInstanceBase,
-  Props extends Record<string, any> = Record<string, any>
+  Props extends Record<string, any>
 > {
   // put name of the driver here
   abstract readonly name: string;
+  private _cfg: Record<string, any> = {};
 
   // readonly requireIo?: string[];
 
   protected instances: Instance[] = [];
-  // Specify your sub driver class. It's required.
-  protected abstract SubDriverClass: new (
-    DriverInstanceParams: any,
-    destroyCb: () => Promise<void>
-  ) => Instance;
-  protected cfg?: Record<string, any>;
+  // Specify your sub driver class
+  protected abstract SubDriverClass: constructor of Instance;
+
+  get cfg(): Record<string, any> {
+    return this._cfg;
+  }
 
   constructor(protected readonly system: System) {}
 
-  async init(cfg?: Record<string, any>) {
-    this.cfg = cfg;
+  async init(cfg: Record<string, any> = {}) {
+    this._cfg = cfg;
   }
 
   async destroy() {
@@ -44,16 +44,10 @@ export abstract class DriverFactoryBase<
     await this.validateInstanceProps(instanceProps);
 
     const instanceId = this.instances.length;
-
-    const instanceParams: DriverInstanceParams<Props> = {
-      instanceId,
-      driver: this,
-      props: instanceProps,
-      cfg: this.cfg,
-    };
-
     const instance = new this.SubDriverClass(
-      instanceParams,
+      this,
+      instanceId,
+      instanceProps,
       this.destroyCb.bind(this, instanceId)
     );
 

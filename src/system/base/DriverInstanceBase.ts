@@ -5,8 +5,8 @@ import type { DriverFactoryBase } from './DriverFactoryBase.js';
 //   Driver = DriverFactoryBase<DriverInstanceBase, Props>
 // > {
 //   instanceId: number;
-//   // base driver instance
-//   driver: Driver;
+//   // get driver config
+//   driverConfig: () => Record<string, any>;
 //   // instance props
 //   props: Props;
 //   cfg?: Record<string, any>;
@@ -16,32 +16,19 @@ export default class DriverInstanceBase<
   Props extends { [index: string]: any } = any,
   Driver extends DriverFactoryBase<any, Props> = DriverFactoryBase<any, Props>
 > {
-  readonly params: DriverInstanceParams<Props, Driver>;
-
-  get instanceId(): string {
-    return this.params.instanceId;
-  }
-
-  protected get ctx(): DriverContext {
-    return this.params.ctx;
-  }
-
   get props(): Props {
-    return this.params.props;
-  }
-
-  get cfg(): Record<string, any> | undefined {
-    return this.params.cfg;
+    return this._props;
   }
 
   // If you have props you can validate it in this method
   protected validateProps?: (props: Props) => string | undefined;
 
   constructor(
-    params: DriverInstanceParams<Props, Driver>,
+    protected readonly driver: Driver,
+    private readonly instanceId: number,
+    private readonly _props: Props,
     private readonly destroyCb?: () => Promise<void>
   ) {
-    this.params = params;
 
     // if (this.driversDidInit) this.ctx.onDriversInit(this.driversDidInit.bind(this))
     // if (this.servicesDidInit) this.ctx.onServicesInit(this.servicesDidInit.bind(this))
