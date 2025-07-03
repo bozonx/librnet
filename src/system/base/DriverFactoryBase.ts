@@ -9,8 +9,8 @@ import type DriverInstanceBase from './DriverInstanceBase.js';
  * if you need more precise match, overload makeMatchString method.
  */
 export abstract class DriverFactoryBase<
-  Instance extends DriverInstanceBase,
-  Props extends Record<string, any>
+  Props extends Record<string, any>,
+  Instance extends DriverInstanceBase<Props, DriverFactoryBase<Props, Instance>>
 > {
   // put name of the driver here
   abstract readonly name: string;
@@ -57,7 +57,6 @@ export abstract class DriverFactoryBase<
     const instanceId = this.instances.length;
     const instance = new this.SubDriverClass(
       this,
-      instanceId,
       instanceProps,
       this.destroyCb.bind(this, instanceId)
     );
