@@ -15,16 +15,26 @@ export class PermissionsManager {
     );
   }
 
-  async checkPermissions(entityName: string, permissionName: string) {
+  async checkPermissions(
+    entityWhoAsk: string,
+    entityName: string,
+    permissionName: string
+  ) {
     if (!this.permissions[entityName]) return false;
 
-    return !!this.permissions[entityName][permissionName];
+    return (
+      !!this.permissions[entityName][permissionName] ||
+      this.permissions[entityName][permissionName] === entityWhoAsk
+    );
   }
 
   async savePermissions(
+    entityWhoAsk: string,
     entityName: string,
     partialPermissions: Record<string, boolean>
   ) {
+    // TODO: check if entityWhoAsk has permission to save permissions for entityName
+
     this.permissions[entityName] = {
       ...(this.permissions[entityName] || {}),
       ...partialPermissions,
@@ -37,7 +47,13 @@ export class PermissionsManager {
     );
   }
 
-  async deletePermissions(entityName: string, permissionNames: string[]) {
+  async deletePermissions(
+    entityWhoAsk: string,
+    entityName: string,
+    permissionNames: string[]
+  ) {
+    // TODO: check if entityWhoAsk has permission to delete permissions for entityName
+
     permissionNames.forEach((permissionName) => {
       delete this.permissions[entityName][permissionName];
     });

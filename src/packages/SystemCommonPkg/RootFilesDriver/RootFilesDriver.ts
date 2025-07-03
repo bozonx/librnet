@@ -22,6 +22,8 @@ import { DirTrap } from '@/system/driversLogic/DirTrap.js';
 // TODO:  add tmpdir https://nodejs.org/api/fs.html#fspromisesmkdtempprefix-options
 // TODO: запретить передавать URL и другие типы путей для чтения и записи
 
+export const FILES_PERM_DELIMITER = '|';
+
 export const RootFilesDriverIndex: DriverIndex = (system: System) => {
   return new RootFilesDriver(system);
 };
@@ -34,6 +36,10 @@ export class RootFilesDriver extends DriverFactoryBase<
   protected SubDriverClass = RootFilesDriverInstance;
 }
 
+export interface RootFilesDriverProps {
+  entityWhoAsk: string;
+}
+
 class FilesDriver extends DirTrap {
   protected preparePath(pathTo: string): string {
     // TODO: review
@@ -44,7 +50,7 @@ class FilesDriver extends DirTrap {
 /**
  * Acces to the root files of the system
  */
-export class RootFilesDriverInstance extends DriverInstanceBase<any> {
+export class RootFilesDriverInstance extends DriverInstanceBase<RootFilesDriverProps> {
   private filesDriver = new FilesDriver(this.system, '/');
 
   ////// READ ONLY METHODS
@@ -52,7 +58,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<any> {
     pathTo: string,
     options?: ReadTextFileOptions
   ): Promise<string> {
-    this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+    await this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
 
     return this.filesDriver.readTextFile(pathTo, options);
   }
@@ -61,61 +67,61 @@ export class RootFilesDriverInstance extends DriverInstanceBase<any> {
     pathTo: string,
     returnType?: BinTypesNames
   ): Promise<BinTypes> {
-    this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+    await this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
 
     return this.filesDriver.readBinFile(pathTo, returnType);
   }
 
   async stat(pathTo: string): Promise<StatsSimplified | undefined> {
-    this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+    await this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
 
     return this.filesDriver.stat(pathTo);
   }
 
   async readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]> {
-    this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+    await this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
 
     return this.filesDriver.readdir(pathTo, options);
   }
 
   async readlink(pathTo: string): Promise<string> {
-    this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+    await this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
 
     return this.filesDriver.readlink(pathTo);
   }
 
   async realpath(pathTo: string): Promise<string> {
-    this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+    await this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
 
     return this.filesDriver.realpath(pathTo);
   }
 
   async isDir(pathToDir: string): Promise<boolean> {
-    this.checkPermissions([pathToDir], FILES_PERMISSIONS.read);
+    await this.checkPermissions([pathToDir], FILES_PERMISSIONS.read);
 
     return this.filesDriver.isDir(pathToDir);
   }
 
   async isFile(pathToFile: string): Promise<boolean> {
-    this.checkPermissions([pathToFile], FILES_PERMISSIONS.read);
+    await this.checkPermissions([pathToFile], FILES_PERMISSIONS.read);
 
     return this.filesDriver.isFile(pathToFile);
   }
 
   async isSymLink(pathToSymLink: string): Promise<boolean> {
-    this.checkPermissions([pathToSymLink], FILES_PERMISSIONS.read);
+    await this.checkPermissions([pathToSymLink], FILES_PERMISSIONS.read);
 
     return this.filesDriver.isSymLink(pathToSymLink);
   }
 
   async isExists(pathToFileOrDir: string): Promise<boolean> {
-    this.checkPermissions([pathToFileOrDir], FILES_PERMISSIONS.read);
+    await this.checkPermissions([pathToFileOrDir], FILES_PERMISSIONS.read);
 
     return this.filesDriver.isExists(pathToFileOrDir);
   }
 
   async isTextFileUtf8(pathTo: string): Promise<boolean> {
-    this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+    await this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
 
     return this.filesDriver.isTextFileUtf8(pathTo);
   }
@@ -126,7 +132,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<any> {
     data: string,
     options?: WriteFileOptions
   ): Promise<void> {
-    this.checkPermissions([pathTo], FILES_PERMISSIONS.write);
+    await this.checkPermissions([pathTo], FILES_PERMISSIONS.write);
 
     return this.filesDriver.appendFile(pathTo, data, options);
   }
@@ -136,37 +142,37 @@ export class RootFilesDriverInstance extends DriverInstanceBase<any> {
     data: string | Uint8Array,
     options?: WriteFileOptions
   ): Promise<void> {
-    this.checkPermissions([pathTo], FILES_PERMISSIONS.write);
+    await this.checkPermissions([pathTo], FILES_PERMISSIONS.write);
 
     return this.filesDriver.writeFile(pathTo, data, options);
   }
 
   async rm(paths: string[], options?: RmOptions): Promise<void> {
-    this.checkPermissions(paths, FILES_PERMISSIONS.write);
+    await this.checkPermissions(paths, FILES_PERMISSIONS.write);
 
     return this.filesDriver.rm(paths, options);
   }
 
   async cp(files: [string, string][], options?: CopyOptions): Promise<void> {
-    this.checkPermissions(files.flat(), FILES_PERMISSIONS.write);
+    await this.checkPermissions(files.flat(), FILES_PERMISSIONS.write);
 
     return this.filesDriver.cp(files, options);
   }
 
   async rename(files: [string, string][]): Promise<void> {
-    this.checkPermissions(files.flat(), FILES_PERMISSIONS.write);
+    await this.checkPermissions(files.flat(), FILES_PERMISSIONS.write);
 
     return this.filesDriver.rename(files);
   }
 
   async mkdir(pathTo: string, options?: MkdirOptions): Promise<void> {
-    this.checkPermissions([pathTo], FILES_PERMISSIONS.write);
+    await this.checkPermissions([pathTo], FILES_PERMISSIONS.write);
 
     return this.filesDriver.mkdir(pathTo, options);
   }
 
   async symlink(target: string, pathTo: string): Promise<void> {
-    this.checkPermissions([target, pathTo], FILES_PERMISSIONS.write);
+    await this.checkPermissions([target, pathTo], FILES_PERMISSIONS.write);
 
     return this.filesDriver.symlink(target, pathTo);
   }
@@ -178,7 +184,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<any> {
     destDir: string,
     force?: boolean
   ): Promise<void> {
-    this.checkPermissions(
+    await this.checkPermissions(
       [...(Array.isArray(src) ? src : [src]), destDir],
       FILES_PERMISSIONS.write
     );
@@ -191,7 +197,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<any> {
     destDir: string,
     force?: boolean
   ): Promise<void> {
-    this.checkPermissions(
+    await this.checkPermissions(
       [...(Array.isArray(src) ? src : [src]), destDir],
       FILES_PERMISSIONS.write
     );
@@ -200,25 +206,39 @@ export class RootFilesDriverInstance extends DriverInstanceBase<any> {
   }
 
   async renameFile(file: string, newName: string): Promise<void> {
-    this.checkPermissions([file], FILES_PERMISSIONS.write);
+    await this.checkPermissions([file], FILES_PERMISSIONS.write);
 
     return this.filesDriver.renameFile(file, newName);
   }
 
   async rmRf(pathToFileOrDir: string): Promise<void> {
-    this.checkPermissions([pathToFileOrDir], FILES_PERMISSIONS.write);
+    await this.checkPermissions([pathToFileOrDir], FILES_PERMISSIONS.write);
 
     return this.filesDriver.rmRf(pathToFileOrDir);
   }
 
   async mkDirP(pathToDir: string): Promise<void> {
-    this.checkPermissions([pathToDir], FILES_PERMISSIONS.write);
+    await this.checkPermissions([pathToDir], FILES_PERMISSIONS.write);
 
     return this.filesDriver.mkDirP(pathToDir);
   }
 
-  private checkPermissions(paths: string[], perm: string) {
-    // TODO: throw an error if path is not allowed
+  private async checkPermissions(paths: string[], perm: string) {
+    for (const path of paths) {
+      if (path.indexOf('/') !== 0) {
+        throw new Error(`Path has to start with "/": ${path}`);
+      }
+
+      if (
+        !(await this.system.permissions.checkPermissions(
+          this.props.entityWhoAsk,
+          this.driver.name,
+          perm + FILES_PERM_DELIMITER + path
+        ))
+      ) {
+        throw new Error(`Path "${path}" is not allowed to be ${perm}`);
+      }
+    }
   }
 }
 
