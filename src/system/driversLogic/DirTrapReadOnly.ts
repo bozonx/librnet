@@ -21,8 +21,8 @@ export class DirTrapReadOnly implements ReadOnlyFilesDriverType {
   }
 
   constructor(
-    private readonly system: System,
-    private readonly rootDir: string
+    protected readonly system: System,
+    protected readonly rootDir: string
   ) {}
 
   async readTextFile(

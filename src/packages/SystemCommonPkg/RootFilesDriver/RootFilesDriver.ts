@@ -1,19 +1,250 @@
-import { pathBasename, pathDirname, pathJoin } from 'squidlet-lib';
+import { clearRelPath, pathJoin, trimCharStart } from 'squidlet-lib';
 import { DriverFactoryBase } from '../../../system/base/DriverFactoryBase.js';
-import type { DriverIndex } from '../../../types/types.js';
-import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js';
-import { IO_NAMES } from '@/types/constants.js';
 import type {
-  FilesIoType,
+  BinTypes,
+  BinTypesNames,
+  DriverIndex,
+} from '../../../types/types.js';
+import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js';
+import { FILES_PERMISSIONS } from '@/types/constants.js';
+import type {
+  CopyOptions,
+  MkdirOptions,
+  RmOptions,
+  ReaddirOptions,
   ReadTextFileOptions,
+  StatsSimplified,
   WriteFileOptions,
 } from '@/types/io/FilesIoType.js';
-import type { IoBase } from '@/system/base/IoBase.js';
-import type { FilesDriverType } from '@/types/FilesDriverType.js';
 import type { System } from '../../../system/System.js';
+import { DirTrap } from '@/system/driversLogic/DirTrap.js';
 
 // TODO:  add tmpdir https://nodejs.org/api/fs.html#fspromisesmkdtempprefix-options
 // TODO: запретить передавать URL и другие типы путей для чтения и записи
+
+export const RootFilesDriverIndex: DriverIndex = (system: System) => {
+  return new RootFilesDriver(system);
+};
+
+export class RootFilesDriver extends DriverFactoryBase<
+  any,
+  RootFilesDriverInstance
+> {
+  readonly name = 'RootFilesDriver';
+  protected SubDriverClass = RootFilesDriverInstance;
+}
+
+class FilesDriver extends DirTrap {
+  protected preparePath(pathTo: string): string {
+    // TODO: review
+    return pathJoin(this.rootDir, trimCharStart(clearRelPath(pathTo), '/'));
+  }
+}
+
+/**
+ * Acces to the root files of the system
+ */
+export class RootFilesDriverInstance extends DriverInstanceBase<any> {
+  private filesDriver = new FilesDriver(this.system, '/');
+
+  ////// READ ONLY METHODS
+  async readTextFile(
+    pathTo: string,
+    options?: ReadTextFileOptions
+  ): Promise<string> {
+    this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.readTextFile(pathTo, options);
+  }
+
+  async readBinFile(
+    pathTo: string,
+    returnType?: BinTypesNames
+  ): Promise<BinTypes> {
+    this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.readBinFile(pathTo, returnType);
+  }
+
+  async stat(pathTo: string): Promise<StatsSimplified | undefined> {
+    this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.stat(pathTo);
+  }
+
+  async readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]> {
+    this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.readdir(pathTo, options);
+  }
+
+  async readlink(pathTo: string): Promise<string> {
+    this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.readlink(pathTo);
+  }
+
+  async realpath(pathTo: string): Promise<string> {
+    this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.realpath(pathTo);
+  }
+
+  async isDir(pathToDir: string): Promise<boolean> {
+    this.checkPermissions([pathToDir], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.isDir(pathToDir);
+  }
+
+  async isFile(pathToFile: string): Promise<boolean> {
+    this.checkPermissions([pathToFile], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.isFile(pathToFile);
+  }
+
+  async isSymLink(pathToSymLink: string): Promise<boolean> {
+    this.checkPermissions([pathToSymLink], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.isSymLink(pathToSymLink);
+  }
+
+  async isExists(pathToFileOrDir: string): Promise<boolean> {
+    this.checkPermissions([pathToFileOrDir], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.isExists(pathToFileOrDir);
+  }
+
+  async isTextFileUtf8(pathTo: string): Promise<boolean> {
+    this.checkPermissions([pathTo], FILES_PERMISSIONS.read);
+
+    return this.filesDriver.isTextFileUtf8(pathTo);
+  }
+
+  ////// WRITE METHODS
+  async appendFile(
+    pathTo: string,
+    data: string,
+    options?: WriteFileOptions
+  ): Promise<void> {
+    this.checkPermissions([pathTo], FILES_PERMISSIONS.write);
+
+    return this.filesDriver.appendFile(pathTo, data, options);
+  }
+
+  async writeFile(
+    pathTo: string,
+    data: string | Uint8Array,
+    options?: WriteFileOptions
+  ): Promise<void> {
+    this.checkPermissions([pathTo], FILES_PERMISSIONS.write);
+
+    return this.filesDriver.writeFile(pathTo, data, options);
+  }
+
+  async rm(paths: string[], options?: RmOptions): Promise<void> {
+    this.checkPermissions([paths], FILES_PERMISSIONS.write);
+
+    return this.filesDriver.rm(paths, options);
+  }
+
+  async cp(files: [string, string][], options?: CopyOptions): Promise<void> {
+    this.checkPermissions([files], FILES_PERMISSIONS.write);
+
+    return this.filesDriver.cp(files, options);
+  }
+
+  async rename(files: [string, string][]): Promise<void> {
+    this.checkPermissions([files], FILES_PERMISSIONS.write);
+
+    return this.filesDriver.rename(files);
+  }
+
+  async mkdir(pathTo: string, options?: MkdirOptions): Promise<void> {
+    this.checkPermissions([pathTo], FILES_PERMISSIONS.write);
+
+    return this.filesDriver.mkdir(pathTo, options);
+  }
+
+  async symlink(target: string, pathTo: string): Promise<void> {
+    this.checkPermissions([pathTo], FILES_PERMISSIONS.write);
+
+    return this.filesDriver.symlink(target, pathTo);
+  }
+
+  ////////// ADDITIONAL
+
+  async copyToDest(
+    src: string | string[],
+    destDir: string,
+    force?: boolean
+  ): Promise<void> {
+    this.checkPermissions([src], FILES_PERMISSIONS.write);
+  }
+
+  async moveToDest(
+    src: string | string[],
+    destDir: string,
+    force?: boolean
+  ): Promise<void> {
+    this.checkPermissions([src], FILES_PERMISSIONS.write);
+  }
+
+  async renameFile(file: string, newName: string): Promise<void> {
+    this.checkPermissions([file], FILES_PERMISSIONS.write);
+  }
+
+  async rmRf(pathToFileOrDir: string): Promise<void> {
+    this.checkPermissions([pathToFileOrDir], FILES_PERMISSIONS.write);
+  }
+
+  async mkDirP(pathToDir: string): Promise<void> {
+    this.checkPermissions([pathToDir], FILES_PERMISSIONS.write);
+  }
+
+  private checkPermissions(paths: string[], perm: string) {
+    // TODO: throw an error if path is not allowed
+  }
+}
+
+/**
+ * Make real path on external file system
+ * @param pathTo - it has to be /appFiles/..., /cfg/... etc.
+ *   /external/extMountedDir/... is a virtual path to virtual dir where some
+ *   external virtual dirs are mounted
+ * @private
+ */
+// private makePath(pathTo: string): string {
+//   if (pathTo.indexOf('/') !== 0) {
+//     throw new Error(`Path has to start with "/": ${pathTo}`);
+//   }
+
+//   const pathMatch = pathTo.match(/^\/([^\/]+)(\/.+)?$/);
+
+//   if (!pathMatch) throw new Error(`Wrong path "${pathTo}"`);
+
+//   const subDir = pathMatch[1] as keyof typeof ROOT_DIRS;
+//   const restPath = pathMatch[2] || '';
+
+//   if ((subDir as string) === EXTERNAL_ROOT_DIR) {
+//     const extMatch = pathTo.match(/^\/([^\/]+)(\/.+)?$/);
+
+//     if (!extMatch) throw new Error(`Wrong external path "${pathTo}"`);
+
+//     const extDir = extMatch[1];
+//     const extRestPath = extMatch[2] || '';
+//     const resolvedExtAbsDir: string | undefined = this.cfg.external[extDir];
+
+//     if (resolvedExtAbsDir) return resolvedExtAbsDir + extRestPath;
+
+//     throw new Error(`Can't resolve external path "${pathTo}"`);
+//   }
+//   // resolve root dir
+//   const resolvedAbsDir: string | undefined = this.cfg.dirs[subDir];
+//   // replace sub dir to system path
+//   if (resolvedAbsDir) return resolvedAbsDir + restPath;
+
+//   throw new Error(`Can't resolve path "${pathTo}"`);
+// }
 
 // export const FilesIoIndex: IoIndex = (ctx: IoContext) => {
 //   // if root dir is relative then make it absolute relate to PWD
@@ -75,139 +306,3 @@ import type { System } from '../../../system/System.js';
 //   };
 //   return new FilesIo(ctx, cfg);
 // };
-
-export const RootFilesDriverIndex: DriverIndex = (system: System) => {
-  return new RootFilesDriver(system);
-};
-
-export class RootFilesDriver extends DriverFactoryBase<
-  any,
-  RootFilesDriverInstance
-> {
-  readonly name = 'RootFilesDriver';
-  protected SubDriverClass = RootFilesDriverInstance;
-}
-
-/**
- * Acces to the root files of the system
- */
-export class RootFilesDriverInstance extends DriverInstanceBase<any> {
-  // requireIo = [IO_NAMES.FilesIo];
-
-  private get io(): IoBase & FilesIoType {
-    return this.system.io.getIo(IO_NAMES.LocalFilesIo);
-  }
-
-  ////// READ ONLY METHODS
-  async readTextFile(
-    pathTo: string,
-    options?: ReadTextFileOptions
-  ): Promise<string> {
-    return this.io.readTextFile(this.preparePath(pathTo), options);
-  }
-
-  ////// WRITE METHODS
-  async writeTextFile(
-    pathTo: string,
-    data: string,
-    options?: WriteFileOptions
-  ): Promise<void> {
-    return this.io.writeFile(this.preparePath(pathTo), data, options);
-  }
-
-  private preparePath(pathTo: string): string {
-    // TODO: check if path is allowed
-    return pathTo;
-  }
-
-  // private checkPermissions(pathTo: string, perm: PermissionFileType) {
-  //   // TODO: throw an error if path is not allowed
-  // }
-
-  // private async prepareBatchFileNames(
-  //   src: string | string[],
-  //   destDir: string
-  // ): Promise<[string, string][]> {
-  //   let resolvedSrc: string[];
-  //   const prepared: [string, string][] = [];
-
-  //   if (typeof src === 'string') {
-  //     this.checkPermissions(src, 'r');
-  //     resolvedSrc = [src];
-  //   } else {
-  //     for (const item of src) this.checkPermissions(item, 'r');
-  //     resolvedSrc = src;
-  //   }
-
-  //   this.checkPermissions(destDir, 'w');
-
-  //   for (const item of resolvedSrc) {
-  //     const fileStats: StatsSimplified | undefined = await this.io.stat(item);
-
-  //     if (!fileStats) throw new Error(`File "${item}" doesn't exist`);
-  //     // the same for dir and file
-  //     prepared.push([item, pathJoin(destDir, pathBasename(item))]);
-  //   }
-
-  //   return prepared;
-  // }
-
-  /**
-   * Make real path on external file system
-   * @param pathTo - it has to be /appFiles/..., /cfg/... etc.
-   *   /external/extMountedDir/... is a virtual path to virtual dir where some
-   *   external virtual dirs are mounted
-   * @private
-   */
-  // private makePath(pathTo: string): string {
-  //   if (pathTo.indexOf('/') !== 0) {
-  //     throw new Error(`Path has to start with "/": ${pathTo}`);
-  //   }
-
-  //   const pathMatch = pathTo.match(/^\/([^\/]+)(\/.+)?$/);
-
-  //   if (!pathMatch) throw new Error(`Wrong path "${pathTo}"`);
-
-  //   const subDir = pathMatch[1] as keyof typeof ROOT_DIRS;
-  //   const restPath = pathMatch[2] || '';
-
-  //   if ((subDir as string) === EXTERNAL_ROOT_DIR) {
-  //     const extMatch = pathTo.match(/^\/([^\/]+)(\/.+)?$/);
-
-  //     if (!extMatch) throw new Error(`Wrong external path "${pathTo}"`);
-
-  //     const extDir = extMatch[1];
-  //     const extRestPath = extMatch[2] || '';
-  //     const resolvedExtAbsDir: string | undefined = this.cfg.external[extDir];
-
-  //     if (resolvedExtAbsDir) return resolvedExtAbsDir + extRestPath;
-
-  //     throw new Error(`Can't resolve external path "${pathTo}"`);
-  //   }
-  //   // resolve root dir
-  //   const resolvedAbsDir: string | undefined = this.cfg.dirs[subDir];
-  //   // replace sub dir to system path
-  //   if (resolvedAbsDir) return resolvedAbsDir + restPath;
-
-  //   throw new Error(`Can't resolve path "${pathTo}"`);
-  // }
-
-  // function prepareSubPath(
-  //   subDirOfRoot: string,
-  //   rootDir?: string,
-  //   envPath?: string
-  // ): string {
-  //   // specified env var is preferred
-  //   if (envPath) {
-  //     // it env variable set then use it as absolute or relative to PWD
-  //     return path.resolve(envPath);
-  //   } else if (rootDir) {
-  //     // if ROOT_DIR env set then just join sub path with it
-  //     return pathJoin(rootDir, subDirOfRoot);
-  //   }
-
-  //   throw new Error(
-  //     `FilesIo: can't resolve path for "${subDirOfRoot}". There are no ROOT_DIR and specified env variable`
-  //   );
-  // }
-}

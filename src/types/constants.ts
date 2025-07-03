@@ -178,3 +178,10 @@ export const DRIVER_DESTROY_REASON = {
 };
 
 export type DriverDestroyReason = keyof typeof DRIVER_DESTROY_REASON;
+
+export const FILES_PERMISSIONS = {
+  read: 'r',
+  write: 'w',
+};
+
+export type FilesPermission = keyof typeof FILES_PERMISSIONS;
