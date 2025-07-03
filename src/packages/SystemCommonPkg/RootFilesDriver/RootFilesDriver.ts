@@ -6,7 +6,7 @@ import type {
   DriverIndex,
 } from '../../../types/types.js';
 import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js';
-import { FILES_PERMISSIONS } from '@/types/constants.js';
+import { FILE_ACTION } from '@/types/constants.js';
 import type {
   CopyOptions,
   MkdirOptions,
@@ -22,7 +22,7 @@ import { DirTrap } from '@/system/driversLogic/DirTrap.js';
 // TODO:  add tmpdir https://nodejs.org/api/fs.html#fspromisesmkdtempprefix-options
 // TODO: запретить передавать URL и другие типы путей для чтения и записи
 
-export const FILES_PERM_DELIMITER = '|';
+export const FILE_PERM_DELIMITER = '|';
 
 export const RootFilesDriverIndex: DriverIndex = (system: System) => {
   return new RootFilesDriver(system);
@@ -62,7 +62,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   ): Promise<string> {
     const preparedPath = this.preparePath(pathTo);
 
-    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+    await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
     return this.filesDriver.readTextFile(preparedPath, options);
   }
@@ -73,7 +73,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   ): Promise<BinTypes> {
     const preparedPath = this.preparePath(pathTo);
 
-    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+    await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
     return this.filesDriver.readBinFile(preparedPath, returnType);
   }
@@ -81,7 +81,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   async stat(pathTo: string): Promise<StatsSimplified | undefined> {
     const preparedPath = this.preparePath(pathTo);
 
-    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+    await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
     return this.filesDriver.stat(preparedPath);
   }
@@ -89,7 +89,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   async readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]> {
     const preparedPath = this.preparePath(pathTo);
 
-    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+    await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
     return this.filesDriver.readdir(preparedPath, options);
   }
@@ -97,7 +97,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   async readlink(pathTo: string): Promise<string> {
     const preparedPath = this.preparePath(pathTo);
 
-    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+    await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
     return this.filesDriver.readlink(preparedPath);
   }
@@ -105,7 +105,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   async realpath(pathTo: string): Promise<string> {
     const preparedPath = this.preparePath(pathTo);
 
-    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+    await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
     return this.filesDriver.realpath(preparedPath);
   }
@@ -113,7 +113,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   async isDir(pathToDir: string): Promise<boolean> {
     const preparedPath = this.preparePath(pathToDir);
 
-    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+    await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
     return this.filesDriver.isDir(preparedPath);
   }
@@ -121,7 +121,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   async isFile(pathToFile: string): Promise<boolean> {
     const preparedPath = this.preparePath(pathToFile);
 
-    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+    await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
     return this.filesDriver.isFile(preparedPath);
   }
@@ -129,7 +129,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   async isSymLink(pathToSymLink: string): Promise<boolean> {
     const preparedPath = this.preparePath(pathToSymLink);
 
-    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+    await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
     return this.filesDriver.isSymLink(preparedPath);
   }
@@ -137,7 +137,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   async isExists(pathToFileOrDir: string): Promise<boolean> {
     const preparedPath = this.preparePath(pathToFileOrDir);
 
-    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+    await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
     return this.filesDriver.isExists(preparedPath);
   }
@@ -145,7 +145,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   async isTextFileUtf8(pathTo: string): Promise<boolean> {
     const preparedPath = this.preparePath(pathTo);
 
-    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.read);
+    await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
     return this.filesDriver.isTextFileUtf8(preparedPath);
   }
@@ -158,7 +158,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   ): Promise<void> {
     const preparedPath = this.preparePath(pathTo);
 
-    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.write);
+    await this.checkPermissions([preparedPath], FILE_ACTION.write);
 
     return this.filesDriver.appendFile(preparedPath, data, options);
   }
@@ -170,7 +170,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   ): Promise<void> {
     const preparedPath = this.preparePath(pathTo);
 
-    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.write);
+    await this.checkPermissions([preparedPath], FILE_ACTION.write);
 
     return this.filesDriver.writeFile(preparedPath, data, options);
   }
@@ -178,7 +178,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   async rm(paths: string[], options?: RmOptions): Promise<void> {
     const preparedPaths = paths.map((path) => this.preparePath(path));
 
-    await this.checkPermissions(preparedPaths, FILES_PERMISSIONS.write);
+    await this.checkPermissions(preparedPaths, FILE_ACTION.write);
 
     return this.filesDriver.rm(preparedPaths, options);
   }
@@ -189,7 +189,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       this.preparePath(dest),
     ]);
 
-    await this.checkPermissions(preparedFiles.flat(), FILES_PERMISSIONS.write);
+    await this.checkPermissions(preparedFiles.flat(), FILE_ACTION.write);
 
     return this.filesDriver.cp(preparedFiles, options);
   }
@@ -200,7 +200,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       this.preparePath(dest),
     ]);
 
-    await this.checkPermissions(preparedFiles.flat(), FILES_PERMISSIONS.write);
+    await this.checkPermissions(preparedFiles.flat(), FILE_ACTION.write);
 
     return this.filesDriver.rename(preparedFiles);
   }
@@ -208,7 +208,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   async mkdir(pathTo: string, options?: MkdirOptions): Promise<void> {
     const preparedPath = this.preparePath(pathTo);
 
-    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.write);
+    await this.checkPermissions([preparedPath], FILE_ACTION.write);
 
     return this.filesDriver.mkdir(preparedPath, options);
   }
@@ -219,7 +219,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions(
       [preparedTarget, preparedPathTo],
-      FILES_PERMISSIONS.write
+      FILE_ACTION.write
     );
 
     return this.filesDriver.symlink(preparedTarget, preparedPathTo);
@@ -239,7 +239,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions(
       [...preparedSrc, preparedDestDir],
-      FILES_PERMISSIONS.write
+      FILE_ACTION.write
     );
 
     return this.filesDriver.copyToDest(preparedSrc, preparedDestDir, force);
@@ -257,7 +257,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions(
       [...preparedSrc, preparedDestDir],
-      FILES_PERMISSIONS.write
+      FILE_ACTION.write
     );
 
     return this.filesDriver.moveToDest(preparedSrc, preparedDestDir, force);
@@ -269,7 +269,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions(
       [preparedFile, preparedNewName],
-      FILES_PERMISSIONS.write
+      FILE_ACTION.write
     );
 
     return this.filesDriver.renameFile(preparedFile, preparedNewName);
@@ -278,7 +278,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   async rmRf(pathToFileOrDir: string): Promise<void> {
     const preparedPath = this.preparePath(pathToFileOrDir);
 
-    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.write);
+    await this.checkPermissions([preparedPath], FILE_ACTION.write);
 
     return this.filesDriver.rmRf(preparedPath);
   }
@@ -286,7 +286,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   async mkDirP(pathToDir: string): Promise<void> {
     const preparedPath = this.preparePath(pathToDir);
 
-    await this.checkPermissions([preparedPath], FILES_PERMISSIONS.write);
+    await this.checkPermissions([preparedPath], FILE_ACTION.write);
 
     return this.filesDriver.mkDirP(preparedPath);
   }
@@ -295,7 +295,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
     return pathJoin('/', trimCharStart(clearRelPath(pathTo), '/'));
   }
 
-  private async checkPermissions(paths: string[], perm: string) {
+  private async checkPermissions(paths: string[], action: string) {
     for (const path of paths) {
       if (path.indexOf('/') !== 0) {
         throw new Error(`Path has to start with "/": ${path}`);
@@ -306,10 +306,10 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
         !(await this.system.permissions.checkPermissions(
           this.props.entityWhoAsk,
           this.driver.name,
-          perm + FILES_PERM_DELIMITER + path
+          action + FILE_PERM_DELIMITER + path
         ))
       ) {
-        throw new Error(`Path "${path}" is not allowed to be ${perm}`);
+        throw new Error(`Path "${path}" is not allowed to be ${action}`);
       }
     }
   }

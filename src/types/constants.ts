@@ -179,9 +179,9 @@ export const DRIVER_DESTROY_REASON = {
 
 export type DriverDestroyReason = keyof typeof DRIVER_DESTROY_REASON;
 
-export const FILES_PERMISSIONS = {
+export const FILE_ACTION = {
   read: 'r',
   write: 'w',
 };
 
-export type FilesPermission = keyof typeof FILES_PERMISSIONS;
+export type FileAction = keyof typeof FILE_ACTION;
