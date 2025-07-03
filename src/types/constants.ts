@@ -172,3 +172,9 @@ export const SYSTEM_SERVICE_NAMES = {
 export const IO_SET_TYPES = {
   IoSetLocal: 'IoSetLocal',
 };
+
+export const DRIVER_DESTROY_REASON = {
+  shutdown: 'shutdown',
+};
+
+export type DriverDestroyReason = keyof typeof DRIVER_DESTROY_REASON;

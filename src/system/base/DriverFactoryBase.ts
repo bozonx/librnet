@@ -1,13 +1,12 @@
+import type { DriverDestroyReason } from '@/types/constants.js';
 import type { System } from '../System.js';
 import type DriverInstanceBase from './DriverInstanceBase.js';
 
 /**
  * This factory creates instances of sub drivers and keeps them in the memory.
  * The instances are owned by service or appp which uses them.
- *
- * If the "instanceId" method is set then id of instances of subDriver will be calculated there.
- * If there no "instanceId" method then a new instance will be created each call of "subDriver"
- * and never be saved.
+ * By default, the instances are matched by props,
+ * if you need more precise match, overload makeMatchString method.
  */
 export abstract class DriverFactoryBase<
   Instance extends DriverInstanceBase,
@@ -17,6 +16,7 @@ export abstract class DriverFactoryBase<
   abstract readonly name: string;
   private _cfg: Record<string, any> = {};
 
+  // TODO: Нужно ли это?
   // readonly requireIo?: string[];
 
   protected instances: Instance[] = [];
@@ -35,15 +35,24 @@ export abstract class DriverFactoryBase<
     this._cfg = cfg;
   }
 
-  async destroy() {
+  async destroy(destroyReason: DriverDestroyReason) {
     for (const instance of this.instances) {
       // It will call destroyCb to remove instance from this.instances
-      await instance.destroy(true);
+      await instance.destroy(destroyReason);
     }
   }
 
   async makeInstance(instanceProps: Props = {} as Props): Promise<Instance> {
     await this.validateInstanceProps(instanceProps);
+
+    const matchString = this.makeMatchString(instanceProps);
+    const theSameInstance = this.instances.find(
+      (instance) => this.makeMatchString(instance.props) === matchString
+    );
+
+    if (theSameInstance) {
+      throw new Error(`Instance with props "${matchString}" already exists`);
+    }
 
     const instanceId = this.instances.length;
     const instance = new this.SubDriverClass(
@@ -60,6 +69,15 @@ export abstract class DriverFactoryBase<
   }
 
   /**
+   * Overload this method to make more precise match instance by props
+   * @param instanceProps
+   * @returns
+   */
+  protected makeMatchString(instanceProps: Props): string {
+    return JSON.stringify(instanceProps);
+  }
+
+  /**
    * Just remove instance from this.instances
    * @param instanceId
    */
@@ -68,20 +86,6 @@ export abstract class DriverFactoryBase<
   }
 
   private async validateInstanceProps(instanceProps: Record<string, any>) {
-    // // TODO: а нужно ли повторно загружать манифест, он же должен быть заружен в drivers manager
-    // const manifest: EntityManifest =
-    //   await this.context.system.envSet.loadManifest(
-    //     'driver',
-    //     this.definition.id
-    //   );
-    // if (!manifest.props) return;
-    // const validationErr: string | undefined =
-    //   validateProps(instanceProps, manifest.props) ||
-    //   validateRequiredProps(mergedProps, manifest.props);
-    // if (validationErr) {
-    //   throw new Error(
-    //     `Props of sub driver "${this.definition.id}" are invalid: ${validationErr}`
-    //   );
-    // }
+    // TODO: validate using props schema
   }
 }

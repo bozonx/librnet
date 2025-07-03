@@ -1,3 +1,4 @@
+import type { DriverDestroyReason } from '@/types/constants.js';
 import type { DriverFactoryBase } from './DriverFactoryBase.js';
 
 // export interface DriverInstanceParams<
@@ -29,7 +30,6 @@ export default class DriverInstanceBase<
     private readonly _props: Props,
     private readonly destroyCb?: () => Promise<void>
   ) {
-
     // if (this.driversDidInit) this.ctx.onDriversInit(this.driversDidInit.bind(this))
     // if (this.servicesDidInit) this.ctx.onServicesInit(this.servicesDidInit.bind(this))
     // if (this.appDidInit) this.ctx.onAppInit(this.appDidInit.bind(this))
@@ -42,9 +42,9 @@ export default class DriverInstanceBase<
   // $doDestroy?(): Promise<void>;
   // define this method to destroy entity when system is destroying.
   // Don't call this method in other cases.
-  async destroy(force: boolean = false): Promise<void> {
+  // Use force in shutdown reason
+  async destroy(destroyReason: DriverDestroyReason): Promise<void> {
     await this.destroyCb?.();
-    // await this.params.driver.destroyInstance(this.params.instanceId);
   }
 
   // // it will be called after all the entities of entityType have been inited
