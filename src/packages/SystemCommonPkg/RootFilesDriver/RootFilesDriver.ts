@@ -536,6 +536,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   };
 
   protected preparePath(pathTo: string): string {
+    // TODO: делать настоящие пути
     // TODO: запретить передавать URL и другие типы путей для чтения и записи
     return pathJoin('/', trimCharStart(clearRelPath(pathTo), '/'));
   }

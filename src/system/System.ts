@@ -11,18 +11,16 @@ import { afterInstall } from './afterInstall.js';
 import { AppsManager } from './managers/AppsManager.js';
 import { ApiManager } from './managers/ApiManager.js';
 import { FileLogsManager } from './managers/FileLogsManager.js';
+import { MountPointsManager } from './managers/MountPointsManager.js';
 
 export class System {
   readonly events = new IndexedEventEmitter();
-  readonly ENV_MODE: EnvMode;
-  readonly ROOT_DIR: string;
-  readonly EXT_DIRS?: string[];
-  readonly JUST_INSTALLED: boolean;
   // this is console logger
   readonly log = new LogPublisher((...p) =>
     this.events.emit(SystemEvents.logger, ...p)
   );
   // managers
+  readonly mountPoints = new MountPointsManager(this, this.ROOT_DIR);
   readonly packageManager = new PackageManager(this);
   readonly configs = new ConfigsManager(this);
   readonly permissions = new PermissionsManager(this);
@@ -46,16 +44,12 @@ export class System {
   }
 
   constructor(
-    ENV_MODE: EnvMode = ENV_MODES.production as EnvMode,
-    ROOT_DIR: string,
-    EXT_DIRS?: string[],
-    JUST_INSTALLED: boolean = false
+    readonly ENV_MODE: EnvMode = ENV_MODES.production as EnvMode,
+    private readonly ROOT_DIR: string,
+    readonly EXT_DIRS?: string[],
+    readonly JUST_INSTALLED: boolean = false
   ) {
     // TODO: receive  logger from outside
-    this.ENV_MODE = ENV_MODE;
-    this.ROOT_DIR = ROOT_DIR;
-    this.EXT_DIRS = EXT_DIRS;
-    this.JUST_INSTALLED = JUST_INSTALLED;
   }
 
   async init() {

@@ -160,3 +160,13 @@ export interface FilesEventData {
   // Size of the operation in bytes
   size?: number;
 }
+
+export interface MountPointDefinition {
+  type: 'root' | 'external';
+  path: string;
+}
+
+export interface MountPoint {
+  src: MountPointDefinition;
+  dest: MountPointDefinition;
+}
