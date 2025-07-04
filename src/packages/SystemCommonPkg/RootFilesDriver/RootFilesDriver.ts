@@ -6,7 +6,7 @@ import type {
   DriverIndex,
 } from '../../../types/types.js';
 import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js';
-import { FILE_ACTION } from '@/types/constants.js';
+import { FILE_ACTION, IO_NAMES } from '../../../types/constants.js';
 import type {
   CopyOptions,
   MkdirOptions,
@@ -15,12 +15,9 @@ import type {
   ReadTextFileOptions,
   StatsSimplified,
   WriteFileOptions,
-} from '@/types/io/FilesIoType.js';
+} from '../../../types/io/FilesIoType.js';
 import type { System } from '../../../system/System.js';
-import { DirTrap } from '@/system/driversLogic/DirTrap.js';
-
-// TODO:  add tmpdir https://nodejs.org/api/fs.html#fspromisesmkdtempprefix-options
-// TODO: запретить передавать URL и другие типы путей для чтения и записи
+import { DirTrap } from '../../../system/driversLogic/DirTrap.js';
 
 export const FILE_PERM_DELIMITER = '|';
 
@@ -35,6 +32,7 @@ export class RootFilesDriver extends DriverFactoryBase<
   RootFilesDriverInstance,
   RootFilesDriverProps
 > {
+  readonly requireIo = [IO_NAMES.LocalFilesIo];
   protected SubDriverClass = RootFilesDriverInstance;
 }
 
@@ -43,6 +41,7 @@ export interface RootFilesDriverProps {
 }
 
 class FilesDriver extends DirTrap {
+  // Do not use path conversion here
   protected preparePath(pathTo: string): string {
     return pathTo;
   }
@@ -50,12 +49,17 @@ class FilesDriver extends DirTrap {
 
 /**
  * Acces to the root files of the system
+ *  - /programFiles
+ *  - /localData
+ *  - /syncedData
+ *  - /home
+ *  - /mnt - this is a virtual dir where some external virtual dirs are mounted
  */
 export class RootFilesDriverInstance extends DriverInstanceBase<
   RootFilesDriverProps,
   Record<string, any>
 > {
-  private filesDriver = new FilesDriver(this.system, '/');
+  private rootDirDriver = new FilesDriver(this.system, '/');
 
   ////// READ ONLY METHODS
   async readTextFile(
@@ -66,7 +70,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.filesDriver.readTextFile(preparedPath, options);
+    return this.rootDirDriver.readTextFile(preparedPath, options);
   }
 
   async readBinFile(
@@ -77,7 +81,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.filesDriver.readBinFile(preparedPath, returnType);
+    return this.rootDirDriver.readBinFile(preparedPath, returnType);
   }
 
   async stat(pathTo: string): Promise<StatsSimplified | undefined> {
@@ -85,7 +89,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.filesDriver.stat(preparedPath);
+    return this.rootDirDriver.stat(preparedPath);
   }
 
   async readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]> {
@@ -93,7 +97,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.filesDriver.readdir(preparedPath, options);
+    return this.rootDirDriver.readdir(preparedPath, options);
   }
 
   async readlink(pathTo: string): Promise<string> {
@@ -101,7 +105,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.filesDriver.readlink(preparedPath);
+    return this.rootDirDriver.readlink(preparedPath);
   }
 
   async realpath(pathTo: string): Promise<string> {
@@ -109,7 +113,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.filesDriver.realpath(preparedPath);
+    return this.rootDirDriver.realpath(preparedPath);
   }
 
   async isDir(pathToDir: string): Promise<boolean> {
@@ -117,7 +121,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.filesDriver.isDir(preparedPath);
+    return this.rootDirDriver.isDir(preparedPath);
   }
 
   async isFile(pathToFile: string): Promise<boolean> {
@@ -125,7 +129,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.filesDriver.isFile(preparedPath);
+    return this.rootDirDriver.isFile(preparedPath);
   }
 
   async isSymLink(pathToSymLink: string): Promise<boolean> {
@@ -133,7 +137,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.filesDriver.isSymLink(preparedPath);
+    return this.rootDirDriver.isSymLink(preparedPath);
   }
 
   async isExists(pathToFileOrDir: string): Promise<boolean> {
@@ -141,7 +145,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.filesDriver.isExists(preparedPath);
+    return this.rootDirDriver.isExists(preparedPath);
   }
 
   async isTextFileUtf8(pathTo: string): Promise<boolean> {
@@ -149,7 +153,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.filesDriver.isTextFileUtf8(preparedPath);
+    return this.rootDirDriver.isTextFileUtf8(preparedPath);
   }
 
   ////// WRITE METHODS
@@ -162,7 +166,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.write);
 
-    return this.filesDriver.appendFile(preparedPath, data, options);
+    return this.rootDirDriver.appendFile(preparedPath, data, options);
   }
 
   async writeFile(
@@ -174,7 +178,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.write);
 
-    return this.filesDriver.writeFile(preparedPath, data, options);
+    return this.rootDirDriver.writeFile(preparedPath, data, options);
   }
 
   async rm(paths: string[], options?: RmOptions): Promise<void> {
@@ -182,7 +186,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions(preparedPaths, FILE_ACTION.write);
 
-    return this.filesDriver.rm(preparedPaths, options);
+    return this.rootDirDriver.rm(preparedPaths, options);
   }
 
   async cp(files: [string, string][], options?: CopyOptions): Promise<void> {
@@ -193,7 +197,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions(preparedFiles.flat(), FILE_ACTION.write);
 
-    return this.filesDriver.cp(preparedFiles, options);
+    return this.rootDirDriver.cp(preparedFiles, options);
   }
 
   async rename(files: [string, string][]): Promise<void> {
@@ -204,7 +208,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions(preparedFiles.flat(), FILE_ACTION.write);
 
-    return this.filesDriver.rename(preparedFiles);
+    return this.rootDirDriver.rename(preparedFiles);
   }
 
   async mkdir(pathTo: string, options?: MkdirOptions): Promise<void> {
@@ -212,7 +216,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.write);
 
-    return this.filesDriver.mkdir(preparedPath, options);
+    return this.rootDirDriver.mkdir(preparedPath, options);
   }
 
   async symlink(target: string, pathTo: string): Promise<void> {
@@ -224,7 +228,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       FILE_ACTION.write
     );
 
-    return this.filesDriver.symlink(preparedTarget, preparedPathTo);
+    return this.rootDirDriver.symlink(preparedTarget, preparedPathTo);
   }
 
   ////////// ADDITIONAL
@@ -244,7 +248,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       FILE_ACTION.write
     );
 
-    return this.filesDriver.copyToDest(preparedSrc, preparedDestDir, force);
+    return this.rootDirDriver.copyToDest(preparedSrc, preparedDestDir, force);
   }
 
   async moveToDest(
@@ -262,7 +266,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       FILE_ACTION.write
     );
 
-    return this.filesDriver.moveToDest(preparedSrc, preparedDestDir, force);
+    return this.rootDirDriver.moveToDest(preparedSrc, preparedDestDir, force);
   }
 
   async renameFile(file: string, newName: string): Promise<void> {
@@ -274,7 +278,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       FILE_ACTION.write
     );
 
-    return this.filesDriver.renameFile(preparedFile, preparedNewName);
+    return this.rootDirDriver.renameFile(preparedFile, preparedNewName);
   }
 
   async rmRf(pathToFileOrDir: string): Promise<void> {
@@ -282,7 +286,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.write);
 
-    return this.filesDriver.rmRf(preparedPath);
+    return this.rootDirDriver.rmRf(preparedPath);
   }
 
   async mkDirP(pathToDir: string): Promise<void> {
@@ -290,10 +294,11 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.write);
 
-    return this.filesDriver.mkDirP(preparedPath);
+    return this.rootDirDriver.mkDirP(preparedPath);
   }
 
   protected preparePath(pathTo: string): string {
+    // TODO: запретить передавать URL и другие типы путей для чтения и записи
     return pathJoin('/', trimCharStart(clearRelPath(pathTo), '/'));
   }
 

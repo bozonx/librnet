@@ -29,7 +29,7 @@ export class System {
   readonly fileLogs = new FileLogsManager(this);
   readonly io = new IoManager(this);
   readonly drivers = new DriversManager(this);
-  readonly api = new ApiManager(this);
+  readonly api = new ApiManager();
   readonly services = new ServicesManager(this);
   readonly apps = new AppsManager(this);
 
@@ -67,7 +67,6 @@ export class System {
       await this.packageManager.loadInstalled();
       await this.io.initIos();
       await this.drivers.init();
-      await this.api.init();
 
       if (this.JUST_INSTALLED) {
         await afterInstall(this);
@@ -94,7 +93,6 @@ export class System {
         this.services.destroy(),
         this.packageManager.destroy(),
         // destroyWrapper(this.permissions.destroy.bind(this.permissions)),
-        this.api.destroy(),
         this.drivers.destroy(),
         this.io.destroy(),
       ]);

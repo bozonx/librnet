@@ -20,6 +20,7 @@ const SYSTEM_MAIN_CFG_NAME = 'system.main';
 export class ConfigsManager {
   systemCfg!: SystemCfg;
 
+  // TODO: нужно хотябы для записи использовать драйвер иначе не поднимутся события
   private get filesIo(): FilesIoType & IoBase {
     return this.system.io.getIo<FilesIoType & IoBase>(IO_NAMES.LocalFilesIo);
   }

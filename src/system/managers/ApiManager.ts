@@ -1,26 +1,13 @@
-import type { System } from '../System.js';
-
 export type ApiSet = Record<string, (...args: any[]) => any | Promise<any>>;
 
 export class ApiManager {
-  private readonly system: System;
   private appUiApiSet: Record<string, ApiSet> = {};
   private appApiSet: Record<string, ApiSet> = {};
   private serviceApiSet: Record<string, ApiSet> = {};
   private appExternalApiSet: Record<string, ApiSet> = {};
   private serviceExternalApiSet: Record<string, ApiSet> = {};
 
-  constructor(system: System) {
-    this.system = system;
-  }
-
-  async init() {
-    //
-  }
-
-  async destroy() {
-    //
-  }
+  constructor() {}
 
   getAppUiApi(appName: string) {
     return this.appUiApiSet[appName];

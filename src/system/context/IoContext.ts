@@ -11,8 +11,4 @@ export class IoContext {
   constructor(pkgCtx: PackageContext) {
     this.pkgCtx = pkgCtx;
   }
-
-  // async loadIoConfig(ioName: string): Promise<Record<string, any> | undefined> {
-  //   return this.pkgCtx.loadIoConfig(ioName);
-  // }
 }

@@ -1,4 +1,3 @@
-import type { DriverDestroyReason } from '@/types/constants.js';
 import type { System } from '../System.js';
 import type DriverInstanceBase from './DriverInstanceBase.js';
 
@@ -18,10 +17,7 @@ export abstract class DriverFactoryBase<
   >,
   Props extends Record<string, any> = Record<string, any>
 > {
-  private _cfg: Record<string, any> = {};
-
-  // TODO: add this
-  // readonly requireIo?: string[];
+  abstract readonly requireIo: string[];
 
   protected instances: Instance[] = [];
   // Specify your sub driver class
@@ -34,19 +30,32 @@ export abstract class DriverFactoryBase<
   ) => Instance;
   // Put here common functions and properties for all instances
   protected commonProps: Record<string, any> = {};
+  private _localCfg: Record<string, any> = {};
+  private _syncedCfg: Record<string, any> = {};
 
-  get cfg(): Record<string, any> {
-    return this._cfg;
+  get localCfg(): Record<string, any> {
+    return structuredClone(this._localCfg);
+  }
+
+  get syncedCfg(): Record<string, any> {
+    return structuredClone(this._syncedCfg);
   }
 
   get name(): string {
     return this._name;
   }
 
-  constructor(protected readonly system: System, private readonly _name: string) {}
+  constructor(
+    protected readonly system: System,
+    private readonly _name: string
+  ) {}
 
-  async init(cfg: Record<string, any> = {}) {
-    this._cfg = cfg;
+  async init(
+    localCfg: Record<string, any> = {},
+    syncedCfg: Record<string, any> = {}
+  ) {
+    this._localCfg = localCfg;
+    this._syncedCfg = syncedCfg;
   }
 
   async destroy(destroyReason: string) {
@@ -72,7 +81,7 @@ export abstract class DriverFactoryBase<
     const instance = new this.SubDriverClass(
       this.system,
       this,
-      instanceProps,
+      structuredClone(instanceProps),
       this.commonProps,
       this.destroyCb.bind(this, instanceId)
     );
