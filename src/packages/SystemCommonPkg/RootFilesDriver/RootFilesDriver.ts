@@ -568,62 +568,60 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
     path: string,
     action: string
   ): Promise<boolean> {
-    // Проверяем основное право на действие
-    const hasPermission = await this.system.permissions.checkPermissions(
-      this.props.entityWhoAsk,
-      this.driver.name,
-      action + FILE_PERM_DELIMITER + path
-    );
-
-    if (hasPermission) {
+    // Проверяем права на сам путь
+    if (await this.checkPathPermissions(path, action)) {
       return true;
-    }
-
-    // Если права нет и это операция чтения, проверяем право на запись
-    if (action === FILE_ACTION.read) {
-      const hasWritePermission = await this.system.permissions.checkPermissions(
-        this.props.entityWhoAsk,
-        this.driver.name,
-        FILE_ACTION.write + FILE_PERM_DELIMITER + path
-      );
-
-      if (hasWritePermission) {
-        return true;
-      }
     }
 
     // Проверяем права на родительские директории
     const parentPaths = this.getParentPaths(path);
-
     for (const parentPath of parentPaths) {
-      // Проверяем право на родительскую директорию
-      const hasParentPermission =
-        await this.system.permissions.checkPermissions(
-          this.props.entityWhoAsk,
-          this.driver.name,
-          action + FILE_PERM_DELIMITER + parentPath
-        );
-
-      if (hasParentPermission) {
+      if (await this.checkPathPermissions(parentPath, action)) {
         return true;
-      }
-
-      // Для операций чтения также проверяем право на запись в родительскую директорию
-      if (action === FILE_ACTION.read) {
-        const hasParentWritePermission =
-          await this.system.permissions.checkPermissions(
-            this.props.entityWhoAsk,
-            this.driver.name,
-            FILE_ACTION.write + FILE_PERM_DELIMITER + parentPath
-          );
-
-        if (hasParentWritePermission) {
-          return true;
-        }
       }
     }
 
     return false;
+  }
+
+  /**
+   * Проверяет права на конкретный путь (включая fallback для чтения)
+   * @param path - путь для проверки
+   * @param action - действие (read/write)
+   * @returns true если есть права на указанный путь
+   */
+  private async checkPathPermissions(
+    path: string,
+    action: string
+  ): Promise<boolean> {
+    // Проверяем основное право на действие
+    if (await this.hasPermission(path, action)) {
+      return true;
+    }
+
+    // Для операций чтения проверяем право на запись как fallback
+    if (
+      action === FILE_ACTION.read &&
+      (await this.hasPermission(path, FILE_ACTION.write))
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Проверяет наличие конкретного права на путь
+   * @param path - путь для проверки
+   * @param action - действие (read/write)
+   * @returns true если право есть
+   */
+  private async hasPermission(path: string, action: string): Promise<boolean> {
+    return await this.system.permissions.checkPermissions(
+      this.props.entityWhoAsk,
+      this.driver.name,
+      action + FILE_PERM_DELIMITER + path
+    );
   }
 
   /**
