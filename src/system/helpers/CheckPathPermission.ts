@@ -1,9 +1,14 @@
 import { FILE_ACTION } from '@/types/constants';
-import type { System } from '../System.js';
 import { FILE_PERM_DELIMITER } from '@/packages/SystemCommonPkg/RootFilesDriver/RootFilesDriver.js';
 
+type CheckPermCb = (
+  entityWhoAsk: string,
+  permitForEntity: string,
+  path: string
+) => Promise<boolean>;
+
 export async function checkPermissions(
-  system: System,
+  checkPermCb: CheckPermCb,
   entityWhoAsk: string,
   permitForEntity: string,
   paths: string[],
@@ -15,7 +20,7 @@ export async function checkPermissions(
     }
 
     const hasPermission = await checkPathAndParentPermissions(
-      system,
+      checkPermCb,
       entityWhoAsk,
       permitForEntity,
       path,
@@ -35,7 +40,7 @@ export async function checkPermissions(
  * @returns true если есть права на путь или любой из родительских путей
  */
 async function checkPathAndParentPermissions(
-  system: System,
+  checkPermCb: CheckPermCb,
   entityWhoAsk: string,
   permitForEntity: string,
   path: string,
@@ -44,7 +49,7 @@ async function checkPathAndParentPermissions(
   // Проверяем права на сам путь
   if (
     await checkPathPermissions(
-      system,
+      checkPermCb,
       entityWhoAsk,
       permitForEntity,
       path,
@@ -59,7 +64,7 @@ async function checkPathAndParentPermissions(
   for (const parentPath of parentPaths) {
     if (
       await checkPathPermissions(
-        system,
+        checkPermCb,
         entityWhoAsk,
         permitForEntity,
         parentPath,
@@ -80,7 +85,7 @@ async function checkPathAndParentPermissions(
  * @returns true если есть права на указанный путь
  */
 async function checkPathPermissions(
-  system: System,
+  checkPermCb: CheckPermCb,
   entityWhoAsk: string,
   permitForEntity: string,
   path: string,
@@ -88,7 +93,13 @@ async function checkPathPermissions(
 ): Promise<boolean> {
   // Проверяем основное право на действие
   if (
-    await hasPermission(system, entityWhoAsk, permitForEntity, path, action)
+    await hasPermission(
+      checkPermCb,
+      entityWhoAsk,
+      permitForEntity,
+      path,
+      action
+    )
   ) {
     return true;
   }
@@ -97,7 +108,7 @@ async function checkPathPermissions(
   if (
     action === FILE_ACTION.read &&
     (await hasPermission(
-      system,
+      checkPermCb,
       entityWhoAsk,
       permitForEntity,
       path,
@@ -117,15 +128,15 @@ async function checkPathPermissions(
  * @returns true если право есть
  */
 async function hasPermission(
-  system: System,
+  checkPermCb: CheckPermCb,
   entityWhoAsk: string,
-  driverName: string,
+  permitForEntity: string,
   path: string,
   action: string
 ): Promise<boolean> {
-  return await system.permissions.checkPermissions(
+  return await checkPermCb(
     entityWhoAsk,
-    driverName,
+    permitForEntity,
     action + FILE_PERM_DELIMITER + path
   );
 }

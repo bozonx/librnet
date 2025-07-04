@@ -6,23 +6,23 @@ export class MountPointsManager {
 
   constructor(private readonly system: System, readonly rootDir: string) {}
 
-  public async getMountPoints() {
+  public getMountPoints(): MountPoint[] {
     return structuredClone(this.mountPoints);
   }
 
-  public async getMountPointBySrcPath(path: string) {
+  public getMountPointBySrcPath(path: string): MountPoint | undefined {
     return structuredClone(
       this.mountPoints.find((point) => point.src.path === path)
     );
   }
 
-  public async getMountPointByDestPath(path: string) {
+  public getMountPointByDestPath(path: string): MountPoint | undefined {
     return structuredClone(
       this.mountPoints.find((point) => point.dest.path === path)
     );
   }
 
-  public async registerMountPoint(point: MountPoint) {
+  public registerMountPoint(point: MountPoint) {
     if (point.src.type === 'root' && point.dest.type === 'root') {
       throw new Error(
         `Root mount point cannot be both source and destination. ${JSON.stringify(
@@ -34,11 +34,11 @@ export class MountPointsManager {
     this.mountPoints.push(point);
   }
 
-  public async unregisterMountPointBySrcPath(path: string) {
+  public unregisterMountPointBySrcPath(path: string) {
     this.mountPoints = this.mountPoints.filter((p) => p.src.path !== path);
   }
 
-  public async unregisterMountPointByDestPath(path: string) {
+  public unregisterMountPointByDestPath(path: string) {
     this.mountPoints = this.mountPoints.filter((p) => p.dest.path !== path);
   }
 }

@@ -1,24 +1,34 @@
 import {makeUniqId} from 'squidlet-lib'
-import {REQUEST_ID_LENGTH} from '../../types/constants'
-
+import { pathJoin } from 'squidlet-lib';
+import type { MountPoint } from '../../types/types';
+import { REQUEST_ID_LENGTH } from '../../types/constants';
 
 export interface RequestError {
-  code: number
-  message: string
+  code: number;
+  message: string;
 }
 
 export function requestError(code: number, message: string): RequestError {
   return {
     code,
-    message
-  }
+    message,
+  };
 }
-
 
 /**
  * Common request id.
  * Used by WsAppApi service
  */
 export function makeRequestId(): string {
-  return makeUniqId(REQUEST_ID_LENGTH)
+  return makeUniqId(REQUEST_ID_LENGTH);
+}
+
+export function resolveRealPath(
+  path: string,
+  rootDir: string,
+  getMountPoints: MountPoint[]
+): string {
+  // TODO: resolve real path using mount points
+
+  return pathJoin(rootDir, path);
 }

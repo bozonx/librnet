@@ -25,6 +25,7 @@ import type {
 import type { System } from '../../../system/System.js';
 import { DirTrap } from '../../../system/driversLogic/DirTrap.js';
 import { checkPermissions } from '../../../system/helpers/CheckPathPermission.js';
+import { resolveRealPath } from '@/system/helpers/helpers.js';
 
 export const FILE_PERM_DELIMITER = '|';
 
@@ -48,9 +49,13 @@ export interface RootFilesDriverProps {
 }
 
 class FilesDriver extends DirTrap {
-  // Do not use path conversion here
+  // Make real path on external file system
   protected preparePath(pathTo: string): string {
-    return pathTo;
+    return resolveRealPath(
+      pathTo,
+      this.system.mountPoints.rootDir,
+      this.system.mountPoints.getMountPoints()
+    );
   }
 }
 
@@ -537,14 +542,13 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   };
 
   protected preparePath(pathTo: string): string {
-    // TODO: делать настоящие пути
     // TODO: запретить передавать URL и другие типы путей для чтения и записи
     return pathJoin('/', trimCharStart(clearRelPath(pathTo), '/'));
   }
 
   protected async checkPermissions(paths: string[], action: string) {
     await checkPermissions(
-      this.system,
+      this.system.permissions.checkPermissions.bind(this.system.permissions),
       this.props.entityWhoAsk,
       this.driver.name,
       paths,
