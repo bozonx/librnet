@@ -547,33 +547,111 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
         throw new Error(`Path has to start with "/": ${path}`);
       }
 
-      // Проверяем основное право на действие
-      const hasPermission = await this.system.permissions.checkPermissions(
-        this.props.entityWhoAsk,
-        this.driver.name,
-        action + FILE_PERM_DELIMITER + path
+      const hasPermission = await this.checkPathAndParentPermissions(
+        path,
+        action
       );
 
-      // Если права нет и это операция чтения, проверяем право на запись
-      if (!hasPermission && action === FILE_ACTION.read) {
-        const hasWritePermission =
-          await this.system.permissions.checkPermissions(
-            this.props.entityWhoAsk,
-            this.driver.name,
-            FILE_ACTION.write + FILE_PERM_DELIMITER + path
-          );
-
-        // Если есть право на запись, разрешаем чтение
-        if (hasWritePermission) {
-          continue; // Переходим к следующему пути
-        }
-      }
-
-      // Если основное право отсутствует (и для чтения нет права на запись)
       if (!hasPermission) {
         throw new Error(`Path "${path}" is not allowed to be ${action}`);
       }
     }
+  }
+
+  /**
+   * Проверяет права на указанный путь и его родительские директории
+   * @param path - путь для проверки
+   * @param action - действие (read/write)
+   * @returns true если есть права на путь или любой из родительских путей
+   */
+  private async checkPathAndParentPermissions(
+    path: string,
+    action: string
+  ): Promise<boolean> {
+    // Проверяем основное право на действие
+    const hasPermission = await this.system.permissions.checkPermissions(
+      this.props.entityWhoAsk,
+      this.driver.name,
+      action + FILE_PERM_DELIMITER + path
+    );
+
+    if (hasPermission) {
+      return true;
+    }
+
+    // Если права нет и это операция чтения, проверяем право на запись
+    if (action === FILE_ACTION.read) {
+      const hasWritePermission = await this.system.permissions.checkPermissions(
+        this.props.entityWhoAsk,
+        this.driver.name,
+        FILE_ACTION.write + FILE_PERM_DELIMITER + path
+      );
+
+      if (hasWritePermission) {
+        return true;
+      }
+    }
+
+    // Проверяем права на родительские директории
+    const parentPaths = this.getParentPaths(path);
+
+    for (const parentPath of parentPaths) {
+      // Проверяем право на родительскую директорию
+      const hasParentPermission =
+        await this.system.permissions.checkPermissions(
+          this.props.entityWhoAsk,
+          this.driver.name,
+          action + FILE_PERM_DELIMITER + parentPath
+        );
+
+      if (hasParentPermission) {
+        return true;
+      }
+
+      // Для операций чтения также проверяем право на запись в родительскую директорию
+      if (action === FILE_ACTION.read) {
+        const hasParentWritePermission =
+          await this.system.permissions.checkPermissions(
+            this.props.entityWhoAsk,
+            this.driver.name,
+            FILE_ACTION.write + FILE_PERM_DELIMITER + parentPath
+          );
+
+        if (hasParentWritePermission) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Генерирует список родительских путей от указанного пути до корня
+   * @param path - исходный путь
+   * @returns массив родительских путей в порядке от ближайшего к корню
+   */
+  private getParentPaths(path: string): string[] {
+    const parentPaths: string[] = [];
+    let currentPath = path;
+
+    // Убираем завершающий слеш если есть (кроме корня)
+    if (currentPath !== '/' && currentPath.endsWith('/')) {
+      currentPath = currentPath.slice(0, -1);
+    }
+
+    // Получаем родительские пути
+    while (currentPath !== '/' && currentPath !== '') {
+      const parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+      if (parentPath === '') {
+        parentPaths.push('/');
+        break;
+      }
+      parentPaths.push(parentPath);
+      currentPath = parentPath;
+    }
+
+    return parentPaths;
   }
 }
 
