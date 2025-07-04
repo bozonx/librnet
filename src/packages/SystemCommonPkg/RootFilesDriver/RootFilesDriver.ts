@@ -9,6 +9,7 @@ import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js';
 import {
   FILE_ACTION,
   IO_NAMES,
+  IS_TEXT_FILE_UTF8_SAMPLE_SIZE,
   SystemEvents,
   type FilesEventData,
 } from '../../../types/constants.js';
@@ -130,7 +131,8 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       action: FILE_ACTION.read,
       method: 'stat',
       timestamp: Date.now(),
-      // TODO: известно ли сколько байт считывается?
+      // do not calculate size because it is very difficult to do
+      // it depends on the file system, OS and cache
     });
 
     return result;
@@ -202,7 +204,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       action: FILE_ACTION.read,
       method: 'isDir',
       timestamp: Date.now(),
-      // TODO: известно ли сколько байт считывается?
+      // do not calculate size
     });
 
     return result;
@@ -220,7 +222,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       action: FILE_ACTION.read,
       method: 'isFile',
       timestamp: Date.now(),
-      // TODO: известно ли сколько байт считывается?
+      // do not calculate size
     });
 
     return result;
@@ -238,7 +240,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       action: FILE_ACTION.read,
       method: 'isSymLink',
       timestamp: Date.now(),
-      // TODO: известно ли сколько байт считывается?
+      // do not calculate size
     });
 
     return result;
@@ -256,7 +258,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       action: FILE_ACTION.read,
       method: 'isExists',
       timestamp: Date.now(),
-      // TODO: известно ли сколько байт считывается?
+      // do not calculate size
     });
 
     return result;
@@ -274,7 +276,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       action: FILE_ACTION.read,
       method: 'isTextFileUtf8',
       timestamp: Date.now(),
-      // TODO: известно ли сколько байт считывается?
+      size: IS_TEXT_FILE_UTF8_SAMPLE_SIZE,
     });
 
     return result;

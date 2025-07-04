@@ -14,7 +14,11 @@ import type {
 import { IoBase } from '../../system/base/IoBase.js';
 import type { BinTypes, BinTypesNames, IoIndex } from '../../types/types.js';
 import type { IoContext } from '../../system/context/IoContext.js';
-import { DEFAULT_ENCODE, IO_NAMES } from '../../types/constants.js';
+import {
+  DEFAULT_ENCODE,
+  IO_NAMES,
+  IS_TEXT_FILE_UTF8_SAMPLE_SIZE,
+} from '../../types/constants.js';
 import type { IoSetBase } from '@/system/base/IoSetBase.js';
 
 export const FilesIoIndex: IoIndex = (ioSet: IoSetBase, ctx: IoContext) => {
@@ -79,7 +83,7 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
 
       // Читаем только первые 8KB для проверки UTF-8
       // Этого достаточно для определения кодировки большинства текстовых файлов
-      const sampleSize = Math.min(8192, stats.size);
+      const sampleSize = Math.min(IS_TEXT_FILE_UTF8_SAMPLE_SIZE, stats.size);
 
       // Открываем файл и читаем только нужную часть
       const fileHandle = await open(pathTo, 'r');
