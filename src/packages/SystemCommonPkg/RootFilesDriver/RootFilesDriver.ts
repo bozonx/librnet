@@ -542,21 +542,35 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   }
 
   protected async checkPermissions(paths: string[], action: string) {
-    // TODO: write inclues read permissions
-    // TODO: если это папка то права на нее или выше
     for (const path of paths) {
       if (path.indexOf('/') !== 0) {
         throw new Error(`Path has to start with "/": ${path}`);
       }
 
-      // TODO: check for parent dir permissions
-      if (
-        !(await this.system.permissions.checkPermissions(
-          this.props.entityWhoAsk,
-          this.driver.name,
-          action + FILE_PERM_DELIMITER + path
-        ))
-      ) {
+      // Проверяем основное право на действие
+      const hasPermission = await this.system.permissions.checkPermissions(
+        this.props.entityWhoAsk,
+        this.driver.name,
+        action + FILE_PERM_DELIMITER + path
+      );
+
+      // Если права нет и это операция чтения, проверяем право на запись
+      if (!hasPermission && action === FILE_ACTION.read) {
+        const hasWritePermission =
+          await this.system.permissions.checkPermissions(
+            this.props.entityWhoAsk,
+            this.driver.name,
+            FILE_ACTION.write + FILE_PERM_DELIMITER + path
+          );
+
+        // Если есть право на запись, разрешаем чтение
+        if (hasWritePermission) {
+          continue; // Переходим к следующему пути
+        }
+      }
+
+      // Если основное право отсутствует (и для чтения нет права на запись)
+      if (!hasPermission) {
         throw new Error(`Path "${path}" is not allowed to be ${action}`);
       }
     }
