@@ -3,8 +3,9 @@ import type { System } from '../System.js';
 const SYSTEM_PERMISSIONS_CFG_NAME = 'system.permissions';
 
 export class PermissionsManager {
-  // object like {entityName: {permissionName: true, false or undefined}}
-  private permissions: Record<string, Record<string, boolean>> = {};
+  // object like {entityWhoAsk: {permitForEntity: {permissionName: true, false or undefined}}}
+  private permissions: Record<string, Record<string, Record<string, boolean>>> =
+    {};
 
   constructor(private readonly system: System) {}
 
@@ -17,26 +18,25 @@ export class PermissionsManager {
 
   async checkPermissions(
     entityWhoAsk: string,
-    entityName: string,
+    permitForEntity: string,
     permissionName: string
-  ) {
-    if (!this.permissions[entityName]) return false;
+  ): Promise<boolean> {
+    if (!this.permissions[entityWhoAsk]?.[permitForEntity]) return false;
 
-    return (
-      !!this.permissions[entityName][permissionName] ||
-      this.permissions[entityName][permissionName] === entityWhoAsk
-    );
+    return !!this.permissions[entityWhoAsk][permitForEntity]?.[permissionName];
   }
 
   async savePermissions(
     entityWhoAsk: string,
-    entityName: string,
+    permitForEntity: string,
     partialPermissions: Record<string, boolean>
   ) {
-    // TODO: check if entityWhoAsk has permission to save permissions for entityName
+    if (!this.permissions[entityWhoAsk]) {
+      this.permissions[entityWhoAsk] = {};
+    }
 
-    this.permissions[entityName] = {
-      ...(this.permissions[entityName] || {}),
+    this.permissions[entityWhoAsk][permitForEntity] = {
+      ...(this.permissions[entityWhoAsk][permitForEntity] || {}),
       ...partialPermissions,
     };
 
@@ -49,17 +49,24 @@ export class PermissionsManager {
 
   async deletePermissions(
     entityWhoAsk: string,
-    entityName: string,
+    permitForEntity: string,
     permissionNames: string[]
   ) {
-    // TODO: check if entityWhoAsk has permission to delete permissions for entityName
-
     permissionNames.forEach((permissionName) => {
-      delete this.permissions[entityName][permissionName];
+      delete this.permissions[entityWhoAsk]?.[permitForEntity]?.[
+        permissionName
+      ];
     });
 
-    if (Object.keys(this.permissions[entityName]).length === 0) {
-      delete this.permissions[entityName];
+    if (
+      Object.keys(this.permissions[entityWhoAsk]?.[permitForEntity] || {})
+        .length === 0
+    ) {
+      delete this.permissions[entityWhoAsk]?.[permitForEntity];
+    }
+
+    if (Object.keys(this.permissions[entityWhoAsk] || {}).length === 0) {
+      delete this.permissions[entityWhoAsk];
     }
 
     await this.system.configs.saveEntityConfig(

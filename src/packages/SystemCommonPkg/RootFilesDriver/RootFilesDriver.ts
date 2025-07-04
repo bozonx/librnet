@@ -195,7 +195,14 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       this.preparePath(dest),
     ]);
 
-    await this.checkPermissions(preparedFiles.flat(), FILE_ACTION.write);
+    await this.checkPermissions(
+      preparedFiles.map(([src]) => src),
+      FILE_ACTION.read
+    );
+    await this.checkPermissions(
+      preparedFiles.map(([, dest]) => dest),
+      FILE_ACTION.write
+    );
 
     return this.rootDirDriver.cp(preparedFiles, options);
   }
@@ -219,6 +226,12 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
     return this.rootDirDriver.mkdir(preparedPath, options);
   }
 
+  /**
+   * Target and dest have to have write permissions
+   * @param target
+   * @param pathTo
+   * @returns
+   */
   async symlink(target: string, pathTo: string): Promise<void> {
     const preparedTarget = this.preparePath(target);
     const preparedPathTo = this.preparePath(pathTo);
@@ -243,10 +256,8 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       : [this.preparePath(src)];
     const preparedDestDir = this.preparePath(destDir);
 
-    await this.checkPermissions(
-      [...preparedSrc, preparedDestDir],
-      FILE_ACTION.write
-    );
+    await this.checkPermissions(preparedSrc, FILE_ACTION.read);
+    await this.checkPermissions([preparedDestDir], FILE_ACTION.write);
 
     return this.rootDirDriver.copyToDest(preparedSrc, preparedDestDir, force);
   }
@@ -303,6 +314,8 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   }
 
   private async checkPermissions(paths: string[], action: string) {
+    // TODO: write inclues read permissions
+    // TODO: если это папка то права на нее или выше
     for (const path of paths) {
       if (path.indexOf('/') !== 0) {
         throw new Error(`Path has to start with "/": ${path}`);
