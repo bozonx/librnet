@@ -102,7 +102,20 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.rootDirDriver.readBinFile(preparedPath, returnType);
+    const result = await this.rootDirDriver.readBinFile(
+      preparedPath,
+      returnType
+    );
+
+    this.commonProps.riseEvent({
+      path: preparedPath,
+      action: FILE_ACTION.read,
+      method: 'readBinFile',
+      timestamp: Date.now(),
+      size: result.byteLength,
+    });
+
+    return result;
   }
 
   async stat(pathTo: string): Promise<StatsSimplified | undefined> {
@@ -110,7 +123,17 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.rootDirDriver.stat(preparedPath);
+    const result = await this.rootDirDriver.stat(preparedPath);
+
+    this.commonProps.riseEvent({
+      path: preparedPath,
+      action: FILE_ACTION.read,
+      method: 'stat',
+      timestamp: Date.now(),
+      // TODO: известно ли сколько байт считывается?
+    });
+
+    return result;
   }
 
   async readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]> {
@@ -118,7 +141,17 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.rootDirDriver.readdir(preparedPath, options);
+    const result = await this.rootDirDriver.readdir(preparedPath, options);
+
+    this.commonProps.riseEvent({
+      path: preparedPath,
+      action: FILE_ACTION.read,
+      method: 'readdir',
+      timestamp: Date.now(),
+      size: result.reduce((acc, item) => acc + item.length, 0),
+    });
+
+    return result;
   }
 
   async readlink(pathTo: string): Promise<string> {
@@ -126,7 +159,17 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.rootDirDriver.readlink(preparedPath);
+    const result = await this.rootDirDriver.readlink(preparedPath);
+
+    this.commonProps.riseEvent({
+      path: preparedPath,
+      action: FILE_ACTION.read,
+      method: 'readlink',
+      timestamp: Date.now(),
+      // TODO: известно ли сколько байт считывается?
+    });
+
+    return result;
   }
 
   async realpath(pathTo: string): Promise<string> {
@@ -134,7 +177,17 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.rootDirDriver.realpath(preparedPath);
+    const result = await this.rootDirDriver.realpath(preparedPath);
+
+    this.commonProps.riseEvent({
+      path: preparedPath,
+      action: FILE_ACTION.read,
+      method: 'realpath',
+      timestamp: Date.now(),
+      // TODO: известно ли сколько байт считывается?
+    });
+
+    return result;
   }
 
   async isDir(pathToDir: string): Promise<boolean> {
@@ -142,7 +195,17 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.rootDirDriver.isDir(preparedPath);
+    const result = await this.rootDirDriver.isDir(preparedPath);
+
+    this.commonProps.riseEvent({
+      path: preparedPath,
+      action: FILE_ACTION.read,
+      method: 'isDir',
+      timestamp: Date.now(),
+      // TODO: известно ли сколько байт считывается?
+    });
+
+    return result;
   }
 
   async isFile(pathToFile: string): Promise<boolean> {
@@ -150,7 +213,17 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.rootDirDriver.isFile(preparedPath);
+    const result = await this.rootDirDriver.isFile(preparedPath);
+
+    this.commonProps.riseEvent({
+      path: preparedPath,
+      action: FILE_ACTION.read,
+      method: 'isFile',
+      timestamp: Date.now(),
+      // TODO: известно ли сколько байт считывается?
+    });
+
+    return result;
   }
 
   async isSymLink(pathToSymLink: string): Promise<boolean> {
@@ -158,7 +231,17 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.rootDirDriver.isSymLink(preparedPath);
+    const result = await this.rootDirDriver.isSymLink(preparedPath);
+
+    this.commonProps.riseEvent({
+      path: preparedPath,
+      action: FILE_ACTION.read,
+      method: 'isSymLink',
+      timestamp: Date.now(),
+      // TODO: известно ли сколько байт считывается?
+    });
+
+    return result;
   }
 
   async isExists(pathToFileOrDir: string): Promise<boolean> {
@@ -166,7 +249,17 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.rootDirDriver.isExists(preparedPath);
+    const result = await this.rootDirDriver.isExists(preparedPath);
+
+    this.commonProps.riseEvent({
+      path: preparedPath,
+      action: FILE_ACTION.read,
+      method: 'isExists',
+      timestamp: Date.now(),
+      // TODO: известно ли сколько байт считывается?
+    });
+
+    return result;
   }
 
   async isTextFileUtf8(pathTo: string): Promise<boolean> {
@@ -174,7 +267,17 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.rootDirDriver.isTextFileUtf8(preparedPath);
+    const result = await this.rootDirDriver.isTextFileUtf8(preparedPath);
+
+    this.commonProps.riseEvent({
+      path: preparedPath,
+      action: FILE_ACTION.read,
+      method: 'isTextFileUtf8',
+      timestamp: Date.now(),
+      // TODO: известно ли сколько байт считывается?
+    });
+
+    return result;
   }
 
   ////// WRITE METHODS
@@ -186,8 +289,15 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
     const preparedPath = this.preparePath(pathTo);
 
     await this.checkPermissions([preparedPath], FILE_ACTION.write);
+    await this.rootDirDriver.appendFile(preparedPath, data, options);
 
-    return this.rootDirDriver.appendFile(preparedPath, data, options);
+    this.commonProps.riseEvent({
+      path: preparedPath,
+      action: FILE_ACTION.write,
+      method: 'appendFile',
+      timestamp: Date.now(),
+      size: data.length,
+    });
   }
 
   async writeFile(
@@ -198,8 +308,15 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
     const preparedPath = this.preparePath(pathTo);
 
     await this.checkPermissions([preparedPath], FILE_ACTION.write);
+    await this.rootDirDriver.writeFile(preparedPath, data, options);
 
-    return this.rootDirDriver.writeFile(preparedPath, data, options);
+    this.commonProps.riseEvent({
+      path: preparedPath,
+      action: FILE_ACTION.write,
+      method: 'writeFile',
+      timestamp: Date.now(),
+      size: data instanceof Uint8Array ? data.byteLength : data.length,
+    });
   }
 
   async rm(paths: string[], options?: RmOptions): Promise<void> {
@@ -207,7 +324,16 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions(preparedPaths, FILE_ACTION.write);
 
-    return this.rootDirDriver.rm(preparedPaths, options);
+    await this.rootDirDriver.rm(preparedPaths, options);
+
+    this.commonProps.riseEvent({
+      // TODO: revew
+      path: preparedPaths.join(','),
+      action: FILE_ACTION.write,
+      method: 'rm',
+      timestamp: Date.now(),
+      // TODO: известно ли сколько байт занимает операция?
+    });
   }
 
   async cp(files: [string, string][], options?: CopyOptions): Promise<void> {
@@ -225,7 +351,16 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       FILE_ACTION.write
     );
 
-    return this.rootDirDriver.cp(preparedFiles, options);
+    await this.rootDirDriver.cp(preparedFiles, options);
+
+    this.commonProps.riseEvent({
+      // TODO: revew
+      path: preparedFiles.map(([src]) => src).join(','),
+      action: FILE_ACTION.write,
+      method: 'cp',
+      timestamp: Date.now(),
+      // TODO: известно ли сколько байт занимает операция?
+    });
   }
 
   async rename(files: [string, string][]): Promise<void> {
@@ -236,7 +371,16 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions(preparedFiles.flat(), FILE_ACTION.write);
 
-    return this.rootDirDriver.rename(preparedFiles);
+    await this.rootDirDriver.rename(preparedFiles);
+
+    this.commonProps.riseEvent({
+      // TODO: revew
+      path: preparedFiles.map(([src]) => src).join(','),
+      action: FILE_ACTION.write,
+      method: 'rename',
+      timestamp: Date.now(),
+      // TODO: известно ли сколько байт занимает операция?
+    });
   }
 
   async mkdir(pathTo: string, options?: MkdirOptions): Promise<void> {
@@ -244,7 +388,15 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.write);
 
-    return this.rootDirDriver.mkdir(preparedPath, options);
+    await this.rootDirDriver.mkdir(preparedPath, options);
+
+    this.commonProps.riseEvent({
+      path: preparedPath,
+      action: FILE_ACTION.write,
+      method: 'mkdir',
+      timestamp: Date.now(),
+      // TODO: известно ли сколько байт занимает операция?
+    });
   }
 
   /**
@@ -262,7 +414,16 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       FILE_ACTION.write
     );
 
-    return this.rootDirDriver.symlink(preparedTarget, preparedPathTo);
+    await this.rootDirDriver.symlink(preparedTarget, preparedPathTo);
+
+    this.commonProps.riseEvent({
+      // TODO: revew
+      path: preparedTarget,
+      action: FILE_ACTION.write,
+      method: 'symlink',
+      timestamp: Date.now(),
+      // TODO: известно ли сколько байт занимает операция?
+    });
   }
 
   ////////// ADDITIONAL
@@ -280,7 +441,16 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
     await this.checkPermissions(preparedSrc, FILE_ACTION.read);
     await this.checkPermissions([preparedDestDir], FILE_ACTION.write);
 
-    return this.rootDirDriver.copyToDest(preparedSrc, preparedDestDir, force);
+    await this.rootDirDriver.copyToDest(preparedSrc, preparedDestDir, force);
+
+    this.commonProps.riseEvent({
+      // TODO: revew
+      path: preparedSrc.join(','),
+      action: FILE_ACTION.write,
+      method: 'copyToDest',
+      timestamp: Date.now(),
+      // TODO: известно ли сколько байт занимает операция?
+    });
   }
 
   async moveToDest(
@@ -298,7 +468,16 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       FILE_ACTION.write
     );
 
-    return this.rootDirDriver.moveToDest(preparedSrc, preparedDestDir, force);
+    await this.rootDirDriver.moveToDest(preparedSrc, preparedDestDir, force);
+
+    this.commonProps.riseEvent({
+      // TODO: revew
+      path: preparedSrc.join(','),
+      action: FILE_ACTION.write,
+      method: 'moveToDest',
+      timestamp: Date.now(),
+      // TODO: известно ли сколько байт занимает операция?
+    });
   }
 
   async renameFile(file: string, newName: string): Promise<void> {
@@ -310,7 +489,16 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       FILE_ACTION.write
     );
 
-    return this.rootDirDriver.renameFile(preparedFile, preparedNewName);
+    await this.rootDirDriver.renameFile(preparedFile, preparedNewName);
+
+    this.commonProps.riseEvent({
+      // TODO: revew
+      path: preparedFile,
+      action: FILE_ACTION.write,
+      method: 'renameFile',
+      timestamp: Date.now(),
+      // TODO: известно ли сколько байт занимает операция?
+    });
   }
 
   async rmRf(pathToFileOrDir: string): Promise<void> {
@@ -318,7 +506,16 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.write);
 
-    return this.rootDirDriver.rmRf(preparedPath);
+    await this.rootDirDriver.rmRf(preparedPath);
+
+    this.commonProps.riseEvent({
+      // TODO: revew
+      path: preparedPath,
+      action: FILE_ACTION.write,
+      method: 'rmRf',
+      timestamp: Date.now(),
+      // TODO: известно ли сколько байт занимает операция?
+    });
   }
 
   async mkDirP(pathToDir: string): Promise<void> {
@@ -326,7 +523,16 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.write);
 
-    return this.rootDirDriver.mkDirP(preparedPath);
+    await this.rootDirDriver.mkDirP(preparedPath);
+
+    this.commonProps.riseEvent({
+      // TODO: revew
+      path: preparedPath,
+      action: FILE_ACTION.write,
+      method: 'mkDirP',
+      timestamp: Date.now(),
+      // TODO: известно ли сколько байт занимает операция?
+    });
   }
 
   protected preparePath(pathTo: string): string {
