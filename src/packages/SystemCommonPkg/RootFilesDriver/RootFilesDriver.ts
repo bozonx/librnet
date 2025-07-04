@@ -4,6 +4,7 @@ import type {
   BinTypes,
   BinTypesNames,
   DriverIndex,
+  FilesEventData,
 } from '../../../types/types.js';
 import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js';
 import {
@@ -11,7 +12,6 @@ import {
   IO_NAMES,
   IS_TEXT_FILE_UTF8_SAMPLE_SIZE,
   SystemEvents,
-  type FilesEventData,
 } from '../../../types/constants.js';
 import type {
   CopyOptions,
@@ -40,12 +40,6 @@ export class RootFilesDriver extends DriverFactoryBase<
 > {
   readonly requireIo = [IO_NAMES.LocalFilesIo];
   protected SubDriverClass = RootFilesDriverInstance;
-
-  protected commonProps = {
-    riseEvent: (data: FilesEventData) => {
-      this.system.events.emit(SystemEvents.localFiles, data);
-    },
-  };
 }
 
 export interface RootFilesDriverProps {
@@ -84,7 +78,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     const result = await this.rootDirDriver.readTextFile(preparedPath, options);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       path: preparedPath,
       action: FILE_ACTION.read,
       method: 'readTextFile',
@@ -108,7 +102,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       returnType
     );
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       path: preparedPath,
       action: FILE_ACTION.read,
       method: 'readBinFile',
@@ -126,7 +120,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     const result = await this.rootDirDriver.stat(preparedPath);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       path: preparedPath,
       action: FILE_ACTION.read,
       method: 'stat',
@@ -145,7 +139,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     const result = await this.rootDirDriver.readdir(preparedPath, options);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       path: preparedPath,
       action: FILE_ACTION.read,
       method: 'readdir',
@@ -163,7 +157,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     const result = await this.rootDirDriver.readlink(preparedPath);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       path: preparedPath,
       action: FILE_ACTION.read,
       method: 'readlink',
@@ -181,7 +175,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     const result = await this.rootDirDriver.realpath(preparedPath);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       path: preparedPath,
       action: FILE_ACTION.read,
       method: 'realpath',
@@ -199,7 +193,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     const result = await this.rootDirDriver.isDir(preparedPath);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       path: preparedPath,
       action: FILE_ACTION.read,
       method: 'isDir',
@@ -217,7 +211,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     const result = await this.rootDirDriver.isFile(preparedPath);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       path: preparedPath,
       action: FILE_ACTION.read,
       method: 'isFile',
@@ -235,7 +229,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     const result = await this.rootDirDriver.isSymLink(preparedPath);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       path: preparedPath,
       action: FILE_ACTION.read,
       method: 'isSymLink',
@@ -253,7 +247,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     const result = await this.rootDirDriver.isExists(preparedPath);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       path: preparedPath,
       action: FILE_ACTION.read,
       method: 'isExists',
@@ -271,7 +265,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     const result = await this.rootDirDriver.isTextFileUtf8(preparedPath);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       path: preparedPath,
       action: FILE_ACTION.read,
       method: 'isTextFileUtf8',
@@ -293,7 +287,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
     await this.checkPermissions([preparedPath], FILE_ACTION.write);
     await this.rootDirDriver.appendFile(preparedPath, data, options);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       path: preparedPath,
       action: FILE_ACTION.write,
       method: 'appendFile',
@@ -312,7 +306,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
     await this.checkPermissions([preparedPath], FILE_ACTION.write);
     await this.rootDirDriver.writeFile(preparedPath, data, options);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       path: preparedPath,
       action: FILE_ACTION.write,
       method: 'writeFile',
@@ -328,7 +322,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.rootDirDriver.rm(preparedPaths, options);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       // TODO: revew
       path: preparedPaths.join(','),
       action: FILE_ACTION.write,
@@ -355,7 +349,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.rootDirDriver.cp(preparedFiles, options);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       // TODO: revew
       path: preparedFiles.map(([src]) => src).join(','),
       action: FILE_ACTION.write,
@@ -375,7 +369,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.rootDirDriver.rename(preparedFiles);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       // TODO: revew
       path: preparedFiles.map(([src]) => src).join(','),
       action: FILE_ACTION.write,
@@ -392,7 +386,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.rootDirDriver.mkdir(preparedPath, options);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       path: preparedPath,
       action: FILE_ACTION.write,
       method: 'mkdir',
@@ -418,7 +412,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.rootDirDriver.symlink(preparedTarget, preparedPathTo);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       // TODO: revew
       path: preparedTarget,
       action: FILE_ACTION.write,
@@ -445,7 +439,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.rootDirDriver.copyToDest(preparedSrc, preparedDestDir, force);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       // TODO: revew
       path: preparedSrc.join(','),
       action: FILE_ACTION.write,
@@ -472,7 +466,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.rootDirDriver.moveToDest(preparedSrc, preparedDestDir, force);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       // TODO: revew
       path: preparedSrc.join(','),
       action: FILE_ACTION.write,
@@ -493,7 +487,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.rootDirDriver.renameFile(preparedFile, preparedNewName);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       // TODO: revew
       path: preparedFile,
       action: FILE_ACTION.write,
@@ -510,7 +504,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.rootDirDriver.rmRf(preparedPath);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       // TODO: revew
       path: preparedPath,
       action: FILE_ACTION.write,
@@ -527,7 +521,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.rootDirDriver.mkDirP(preparedPath);
 
-    this.commonProps.riseEvent({
+    this.riseEvent({
       // TODO: revew
       path: preparedPath,
       action: FILE_ACTION.write,
@@ -537,12 +531,16 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
     });
   }
 
+  protected riseEvent = (data: FilesEventData) => {
+    this.system.events.emit(SystemEvents.localFiles, data);
+  };
+
   protected preparePath(pathTo: string): string {
     // TODO: запретить передавать URL и другие типы путей для чтения и записи
     return pathJoin('/', trimCharStart(clearRelPath(pathTo), '/'));
   }
 
-  private async checkPermissions(paths: string[], action: string) {
+  protected async checkPermissions(paths: string[], action: string) {
     // TODO: write inclues read permissions
     // TODO: если это папка то права на нее или выше
     for (const path of paths) {

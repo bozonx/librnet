@@ -40,16 +40,6 @@ export enum ServiceEvents {
   status,
 }
 
-export interface FilesEventData {
-  // Timestamp of the operation in milliseconds
-  timestamp: number;
-  path: string;
-  action: FileAction;
-  // Method of FilesDriverType
-  method: string;
-  // Size of the operation in bytes
-  size?: number;
-}
 
 // TODO: review, move to network service
 export enum NETWORK_CODES {
