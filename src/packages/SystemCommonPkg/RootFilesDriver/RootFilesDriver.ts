@@ -6,7 +6,12 @@ import type {
   DriverIndex,
 } from '../../../types/types.js';
 import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js';
-import { FILE_ACTION, IO_NAMES } from '../../../types/constants.js';
+import {
+  FILE_ACTION,
+  IO_NAMES,
+  SystemEvents,
+  type FilesEventData,
+} from '../../../types/constants.js';
 import type {
   CopyOptions,
   MkdirOptions,
@@ -34,6 +39,12 @@ export class RootFilesDriver extends DriverFactoryBase<
 > {
   readonly requireIo = [IO_NAMES.LocalFilesIo];
   protected SubDriverClass = RootFilesDriverInstance;
+
+  protected commonProps = {
+    riseEvent: (data: FilesEventData) => {
+      this.system.events.emit(SystemEvents.localFiles, data);
+    },
+  };
 }
 
 export interface RootFilesDriverProps {
@@ -70,7 +81,17 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
-    return this.rootDirDriver.readTextFile(preparedPath, options);
+    const result = await this.rootDirDriver.readTextFile(preparedPath, options);
+
+    this.commonProps.riseEvent({
+      path: preparedPath,
+      action: FILE_ACTION.read,
+      method: 'readTextFile',
+      timestamp: Date.now(),
+      size: result.length,
+    });
+
+    return result;
   }
 
   async readBinFile(

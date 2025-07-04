@@ -26,6 +26,7 @@ export enum SystemEvents {
   systemInited,
   systemStarted,
   systemDestroying,
+  localFiles,
 }
 
 // TODO: review
@@ -36,6 +37,17 @@ export enum RootEvents {
 // TODO: review
 export enum ServiceEvents {
   status,
+}
+
+export interface FilesEventData {
+  // Timestamp of the operation in milliseconds
+  timestamp: number;
+  path: string;
+  action: FileAction;
+  // Method of FilesDriverType
+  method: string;
+  // Size of the operation in bytes
+  size?: number;
 }
 
 // TODO: review, move to network service
