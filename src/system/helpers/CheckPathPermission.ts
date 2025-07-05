@@ -1,6 +1,8 @@
 import { FILE_ACTION } from '@/types/constants';
 import { FILE_PERM_DELIMITER } from '@/packages/SystemCommonPkg/RootFilesDriver/RootFilesDriver.js';
 
+// TODO: при проходе вверх как будут отрабатывать слэши?
+
 type CheckPermCb = (
   entityWhoAsk: string,
   permitForEntity: string,
