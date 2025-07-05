@@ -27,10 +27,11 @@ import { FILE_ACTION } from '../../types/constants.js';
 /**
  * Logic of the files driver which
  * - adds more methods
+ * - ️️‼️❓resolves glob patterns
  * - emits events
  * - uses preparePath which you should implement in your driver
  */
-export abstract class FilesDriver implements FilesDriverType {
+export abstract class FilesDriverLogic implements FilesDriverType {
   constructor(
     protected readonly filesIo: FilesIoType & IoBase,
     protected readonly riseEvent: (event: FilesEventData) => void

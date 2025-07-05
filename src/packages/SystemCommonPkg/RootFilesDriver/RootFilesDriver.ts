@@ -23,7 +23,7 @@ import type {
 import type { System } from '../../../system/System.js';
 import { checkPermissions } from '../../../system/helpers/CheckPathPermission.js';
 import { resolveRealPath } from '@/system/helpers/helpers.js';
-import { FilesDriver } from '@/system/driversLogic/FilesDriver.js';
+import { FilesDriverLogic } from '@/system/driversLogic/FilesDriverLogic.js';
 import type { FilesIoType } from '@/types/io/FilesIoType.js';
 import type { IoBase } from '@/system/base/IoBase.js';
 
@@ -48,7 +48,7 @@ export interface RootFilesDriverProps {
   entityWhoAsk: string;
 }
 
-class RootDirDriver extends FilesDriver {
+class RootDirDriver extends FilesDriverLogic {
   constructor(
     protected readonly system: System,
     protected readonly rootDir: string
@@ -78,6 +78,12 @@ class RootDirDriver extends FilesDriver {
  *  - /syncedData
  *  - /home
  *  - /mnt - this is a virtual dir where some external virtual dirs are mounted
+ * It does:
+ * - Add more methods
+ * - Check permissions
+ * - Emits events
+ * - Resolve real path
+ * - And finaly do requests to the external file system via FilesIo
  */
 export class RootFilesDriverInstance extends DriverInstanceBase<
   RootFilesDriverProps,
@@ -301,13 +307,14 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
   async renameFile(file: string, newName: string): Promise<void> {
     const preparedFile = this.rootDirDriver.clearPath(file);
-    const preparedNewName = this.rootDirDriver.clearPath(newName);
 
-    await this.checkPermissions(
-      [preparedFile, preparedNewName],
-      FILE_ACTION.write
-    );
+    if (newName.includes('/') || newName.includes('\\')) {
+      throw new Error('New name cannot contain slashes');
+    }
 
+    const preparedNewName = newName.trim();
+
+    await this.checkPermissions([preparedFile], FILE_ACTION.write);
     await this.rootDirDriver.renameFile(preparedFile, preparedNewName);
   }
 
