@@ -8,13 +8,7 @@ import type {
   StatsSimplified,
 } from '../../types/io/FilesIoType.js';
 import type { MkdirOptions } from '../../types/io/FilesIoType.js';
-import {
-  pathBasename,
-  pathDirname,
-  pathJoin,
-  clearRelPath,
-  trimCharStart,
-} from 'squidlet-lib';
+import { pathBasename, pathDirname, pathJoin } from 'squidlet-lib';
 import type { FilesIoType } from '../../types/io/FilesIoType.js';
 import type { IoBase } from '../base/IoBase.js';
 import type {
