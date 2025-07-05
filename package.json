@@ -32,7 +32,8 @@
   },
   "dependencies": {
     "squidlet-lib": "file:../squidlet-lib",
-    "ws": "^8.18.2"
+    "ws": "^8.18.2",
+    "yaml": "^2.8.0"
   },
   "devDependencies": {
     "@types/koa": "^2.15.0",

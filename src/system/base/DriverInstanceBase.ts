@@ -12,7 +12,7 @@ export default class DriverInstanceBase<
 
   constructor(
     protected readonly system: System,
-    protected readonly driver: Driver,
+    protected readonly driverFactory: Driver,
     private readonly _props: Props,
     protected readonly commonProps: CommonProps,
     private readonly destroyCb?: () => Promise<void>

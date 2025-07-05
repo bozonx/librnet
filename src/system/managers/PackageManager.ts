@@ -1,59 +1,94 @@
 import {pathJoin} from 'squidlet-lib'
-import type {System} from '../System.js'
-import { PackageContext } from '../context/PackageContext.js';
-import type { PackageIndex } from '@/types/types.js';
-import { IO_NAMES } from '@/types/constants.js';
-import type { FilesIoType } from '@/types/io/FilesIoType.js';
-import type { IoBase } from '../base/IoBase.js';
+import type { System } from '../System.js';
+import type { AnyEntityManifest } from '@/types/types.js';
+import {
+  DRIVER_NAMES,
+  ENTITY_MANIFEST_FILE_NAME,
+  ROOT_DIRS,
+  SYSTEM_ENTITY,
+} from '@/types/constants.js';
+import type { ArchiveDriver } from '@/packages/SystemCommonPkg/ArchiveDriver/ArchiveDriver.js';
+import yaml from 'yaml';
+
+const SYSTEM_INSTALLED_PACKAGES_CFG_NAME = 'system.installedPackages';
 
 export class PackageManager {
-  private readonly system;
-  readonly ctx;
+  // private installedEntities: Record<string, AnyEntityManifest> = {};
 
-  private get filesIo(): FilesIoType & IoBase {
-    return this.system.io.getIo<FilesIoType & IoBase>(IO_NAMES.LocalFilesIo);
-  }
-
-  constructor(system: System) {
-    this.system = system;
-    this.ctx = new PackageContext(this.system);
-  }
+  constructor(private readonly system: System) {}
 
   // async init() {
-  //   // TODO: what to do here?
+  //   this.installedEntities = await this.system.configs.loadEntityConfig(
+  //     SYSTEM_INSTALLED_PACKAGES_CFG_NAME,
+  //     true
+  //   );
   // }
 
-  async destroy() {
-    // TODO: дестроить то на что пакеты навешались дестроить
-  }
+  /**
+   * Install or update package from file.
+   * @param pathToPkg - path to package.
+   * @param force - force install package.
+   */
+  async installFromFile(pathToPkg: string, force: boolean = false) {
+    const archiveDriver = this.system.drivers.getDriver<ArchiveDriver>(
+      DRIVER_NAMES.ArchiveDriver
+    );
+    const archiveFiles = await archiveDriver.makeInstance({
+      entityWhoAsk: SYSTEM_ENTITY,
+      archivePath: pathToPkg,
+    });
+    const manifestContent = await archiveFiles.readTextFile(
+      '/' + ENTITY_MANIFEST_FILE_NAME
+    );
+    const manifest = yaml.parse(manifestContent);
 
-  // TODO: наверное сделать отдельный дестрой для системных пакетов и пользовательских
+    let installedManifest;
 
-  async loadInstalled() {
-    // TODO: должно быть установлено всё пакетами
-    // TODO: и нужно пройтись по всем пакетам и сделать use(pkg)
-    // TODO: загружать нужно файл через import
-    // TODO: и нужно использовать sandbox
-  }
+    try {
+      installedManifest = await this.getInstalledEntityManifest(manifest.name);
+    } catch (e) {
+      // remove installed entity
+      await this.uninstall(manifest.name);
+    }
 
-  async install(pkgPath: string) {
-    // TODO: add
-  }
+    if (installedManifest) {
+      // TODO: check versions
+      if (force) {
+        await this.uninstall(manifest.name);
+      } else {
+        throw new Error(`Entity "${manifest.name}" already installed`);
+      }
+    }
 
-  async update(pkgName: string) {
-    // TODO: чтобы обновить пакет нужно понять что к нему относится
+    console.log(manifest);
+
+    // TODO: check if package is already installed
+    // TODO: if force is true, then uninstall package
+    // TODO: install package
   }
 
   async uninstall(pkgName: string) {
     // TODO: чтобы удалить пакет нужно понять что к нему относится
   }
 
-  // это работает без инициализации пакета
-  use(pkg: PackageIndex) {
-    pkg(this.ctx);
+  private async getInstalledEntityManifest(
+    entytyName: string
+  ): Promise<AnyEntityManifest | undefined> {
+    const programFilesDirItems = await this.system.localFiles.readdir(
+      ROOT_DIRS.programFiles
+    );
+
+    if (!programFilesDirItems.find((item) => item === entytyName)) {
+      return;
+    }
+
+    const manifestContent = await this.system.localFiles.readTextFile(
+      pathJoin(ROOT_DIRS.programFiles, entytyName, ENTITY_MANIFEST_FILE_NAME)
+    );
+
+    return yaml.parse(manifestContent);
   }
 }
-
 
   // /**
   //  * Install app from package to system.

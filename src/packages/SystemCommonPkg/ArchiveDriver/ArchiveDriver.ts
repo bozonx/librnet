@@ -19,35 +19,67 @@ import type { System } from '../../../system/System.js';
 import { checkPermissions } from '../../../system/helpers/CheckPathPermission.js';
 import { RootDirDriverLogic } from '@/system/driversLogic/RootDirDriverLogic.js';
 import { clearAbsolutePath } from '@/system/helpers/helpers.js';
+import { FilesDriverLogic } from '@/system/driversLogic/FilesDriverLogic.js';
+import { SystemEvents } from '../../../types/constants.js';
+import type { FilesEventData } from '../../../types/types.js';
 
 export const FILE_PERM_DELIMITER = '|';
 
-export const RootFilesDriverIndex: DriverIndex = (
+export const ArchiveDriverIndex: DriverIndex = (
   name: string,
   system: System
 ) => {
-  return new RootFilesDriver(system, name);
+  return new ArchiveDriver(system, name);
 };
 
-export class RootFilesDriver extends DriverFactoryBase<
-  RootFilesDriverInstance,
-  RootFilesDriverProps
+export class ArchiveDriver extends DriverFactoryBase<
+  ArchiveDriverInstance,
+  ArchiveDriverProps
 > {
-  readonly requireIo = [IO_NAMES.LocalFilesIo];
-  protected SubDriverClass = RootFilesDriverInstance;
+  readonly requireIo = [IO_NAMES.ArchiveIo];
+  protected SubDriverClass = ArchiveDriverInstance;
 }
 
-export interface RootFilesDriverProps {
+export interface ArchiveDriverProps {
   entityWhoAsk: string;
+  archivePath: string;
+}
+
+class ArchiveDriverLogic extends FilesDriverLogic {
+  constructor(
+    protected readonly system: System,
+    protected readonly rootDir: string
+  ) {
+    super(
+      system.io.getIo<FilesIoType & IoBase>(IO_NAMES.LocalFilesIo),
+      (data: FilesEventData) => {
+        this.system.events.emit(SystemEvents.localFiles, data);
+      }
+    );
+  }
+
+  // TODO: check permissions
+
+  // await checkPermissions(
+  //   this.system.permissions.checkPermissions.bind(this.system.permissions),
+  //   this.props.entityWhoAsk,
+  //   this.driverFactory.name,
+  //   paths,
+  //   action
+  // );
+
+  // Make real path on external file system
+  protected preparePath(pathTo: string): string {
+    return resolveRealPath(
+      pathTo,
+      this.system.mountPoints.rootDir,
+      this.system.mountPoints.getMountPoints()
+    );
+  }
 }
 
 /**
- * Acces to the root files of the system
- *  - /programFiles
- *  - /localData
- *  - /syncedData
- *  - /home
- *  - /mnt - this is a virtual dir where some external virtual dirs are mounted
+ * Acces to files in archive
  * It does:
  * - Add more methods
  * - Check permissions
@@ -55,11 +87,12 @@ export interface RootFilesDriverProps {
  * - Resolve real path
  * - And finaly do requests to the external file system via FilesIo
  */
-export class RootFilesDriverInstance extends DriverInstanceBase<
-  RootFilesDriverProps,
+export class ArchiveDriverInstance extends DriverInstanceBase<
+  ArchiveDriverProps,
   Record<string, any>
 > {
-  private driver = new RootDirDriverLogic(this.system, '/');
+  // TODO: add archive path
+  private driver = new ArchiveDriverLogic(this.system, '/');
 
   ////// READ ONLY METHODS
   async readTextFile(
@@ -67,8 +100,6 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
     options?: ReadTextFileOptions
   ): Promise<string> {
     const preparedPath = clearAbsolutePath(pathTo);
-
-    await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
     return await this.driver.readTextFile(preparedPath, options);
   }
@@ -79,15 +110,11 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   ): Promise<BinTypes> {
     const preparedPath = clearAbsolutePath(pathTo);
 
-    await this.checkPermissions([preparedPath], FILE_ACTION.read);
-
     return await this.driver.readBinFile(preparedPath, returnType);
   }
 
   async stat(pathTo: string): Promise<StatsSimplified | undefined> {
     const preparedPath = clearAbsolutePath(pathTo);
-
-    await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
     return await this.driver.stat(preparedPath);
   }
@@ -95,15 +122,11 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   async readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]> {
     const preparedPath = clearAbsolutePath(pathTo);
 
-    await this.checkPermissions([preparedPath], FILE_ACTION.read);
-
     return await this.driver.readdir(preparedPath, options);
   }
 
   async readlink(pathTo: string): Promise<string> {
     const preparedPath = clearAbsolutePath(pathTo);
-
-    await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
     return await this.driver.readlink(preparedPath);
   }
@@ -130,15 +153,11 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   async isDir(pathToDir: string): Promise<boolean> {
     const preparedPath = clearAbsolutePath(pathToDir);
 
-    await this.checkPermissions([preparedPath], FILE_ACTION.read);
-
     return await this.driver.isDir(preparedPath);
   }
 
   async isFile(pathToFile: string): Promise<boolean> {
     const preparedPath = clearAbsolutePath(pathToFile);
-
-    await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
     return await this.driver.isFile(preparedPath);
   }
@@ -146,23 +165,17 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   async isSymLink(pathToSymLink: string): Promise<boolean> {
     const preparedPath = clearAbsolutePath(pathToSymLink);
 
-    await this.checkPermissions([preparedPath], FILE_ACTION.read);
-
     return await this.driver.isSymLink(preparedPath);
   }
 
   async isExists(pathToFileOrDir: string): Promise<boolean> {
     const preparedPath = clearAbsolutePath(pathToFileOrDir);
 
-    await this.checkPermissions([preparedPath], FILE_ACTION.read);
-
     return await this.driver.isExists(preparedPath);
   }
 
   async isTextFileUtf8(pathTo: string): Promise<boolean> {
     const preparedPath = clearAbsolutePath(pathTo);
-
-    await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
     return await this.driver.isTextFileUtf8(preparedPath);
   }
@@ -175,7 +188,6 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   ): Promise<void> {
     const preparedPath = clearAbsolutePath(pathTo);
 
-    await this.checkPermissions([preparedPath], FILE_ACTION.write);
     await this.driver.appendFile(preparedPath, data, options);
   }
 
@@ -186,14 +198,12 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   ): Promise<void> {
     const preparedPath = clearAbsolutePath(pathTo);
 
-    await this.checkPermissions([preparedPath], FILE_ACTION.write);
     await this.driver.writeFile(preparedPath, data, options);
   }
 
   async rm(paths: string[], options?: RmOptions): Promise<void> {
     const preparedPaths = paths.map((path) => clearAbsolutePath(path));
 
-    await this.checkPermissions(preparedPaths, FILE_ACTION.write);
     await this.driver.rm(preparedPaths, options);
   }
 
@@ -202,15 +212,6 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       clearAbsolutePath(src),
       clearAbsolutePath(dest),
     ]);
-
-    await this.checkPermissions(
-      preparedFiles.map(([src]) => src),
-      FILE_ACTION.read
-    );
-    await this.checkPermissions(
-      preparedFiles.map(([, dest]) => dest),
-      FILE_ACTION.write
-    );
 
     await this.driver.cp(preparedFiles, options);
   }
@@ -221,14 +222,12 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       clearAbsolutePath(dest),
     ]);
 
-    await this.checkPermissions(preparedFiles.flat(), FILE_ACTION.write);
     await this.driver.rename(preparedFiles);
   }
 
   async mkdir(pathTo: string, options?: MkdirOptions): Promise<void> {
     const preparedPath = clearAbsolutePath(pathTo);
 
-    await this.checkPermissions([preparedPath], FILE_ACTION.write);
     await this.driver.mkdir(preparedPath, options);
   }
 
@@ -242,10 +241,6 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
     const preparedTarget = clearAbsolutePath(target);
     const preparedPathTo = clearAbsolutePath(pathTo);
 
-    await this.checkPermissions(
-      [preparedTarget, preparedPathTo],
-      FILE_ACTION.write
-    );
     await this.driver.symlink(preparedTarget, preparedPathTo);
   }
 
@@ -261,8 +256,6 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       : [clearAbsolutePath(src)];
     const preparedDestDir = clearAbsolutePath(destDir);
 
-    await this.checkPermissions(preparedSrc, FILE_ACTION.read);
-    await this.checkPermissions([preparedDestDir], FILE_ACTION.write);
     await this.driver.copyToDest(preparedSrc, preparedDestDir, force);
   }
 
@@ -276,11 +269,6 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
       : [clearAbsolutePath(src)];
     const preparedDestDir = clearAbsolutePath(destDir);
 
-    await this.checkPermissions(
-      [...preparedSrc, preparedDestDir],
-      FILE_ACTION.write
-    );
-
     await this.driver.moveToDest(preparedSrc, preparedDestDir, force);
   }
 
@@ -293,31 +281,18 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
     const preparedNewName = newName.trim();
 
-    await this.checkPermissions([preparedFile], FILE_ACTION.write);
     await this.driver.renameFile(preparedFile, preparedNewName);
   }
 
   async rmRf(pathToFileOrDir: string): Promise<void> {
     const preparedPath = clearAbsolutePath(pathToFileOrDir);
 
-    await this.checkPermissions([preparedPath], FILE_ACTION.write);
     await this.driver.rmRf(preparedPath);
   }
 
   async mkDirP(pathToDir: string): Promise<void> {
     const preparedPath = clearAbsolutePath(pathToDir);
 
-    await this.checkPermissions([preparedPath], FILE_ACTION.write);
     await this.driver.mkDirP(preparedPath);
-  }
-
-  protected async checkPermissions(paths: string[], action: string) {
-    await checkPermissions(
-      this.system.permissions.checkPermissions.bind(this.system.permissions),
-      this.props.entityWhoAsk,
-      this.driverFactory.name,
-      paths,
-      action
-    );
   }
 }

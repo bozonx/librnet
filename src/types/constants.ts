@@ -9,6 +9,7 @@ export const CFG_FILE_EXT = 'json';
 export const LOG_FILE_EXT = 'log';
 export const LOCAL_HOST = 'localhost';
 export const SYSTEM_ENTITY = 'system';
+export const ENTITY_MANIFEST_FILE_NAME = 'manifest.yaml';
 export const IS_TEXT_FILE_UTF8_SAMPLE_SIZE = 8192;
 // UI port for localhost
 export const DEFAULT_HTTP_LOCAL_PORT = 41808;
@@ -39,7 +40,6 @@ export enum RootEvents {
 export enum ServiceEvents {
   status,
 }
-
 
 // TODO: review, move to network service
 export enum NETWORK_CODES {
@@ -98,7 +98,6 @@ export const HOME_SUB_DIRS = {
   Media: 'Media',
 };
 
-
 //// virtual local device root dir
 // export const DEVICE_ROOT_DIR = 'Device';
 //// virtual synced storage root dir
@@ -150,6 +149,7 @@ export const SERVICE_TARGETS = {
 
 export const IO_NAMES = {
   LocalFilesIo: 'LocalFilesIo',
+  ArchiveIo: 'ArchiveIo',
   HttpClientIo: 'HttpClientIo',
   HttpServerIo: 'HttpServerIo',
   MqttClientIo: 'MqttClientIo',
@@ -159,6 +159,7 @@ export const IO_NAMES = {
 
 export const DRIVER_NAMES = {
   FilesDriver: 'FilesDriver',
+  ArchiveDriver: 'ArchiveDriver',
   HttpClientDriver: 'HttpClientDriver',
   HttpServerDriver: 'HttpServerDriver',
   MqttClientDriver: 'MqttClientDriver',
