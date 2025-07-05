@@ -138,13 +138,24 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
     return await this.rootDirDriver.readlink(preparedPath);
   }
 
-  // async realpath(pathTo: string): Promise<string> {
-  //   const preparedPath = this.rootDirDriver.clearPath(pathTo);
+  // TODO: должна резолвить пути только в пределах rootDir
+  async realpath(pathTo: string): Promise<string> {
+    return pathTo;
 
-  //   await this.checkPermissions([preparedPath], FILE_ACTION.read);
+    // const preparedPath = this.rootDirDriver.clearPath(pathTo);
 
-  //   return await this.rootDirDriver.realpath(preparedPath);
-  // }
+    // await this.checkPermissions([preparedPath], FILE_ACTION.read);
+
+    // return await this.rootDirDriver.realpath(preparedPath);
+
+    // this.riseEvent({
+    //   path: pathTo,
+    //   action: FILE_ACTION.read,
+    //   method: 'realpath',
+    //   timestamp: Date.now(),
+    //   // TODO: известно ли сколько байт считывается?
+    // });
+  }
 
   async isDir(pathToDir: string): Promise<boolean> {
     const preparedPath = this.rootDirDriver.clearPath(pathToDir);

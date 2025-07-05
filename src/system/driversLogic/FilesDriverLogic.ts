@@ -136,21 +136,6 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     return result;
   }
 
-  // TODO: зачем это в драйере?
-  // async realpath(pathTo: string): Promise<string> {
-  //   const result = await this.filesIo.realpath(this.preparePath(pathTo));
-
-  //   this.riseEvent({
-  //     path: pathTo,
-  //     action: FILE_ACTION.read,
-  //     method: 'realpath',
-  //     timestamp: Date.now(),
-  //     // TODO: известно ли сколько байт считывается?
-  //   });
-
-  //   return result;
-  // }
-
   ////////// ADDITIONAL
 
   async isDir(pathToDir: string): Promise<boolean> {
@@ -416,7 +401,6 @@ export abstract class FilesDriverLogic implements FilesDriverType {
       pathJoin(destDir, pathBasename(el)),
     ])) {
       this.riseEvent({
-        // TODO: revew
         path: dest,
         action: FILE_ACTION.write,
         method: 'moveToDest',
@@ -444,7 +428,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
       details: {
         oldPath: file,
       },
-      // TODO: известно ли сколько байт занимает операция?
+      // do not calculate size because it is very difficult to do
     });
   }
 
@@ -455,12 +439,11 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     });
 
     this.riseEvent({
-      // TODO: revew
       path: pathToFileOrDir,
       action: FILE_ACTION.write,
       method: 'rmRf',
       timestamp: Date.now(),
-      // TODO: известно ли сколько байт занимает операция?
+      // do not calculate size because it is very difficult to do
     });
   }
 
@@ -468,7 +451,6 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     await this.filesIo.mkdir(this.preparePath(pathToDir), { recursive: true });
 
     this.riseEvent({
-      // TODO: revew
       path: pathToDir,
       action: FILE_ACTION.write,
       method: 'mkDirP',
