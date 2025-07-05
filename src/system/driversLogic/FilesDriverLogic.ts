@@ -364,11 +364,13 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     destDir: string,
     force?: boolean
   ): Promise<void> {
-    const preparedDestDir = this.preparePath(destDir);
     const srcPaths = typeof src === 'string' ? [src] : src;
 
     await this.filesIo.cp(
-      srcPaths.map((el) => [el, pathJoin(preparedDestDir, pathBasename(el))]),
+      srcPaths.map((el) => [
+        el,
+        pathJoin(this.preparePath(destDir), pathBasename(el)),
+      ]),
       {
         recursive: true,
         force,
@@ -399,48 +401,49 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     destDir: string,
     force?: boolean
   ): Promise<void> {
-    // TODO: suport glob
-    const destPath = this.preparePath(destDir);
-    const srcPaths =
-      typeof src === 'string'
-        ? [this.preparePath(src)]
-        : src.map((el) => this.preparePath(el));
+    const srcPaths = typeof src === 'string' ? [src] : src;
     // first copy to dest
-    await this.cp(
-      srcPaths.map((el) => [el, pathJoin(destPath, pathBasename(el))]),
-      {
-        recursive: true,
-        force,
-      }
-    );
+    await this.copyToDest(src, destDir, force);
     // then remove src
-    await this.rm(srcPaths, { recursive: true, force });
+    await this.rm(
+      srcPaths.map((el) => this.preparePath(el), { recursive: true, force })
+    );
 
     // TODO: Делает 2 операциияя - считываение и запись
 
-    this.riseEvent({
-      // TODO: revew
-      path: preparedSrc.join(','),
-      action: FILE_ACTION.write,
-      method: 'moveToDest',
-      timestamp: Date.now(),
-      // TODO: нужно определить находятся ли файлы на разных дисках
-      // и если да, то нужно считать размер файлов
-    });
+    for (const [src, dest] of srcPaths.map((el) => [
+      el,
+      pathJoin(destDir, pathBasename(el)),
+    ])) {
+      this.riseEvent({
+        // TODO: revew
+        path: dest,
+        action: FILE_ACTION.write,
+        method: 'moveToDest',
+        timestamp: Date.now(),
+        details: {
+          src,
+        },
+        // TODO: нужно определить находятся ли файлы на разных дисках
+        // и если да, то нужно считать размер файлов
+      });
+    }
   }
 
   async renameFile(file: string, newName: string): Promise<void> {
-    const oldPath = this.preparePath(file);
-    const newPath = pathJoin(pathDirname(oldPath), newName);
+    const preparedOldPath = this.preparePath(file);
+    const newPath = pathJoin(pathDirname(preparedOldPath), newName);
 
-    await this.filesIo.rename([[oldPath, newPath]]);
+    await this.filesIo.rename([[preparedOldPath, newPath]]);
 
     this.riseEvent({
-      // TODO: revew
       path: newPath,
       action: FILE_ACTION.write,
       method: 'renameFile',
       timestamp: Date.now(),
+      details: {
+        oldPath: file,
+      },
       // TODO: известно ли сколько байт занимает операция?
     });
   }
