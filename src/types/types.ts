@@ -93,11 +93,13 @@ export interface EntityManifest {
   // Unique name
   name: string;
   // If not set, it will be the same as the package version
-  version?: string;
+  version: string;
+  // Path to the package
+  distDir: string;
   // name in different languages
-  nameLocale: Record<string, string>;
+  nameLocale?: Record<string, string>;
   // description in different languages
-  description: Record<string, string>;
+  description?: Record<string, string>;
   // If not set, it will be the same as the package author
   author?: string;
   // If not set, it will be the same as the package license

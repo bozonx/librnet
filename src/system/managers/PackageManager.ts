@@ -1,4 +1,4 @@
-import {pathJoin} from 'squidlet-lib'
+import { pathJoin, trimChar } from 'squidlet-lib';
 import type { System } from '../System.js';
 import type { AnyEntityManifest } from '@/types/types.js';
 import {
@@ -9,20 +9,10 @@ import {
 } from '@/types/constants.js';
 import type { ArchiveDriver } from '@/packages/SystemCommonPkg/ArchiveDriver/ArchiveDriver.js';
 import yaml from 'yaml';
-
-const SYSTEM_INSTALLED_PACKAGES_CFG_NAME = 'system.installedPackages';
+import semver from 'semver';
 
 export class PackageManager {
-  // private installedEntities: Record<string, AnyEntityManifest> = {};
-
   constructor(private readonly system: System) {}
-
-  // async init() {
-  //   this.installedEntities = await this.system.configs.loadEntityConfig(
-  //     SYSTEM_INSTALLED_PACKAGES_CFG_NAME,
-  //     true
-  //   );
-  // }
 
   /**
    * Install or update package from file.
@@ -52,23 +42,36 @@ export class PackageManager {
     }
 
     if (installedManifest) {
-      // TODO: check versions
       if (force) {
         await this.uninstall(manifest.name);
       } else {
-        throw new Error(`Entity "${manifest.name}" already installed`);
+        if (semver.gt(manifest.version, installedManifest.version)) {
+          await this.uninstall(manifest.name);
+        } else if (semver.eq(manifest.version, installedManifest.version)) {
+          throw new Error(`Entity "${manifest.name}" already installed`);
+        } else {
+          throw new Error(
+            `Entity "${manifest.name}" version is older than installed`
+          );
+        }
       }
     }
 
-    console.log(manifest);
+    await this.system.localFiles.mkdir(
+      pathJoin('/', ROOT_DIRS.programFiles, manifest.name)
+    );
 
-    // TODO: check if package is already installed
-    // TODO: if force is true, then uninstall package
-    // TODO: install package
+    await archiveFiles.extractToDest(
+      '/' + trimChar(manifest.distDir, '/'),
+      pathJoin('/', ROOT_DIRS.programFiles, manifest.name),
+      pathToPkg
+    );
   }
 
-  async uninstall(pkgName: string) {
-    // TODO: чтобы удалить пакет нужно понять что к нему относится
+  async uninstall(entityName: string) {
+    await this.system.localFiles.rmRf(
+      pathJoin('/', ROOT_DIRS.programFiles, entityName)
+    );
   }
 
   private async getInstalledEntityManifest(
@@ -89,45 +92,3 @@ export class PackageManager {
     return yaml.parse(manifestContent);
   }
 }
-
-  // /**
-  //  * Install app from package to system.
-  //  * @param appName - app name.
-  //  * @param packagePath - path to app package.
-  //  */
-  // async installApp(appName: string, packagePath: string): Promise<void> {
-  //   // TODO: add timeout
-
-  //   const appDestDir = pathJoin(
-  //     this.system.configs.systemCfg.rootDir,
-  //     ROOT_DIRS.system,
-  //     SYSTEM_SUB_DIRS.apps,
-  //     appName
-  //   );
-  //   const appDataDir = pathJoin(
-  //     this.system.configs.systemCfg.rootDir,
-  //     ROOT_DIRS.appsData,
-  //     appName
-  //   );
-
-  //   const filesDriver = this.system.drivers.getDriver<
-  //     FilesDriverType & DriverBase
-  //   >(DRIVER_NAMES.FilesDriver);
-
-  //   if (await filesDriver.isExists(appDestDir)) {
-  //     throw new Error(`App "${appName}" already installed`);
-  //   }
-
-  //   // TODO: copy from archive
-  //   //await filesDriver?.copyDirContent(srcDir, appDestDir);
-
-  //   // create app data dirs
-  //   for (const subDir of Object.values(APP_SUB_DIRS)) {
-  //     await filesDriver.mkDirP(pathJoin(appDataDir, subDir));
-  //   }
-
-  //   const app = this.apps[appName];
-  //   if (app.afterInstall) {
-  //     app.afterInstall(false);
-  //   }
-  // }

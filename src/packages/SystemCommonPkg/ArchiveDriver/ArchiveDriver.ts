@@ -94,6 +94,36 @@ export class ArchiveDriverInstance extends DriverInstanceBase<
   // TODO: add archive path
   private driver = new ArchiveDriverLogic(this.system, '/');
 
+  async extract(paths: [string, string][], archivePath: string): Promise<void> {
+    // const preparedPath = clearAbsolutePath(pathTo);
+  }
+
+  async archive(pathToFileOrDir: string, archivePath: string): Promise<void> {
+    // const preparedPath = clearAbsolutePath(pathTo);
+  }
+
+  async add(paths: [string, string][], archivePath: string): Promise<void> {
+    // const preparedPath = clearAbsolutePath(pathTo);
+  }
+
+  async extractToDest(
+    pathInArchive: string,
+    destDir: string,
+    archivePath: string
+  ): Promise<void> {
+    // TODO: resolve destDir
+    this.extract([[pathInArchive, destDir]], archivePath);
+  }
+
+  async addToDest(
+    pathToFileOrDir: string,
+    destDir: string,
+    archivePath: string
+  ): Promise<void> {
+    // TODO: resolve destDir
+    this.add([[pathToFileOrDir, destDir]], archivePath);
+  }
+
   ////// READ ONLY METHODS
   async readTextFile(
     pathTo: string,
