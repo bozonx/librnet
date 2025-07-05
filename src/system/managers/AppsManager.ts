@@ -7,12 +7,9 @@ export interface AppItem extends EntityItem, AppMain {
 }
 
 export class AppsManager {
-  private readonly system: System;
   private apps: Record<string, AppItem> = {};
 
-  constructor(system: System) {
-    this.system = system;
-  }
+  constructor(private readonly system: System) {}
 
   async init() {
     if (this.system.isProdMode) {
