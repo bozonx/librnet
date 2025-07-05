@@ -12,7 +12,7 @@ import { ApiManager } from './managers/ApiManager.js';
 import { FileLogsManager } from './managers/FileLogsManager.js';
 import { MountPointsManager } from './managers/MountPointsManager.js';
 import { RootDirDriverLogic } from './driversLogic/RootDirDriverLogic.js';
-import { SystemApiAccessManager } from './managers/SystemApiAccessManager.js';
+import { SystemApiManager } from './managers/SystemApiManager.js';
 
 export class System {
   readonly events = new IndexedEventEmitter();
@@ -30,7 +30,7 @@ export class System {
   readonly io = new IoManager(this);
   readonly drivers = new DriversManager(this);
   readonly api = new ApiManager();
-  readonly systemApi = new SystemApiAccessManager(this);
+  readonly systemApi = new SystemApiManager(this);
   readonly services = new ServicesManager(this);
   readonly apps = new AppsManager(this);
 

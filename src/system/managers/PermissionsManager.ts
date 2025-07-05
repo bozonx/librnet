@@ -4,13 +4,19 @@ const SYSTEM_PERMISSIONS_CFG_NAME = 'system.permissions';
 
 export class PermissionsManager {
   // object like {entityWhoAsk: {permitForEntity: {permissionName: true, false or undefined}}}
-  private permissions: Record<string, Record<string, Record<string, boolean>>> =
-    {};
+  private _permissions: Record<
+    string,
+    Record<string, Record<string, boolean>>
+  > = {};
+
+  get permissions() {
+    return structuredClone(this._permissions);
+  }
 
   constructor(private readonly system: System) {}
 
   async init() {
-    this.permissions = await this.system.configs.loadEntityConfig(
+    this._permissions = await this.system.configs.loadEntityConfig(
       SYSTEM_PERMISSIONS_CFG_NAME,
       true
     );
@@ -21,9 +27,9 @@ export class PermissionsManager {
     permitForEntity: string,
     permissionName: string
   ): Promise<boolean> {
-    if (!this.permissions[entityWhoAsk]?.[permitForEntity]) return false;
+    if (!this._permissions[entityWhoAsk]?.[permitForEntity]) return false;
 
-    return !!this.permissions[entityWhoAsk][permitForEntity]?.[permissionName];
+    return !!this._permissions[entityWhoAsk][permitForEntity]?.[permissionName];
   }
 
   async savePermissions(
@@ -31,18 +37,18 @@ export class PermissionsManager {
     permitForEntity: string,
     partialPermissions: Record<string, boolean>
   ) {
-    if (!this.permissions[entityWhoAsk]) {
-      this.permissions[entityWhoAsk] = {};
+    if (!this._permissions[entityWhoAsk]) {
+      this._permissions[entityWhoAsk] = {};
     }
 
-    this.permissions[entityWhoAsk][permitForEntity] = {
-      ...(this.permissions[entityWhoAsk][permitForEntity] || {}),
+    this._permissions[entityWhoAsk][permitForEntity] = {
+      ...(this._permissions[entityWhoAsk][permitForEntity] || {}),
       ...partialPermissions,
     };
 
     await this.system.configs.saveEntityConfig(
       SYSTEM_PERMISSIONS_CFG_NAME,
-      this.permissions,
+      this._permissions,
       true
     );
   }
@@ -53,25 +59,25 @@ export class PermissionsManager {
     permissionNames: string[]
   ) {
     permissionNames.forEach((permissionName) => {
-      delete this.permissions[entityWhoAsk]?.[permitForEntity]?.[
+      delete this._permissions[entityWhoAsk]?.[permitForEntity]?.[
         permissionName
       ];
     });
 
     if (
-      Object.keys(this.permissions[entityWhoAsk]?.[permitForEntity] || {})
+      Object.keys(this._permissions[entityWhoAsk]?.[permitForEntity] || {})
         .length === 0
     ) {
-      delete this.permissions[entityWhoAsk]?.[permitForEntity];
+      delete this._permissions[entityWhoAsk]?.[permitForEntity];
     }
 
-    if (Object.keys(this.permissions[entityWhoAsk] || {}).length === 0) {
-      delete this.permissions[entityWhoAsk];
+    if (Object.keys(this._permissions[entityWhoAsk] || {}).length === 0) {
+      delete this._permissions[entityWhoAsk];
     }
 
     await this.system.configs.saveEntityConfig(
       SYSTEM_PERMISSIONS_CFG_NAME,
-      this.permissions,
+      this._permissions,
       true
     );
   }

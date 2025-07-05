@@ -15,12 +15,16 @@ import {
 const SYSTEM_MAIN_CFG_NAME = 'system.main';
 
 export class ConfigsManager {
-  systemCfg!: SystemCfg;
+  private _systemCfg!: SystemCfg;
+
+  get systemCfg() {
+    return structuredClone(this._systemCfg);
+  }
 
   constructor(private readonly system: System) {}
 
   async init() {
-    this.systemCfg = {
+    this._systemCfg = {
       local: await this.loadEntityConfig<SystemLocalCfg>(
         SYSTEM_MAIN_CFG_NAME,
         false
@@ -75,16 +79,16 @@ export class ConfigsManager {
     // TODO: валидировать
     // TODO: валидировать - пути в versionsCount должны начинаться со слеша
 
-    this.systemCfg = mergeDeepObjects(
+    this._systemCfg = mergeDeepObjects(
       {
         local: partialLocal,
         synced: partialSynced,
       },
-      this.systemCfg
+      this._systemCfg
     );
 
-    await this.saveEntityConfig('system', this.systemCfg, false);
-    await this.saveEntityConfig('system', this.systemCfg, true);
+    await this.saveEntityConfig('system', this._systemCfg, false);
+    await this.saveEntityConfig('system', this._systemCfg, true);
   }
 
   async deleteEntityConfig(entityName: string, isSynced: boolean) {
