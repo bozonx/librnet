@@ -1,10 +1,8 @@
-import type {PackageContext} from '../system/context/PackageContext.js'
-import type {DriverContext} from '../system/context/DriverContext.js'
-import type { DriverBase } from '../system/base/DriverBase.js';
+import type { PackageContext } from '../system/context/PackageContext.js';
 import type { IoBase } from '../system/base/IoBase.js';
 import type { ServiceBase } from '../system/base/ServiceBase.js';
-import type {ServiceContext} from '../system/context/ServiceContext.js'
-import type {IoContext} from '../system/context/IoContext.js'
+import type { ServiceContext } from '../system/context/ServiceContext.js';
+import type { IoContext } from '../system/context/IoContext.js';
 import type {
   EnvMode,
   SERVICE_DESTROY_REASON,
@@ -12,12 +10,14 @@ import type {
 } from './constants.js';
 import type { IoSetBase } from '@/system/base/IoSetBase.js';
 import type { AppContext } from '@/system/context/AppContext.js';
+import type { System } from '@/system/System.js';
+import type { DriverFactoryBase } from '@/system/base/DriverFactoryBase.js';
 
 // It is called right after it is set to system via use()
 // That means very early, before system.init()
 export type PackageIndex = (ctx: PackageContext) => void;
 export type IoIndex = (ioSet: IoSetBase, ctx: IoContext) => IoBase;
-export type DriverIndex = (name: string, ctx: DriverContext) => DriverBase;
+export type DriverIndex = (name: string, system: System) => DriverFactoryBase;
 export type ServiceIndex = (ctx: ServiceContext) => ServiceBase;
 export type AppIndex = () => AppMain;
 export type ServiceStatus = keyof typeof SERVICE_STATUS;
