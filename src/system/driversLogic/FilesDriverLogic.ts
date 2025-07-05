@@ -22,7 +22,10 @@ import type {
   BinTypesNames,
   FilesEventData,
 } from '../../types/types.js';
-import { FILE_ACTION } from '../../types/constants.js';
+import {
+  FILE_ACTION,
+  IS_TEXT_FILE_UTF8_SAMPLE_SIZE,
+} from '../../types/constants.js';
 
 /**
  * Logic of the files driver which
@@ -39,6 +42,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
   protected abstract preparePath(pathTo: string): string;
 
+  // TODO: Move to helpers
   clearPath(pathTo: string): string {
     return trimCharStart(clearRelPath(pathTo), '/');
   }
@@ -47,12 +51,13 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     pathTo: string,
     options?: ReadTextFileOptions
   ): Promise<string> {
-    const preparedPath = this.preparePath(pathTo);
-
-    const result = await this.filesIo.readTextFile(preparedPath, options);
+    const result = await this.filesIo.readTextFile(
+      this.preparePath(pathTo),
+      options
+    );
 
     this.riseEvent({
-      path: preparedPath,
+      path: pathTo,
       action: FILE_ACTION.read,
       method: 'readTextFile',
       timestamp: Date.now(),
@@ -66,12 +71,13 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     pathTo: string,
     returnType?: BinTypesNames
   ): Promise<BinTypes> {
-    const preparedPath = this.preparePath(pathTo);
-
-    const result = await this.filesIo.readBinFile(preparedPath, returnType);
+    const result = await this.filesIo.readBinFile(
+      this.preparePath(pathTo),
+      returnType
+    );
 
     this.riseEvent({
-      path: preparedPath,
+      path: pathTo,
       action: FILE_ACTION.read,
       method: 'readBinFile',
       timestamp: Date.now(),
@@ -82,12 +88,10 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   }
 
   async stat(pathTo: string): Promise<StatsSimplified | undefined> {
-    const preparedPath = this.preparePath(pathTo);
-
-    const result = await this.filesIo.stat(preparedPath);
+    const result = await this.filesIo.stat(this.preparePath(pathTo));
 
     this.riseEvent({
-      path: preparedPath,
+      path: pathTo,
       action: FILE_ACTION.read,
       method: 'stat',
       timestamp: Date.now(),
@@ -99,27 +103,30 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   }
 
   async readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]> {
-    const preparedPath = this.preparePath(pathTo);
-
-    const result = await this.filesIo.readdir(preparedPath, options);
+    const result = await this.filesIo.readdir(
+      this.preparePath(pathTo),
+      options
+    );
 
     this.riseEvent({
-      path: preparedPath,
+      path: pathTo,
       action: FILE_ACTION.read,
       method: 'readdir',
       timestamp: Date.now(),
       size: result.reduce((acc, item) => acc + item.length, 0),
+      details: {
+        recursive: options?.recursive ?? false,
+      },
     });
 
     return result;
   }
 
   async readlink(pathTo: string): Promise<string> {
-    const preparedPath = this.preparePath(pathTo);
-    const result = await this.filesIo.readlink(preparedPath);
+    const result = await this.filesIo.readlink(this.preparePath(pathTo));
 
     this.riseEvent({
-      path: preparedPath,
+      path: pathTo,
       action: FILE_ACTION.read,
       method: 'readlink',
       timestamp: Date.now(),
@@ -129,29 +136,29 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     return result;
   }
 
-  async realpath(pathTo: string): Promise<string> {
-    const preparedPath = this.preparePath(pathTo);
-    const result = await this.filesIo.realpath(preparedPath);
+  // TODO: зачем это в драйере?
+  // async realpath(pathTo: string): Promise<string> {
+  //   const result = await this.filesIo.realpath(this.preparePath(pathTo));
 
-    this.riseEvent({
-      path: preparedPath,
-      action: FILE_ACTION.read,
-      method: 'realpath',
-      timestamp: Date.now(),
-      // TODO: известно ли сколько байт считывается?
-    });
+  //   this.riseEvent({
+  //     path: pathTo,
+  //     action: FILE_ACTION.read,
+  //     method: 'realpath',
+  //     timestamp: Date.now(),
+  //     // TODO: известно ли сколько байт считывается?
+  //   });
 
-    return result;
-  }
+  //   return result;
+  // }
 
   ////////// ADDITIONAL
 
   async isDir(pathToDir: string): Promise<boolean> {
-    const preparedPath = this.preparePath(pathToDir);
-    const result = (await this.filesIo.stat(preparedPath))?.dir ?? false;
+    const result =
+      (await this.filesIo.stat(this.preparePath(pathToDir)))?.dir ?? false;
 
     this.riseEvent({
-      path: preparedPath,
+      path: pathToDir,
       action: FILE_ACTION.read,
       method: 'isDir',
       timestamp: Date.now(),
@@ -162,11 +169,10 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   }
 
   async isFile(pathToFile: string): Promise<boolean> {
-    const preparedPath = this.preparePath(pathToFile);
-    const result = !(await this.isDir(preparedPath));
+    const result = !(await this.isDir(this.preparePath(pathToFile)));
 
     this.riseEvent({
-      path: preparedPath,
+      path: pathToFile,
       action: FILE_ACTION.read,
       method: 'isFile',
       timestamp: Date.now(),
@@ -177,12 +183,12 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   }
 
   async isSymLink(pathToSymLink: string): Promise<boolean> {
-    const preparedPath = this.preparePath(pathToSymLink);
     const result =
-      (await this.filesIo.stat(preparedPath))?.symbolicLink ?? false;
+      (await this.filesIo.stat(this.preparePath(pathToSymLink)))
+        ?.symbolicLink ?? false;
 
     this.riseEvent({
-      path: preparedPath,
+      path: pathToSymLink,
       action: FILE_ACTION.read,
       method: 'isSymLink',
       timestamp: Date.now(),
@@ -193,11 +199,10 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   }
 
   async isExists(pathToFileOrDir: string): Promise<boolean> {
-    const preparedPath = this.preparePath(pathToFileOrDir);
-    const result = !!(await this.stat(preparedPath));
+    const result = !!(await this.stat(this.preparePath(pathToFileOrDir)));
 
     this.riseEvent({
-      path: preparedPath,
+      path: pathToFileOrDir,
       action: FILE_ACTION.read,
       method: 'isExists',
       timestamp: Date.now(),
@@ -208,11 +213,10 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   }
 
   async isTextFileUtf8(pathTo: string): Promise<boolean> {
-    const preparedPath = this.preparePath(pathTo);
-    const result = await this.filesIo.isTextFileUtf8(preparedPath);
+    const result = await this.filesIo.isTextFileUtf8(this.preparePath(pathTo));
 
     this.riseEvent({
-      path: preparedPath,
+      path: pathTo,
       action: FILE_ACTION.read,
       method: 'isTextFileUtf8',
       timestamp: Date.now(),
@@ -229,11 +233,10 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     data: string | Uint8Array,
     options?: WriteFileOptions
   ) {
-    const preparedPath = this.preparePath(pathTo);
-    const result = await this.filesIo.appendFile(preparedPath, data, options);
+    await this.filesIo.appendFile(this.preparePath(pathTo), data, options);
 
     this.riseEvent({
-      path: preparedPath,
+      path: pathTo,
       action: FILE_ACTION.write,
       method: 'appendFile',
       timestamp: Date.now(),
@@ -246,11 +249,10 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     data: string | Uint8Array,
     options?: WriteFileOptions
   ) {
-    const preparedPath = this.preparePath(pathTo);
-    const result = await this.filesIo.writeFile(preparedPath, data, options);
+    await this.filesIo.writeFile(this.preparePath(pathTo), data, options);
 
     this.riseEvent({
-      path: preparedPath,
+      path: pathTo,
       action: FILE_ACTION.write,
       method: 'writeFile',
       timestamp: Date.now(),
@@ -259,60 +261,83 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   }
 
   async rm(paths: string[], options?: RmOptions) {
-    const preparedPaths = paths.map((path) => this.preparePath(path));
-    const result = await this.filesIo.rm(preparedPaths, options);
+    await this.filesIo.rm(
+      paths.map((path) => this.preparePath(path)),
+      options
+    );
 
-    this.riseEvent({
-      // TODO: revew
-      path: preparedPaths.join(','),
-      action: FILE_ACTION.write,
-      method: 'rm',
-      timestamp: Date.now(),
-      // TODO: известно ли сколько байт занимает операция?
-    });
+    for (const path of paths) {
+      this.riseEvent({
+        path,
+        action: FILE_ACTION.write,
+        method: 'rm',
+        timestamp: Date.now(),
+        // Do not calculate size because it is very difficult to do
+        // it depends on the file system, OS journaling and cache
+      });
+    }
   }
 
   async cp(files: [string, string][], options?: CopyOptions): Promise<void> {
-    const preparedFiles = files.map(([src, dest]) => {
-      return [this.preparePath(src), this.preparePath(dest)];
-    });
-    const result = await this.filesIo.cp(preparedFiles, options);
+    await this.filesIo.cp(
+      files.map(([src, dest]) => [
+        this.preparePath(src),
+        this.preparePath(dest),
+      ]),
+      options
+    );
 
-    this.riseEvent({
-      // TODO: revew
-      path: preparedFiles.map(([src]) => src).join(','),
-      action: FILE_ACTION.write,
-      method: 'cp',
-      timestamp: Date.now(),
-      // TODO: известно ли сколько байт занимает операция?
-    });
+    for (const [src, dest] of files) {
+      // TODO: Делает 2 операциияя - считываение и запись
+      this.riseEvent({
+        path: dest,
+        action: FILE_ACTION.write,
+        method: 'cp',
+        timestamp: Date.now(),
+        details: {
+          src,
+          recursive: options?.recursive ?? false,
+        },
+        // TODO: calculate size
+      });
+    }
   }
 
   async rename(files: [string, string][]): Promise<void> {
-    const preparedFiles = files.map(([src, dest]) => {
-      return [this.preparePath(src), this.preparePath(dest)];
-    });
-    const result = await this.filesIo.rename(preparedFiles);
+    await this.filesIo.rename(
+      files.map(([src, dest]) => [
+        this.preparePath(src),
+        this.preparePath(dest),
+      ])
+    );
 
-    this.riseEvent({
-      // TODO: revew
-      path: preparedFiles.map(([src]) => src).join(','),
-      action: FILE_ACTION.write,
-      method: 'rename',
-      timestamp: Date.now(),
-      // TODO: известно ли сколько байт занимает операция?
-    });
+    for (const [src, dest] of files) {
+      this.riseEvent({
+        path: dest,
+        action: FILE_ACTION.write,
+        method: 'rename',
+        timestamp: Date.now(),
+        details: {
+          src,
+        },
+        // TODO: нужно определить находятся ли файлы на разных дисках
+        // и если да, то нужно считать размер файлов
+        // TODO: Делает 2 операциияя - считываение и запись
+      });
+    }
   }
 
   async mkdir(pathTo: string, options?: MkdirOptions) {
-    const preparedPath = this.preparePath(pathTo);
-    const result = await this.filesIo.mkdir(preparedPath, options);
+    await this.filesIo.mkdir(this.preparePath(pathTo), options);
 
     this.riseEvent({
-      path: preparedPath,
+      path: pathTo,
       action: FILE_ACTION.write,
       method: 'mkdir',
       timestamp: Date.now(),
+      details: {
+        recursive: options?.recursive ?? false,
+      },
       // TODO: известно ли сколько байт занимает операция?
     });
   }
@@ -320,11 +345,11 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   async symlink(target: string, pathTo: string): Promise<void> {
     const preparedTarget = this.preparePath(target);
     const preparedPathTo = this.preparePath(pathTo);
-    const result = await this.filesIo.symlink(preparedTarget, preparedPathTo);
+
+    await this.filesIo.symlink(preparedTarget, preparedPathTo);
 
     this.riseEvent({
-      // TODO: revew
-      path: preparedTarget,
+      path: pathTo,
       action: FILE_ACTION.write,
       method: 'symlink',
       timestamp: Date.now(),
@@ -339,30 +364,34 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     destDir: string,
     force?: boolean
   ): Promise<void> {
-    // TODO: suport glob
-    const destPath = this.preparePath(destDir);
-    const srcPaths =
-      typeof src === 'string'
-        ? [this.preparePath(src)]
-        : src.map((el) => this.preparePath(el));
+    const preparedDestDir = this.preparePath(destDir);
+    const srcPaths = typeof src === 'string' ? [src] : src;
 
-    const preparedFiles = srcPaths.map((el) => [
+    await this.filesIo.cp(
+      srcPaths.map((el) => [el, pathJoin(preparedDestDir, pathBasename(el))]),
+      {
+        recursive: true,
+        force,
+      }
+    );
+
+    for (const [src, dest] of srcPaths.map((el) => [
       el,
-      pathJoin(destPath, pathBasename(el)),
-    ]);
-    const result = await this.filesIo.cp(preparedFiles, {
-      recursive: true,
-      force,
-    });
-
-    this.riseEvent({
-      // TODO: revew
-      path: preparedSrc.join(','),
-      action: FILE_ACTION.write,
-      method: 'copyToDest',
-      timestamp: Date.now(),
-      // TODO: известно ли сколько байт занимает операция?
-    });
+      pathJoin(destDir, pathBasename(el)),
+    ])) {
+      // TODO: Делает 2 операциияя - считываение и запись
+      this.riseEvent({
+        // TODO: revew
+        path: dest,
+        action: FILE_ACTION.write,
+        method: 'copyToDest',
+        timestamp: Date.now(),
+        details: {
+          src,
+        },
+        // TODO: считать размер файлов
+      });
+    }
   }
 
   async moveToDest(
@@ -387,13 +416,16 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     // then remove src
     await this.rm(srcPaths, { recursive: true, force });
 
+    // TODO: Делает 2 операциияя - считываение и запись
+
     this.riseEvent({
       // TODO: revew
       path: preparedSrc.join(','),
       action: FILE_ACTION.write,
       method: 'moveToDest',
       timestamp: Date.now(),
-      // TODO: известно ли сколько байт занимает операция?
+      // TODO: нужно определить находятся ли файлы на разных дисках
+      // и если да, то нужно считать размер файлов
     });
   }
 
@@ -401,11 +433,11 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     const oldPath = this.preparePath(file);
     const newPath = pathJoin(pathDirname(oldPath), newName);
 
-    const result = await this.filesIo.rename([[oldPath, newPath]]);
+    await this.filesIo.rename([[oldPath, newPath]]);
 
     this.riseEvent({
       // TODO: revew
-      path: preparedFile,
+      path: newPath,
       action: FILE_ACTION.write,
       method: 'renameFile',
       timestamp: Date.now(),
@@ -414,15 +446,14 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   }
 
   async rmRf(pathToFileOrDir: string): Promise<void> {
-    const preparedPath = this.preparePath(pathToFileOrDir);
-    const result = await this.filesIo.rm([preparedPath], {
+    await this.filesIo.rm([this.preparePath(pathToFileOrDir)], {
       recursive: true,
       force: true,
     });
 
     this.riseEvent({
       // TODO: revew
-      path: preparedPath,
+      path: pathToFileOrDir,
       action: FILE_ACTION.write,
       method: 'rmRf',
       timestamp: Date.now(),
@@ -431,12 +462,11 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   }
 
   async mkDirP(pathToDir: string): Promise<void> {
-    const preparedPath = this.preparePath(pathToDir);
-    const result = await this.filesIo.mkdir(preparedPath, { recursive: true });
+    await this.filesIo.mkdir(this.preparePath(pathToDir), { recursive: true });
 
     this.riseEvent({
       // TODO: revew
-      path: preparedPath,
+      path: pathToDir,
       action: FILE_ACTION.write,
       method: 'mkDirP',
       timestamp: Date.now(),

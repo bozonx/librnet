@@ -15,7 +15,7 @@ export interface ReadOnlyFilesDriverType {
   stat(pathTo: string): Promise<StatsSimplified | undefined>;
   readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]>;
   readlink(pathTo: string): Promise<string>;
-  realpath(pathTo: string): Promise<string>;
+  // realpath(pathTo: string): Promise<string>;
 
   ////////// ADDITIONAL
   isDir(pathToDir: string): Promise<boolean>;

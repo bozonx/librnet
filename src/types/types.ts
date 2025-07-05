@@ -159,6 +159,8 @@ export interface FilesEventData {
   method: string;
   // Size of the operation in bytes
   size?: number;
+  // Additional details of the operation
+  details?: Record<string, any>;
 }
 
 export interface MountPointDefinition {
