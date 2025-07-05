@@ -9,6 +9,7 @@ export const CFG_FILE_EXT = 'json';
 export const LOG_FILE_EXT = 'log';
 export const LOCAL_HOST = 'localhost';
 export const SYSTEM_ENTITY = 'system';
+export const SYSTEM_API_SERVICE_NAME = 'systemApi';
 export const ENTITY_MANIFEST_FILE_NAME = 'manifest.yaml';
 export const IS_TEXT_FILE_UTF8_SAMPLE_SIZE = 8192;
 // UI port for localhost

@@ -4,7 +4,6 @@ import { IoManager } from './managers/IoManager.js';
 import { ServicesManager } from './managers/ServicesManager.js';
 import { ConfigsManager } from './managers/ConfigsManager.js';
 import { PermissionsManager } from './managers/PermissionsManager.js';
-import type { PackageIndex } from '../types/types.js';
 import { PackageManager } from './managers/PackageManager.js';
 import { DriversManager } from './managers/DriversManager.js';
 import { afterInstall } from './afterInstall.js';
@@ -13,6 +12,7 @@ import { ApiManager } from './managers/ApiManager.js';
 import { FileLogsManager } from './managers/FileLogsManager.js';
 import { MountPointsManager } from './managers/MountPointsManager.js';
 import { RootDirDriverLogic } from './driversLogic/RootDirDriverLogic.js';
+import { SystemApiAccessManager } from './managers/SystemApiAccessManager.js';
 
 export class System {
   readonly events = new IndexedEventEmitter();
@@ -30,6 +30,7 @@ export class System {
   readonly io = new IoManager(this);
   readonly drivers = new DriversManager(this);
   readonly api = new ApiManager();
+  readonly systemApi = new SystemApiAccessManager(this);
   readonly services = new ServicesManager(this);
   readonly apps = new AppsManager(this);
 
@@ -60,7 +61,6 @@ export class System {
       // system configs for IO, drivers and services
       await this.configs.init();
       await this.permissions.init();
-      await this.packageManager.loadInstalled();
       await this.io.initIos();
       await this.drivers.init();
 
@@ -87,8 +87,6 @@ export class System {
       await Promise.allSettled([
         this.apps.destroy(),
         this.services.destroy(),
-        this.packageManager.destroy(),
-        // destroyWrapper(this.permissions.destroy.bind(this.permissions)),
         this.drivers.destroy(),
         this.io.destroy(),
       ]);
@@ -109,9 +107,5 @@ export class System {
     } catch (e) {
       this.log.error(String(e));
     }
-  }
-
-  use(pkg: PackageIndex) {
-    this.packageManager.use(pkg);
   }
 }

@@ -3,6 +3,7 @@ import {
   LOCAL_DATA_SUB_DIRS,
   ROOT_DIRS,
   SYNCED_DATA_SUB_DIRS,
+  SYSTEM_API_SERVICE_NAME,
 } from '../../types/constants.js';
 import type { Logger } from 'squidlet-lib';
 import type { System } from '../System';
@@ -119,6 +120,16 @@ export class EntityBaseContext {
    * Access to api of services that registered their api in the system
    */
   serviceApi(serviceName: string) {
+    if (serviceName === SYSTEM_API_SERVICE_NAME) {
+      // Emitate system api service
+      return permissionWrapper(
+        this.system,
+        this.manifest.name,
+        serviceName,
+        this.system.systemApi
+      );
+    }
+
     const serviceApi = this.system.api.getServiceApi(serviceName);
 
     return permissionWrapper(
