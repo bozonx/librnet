@@ -2,6 +2,7 @@ import type { System } from '../System.js';
 
 export function permissionWrapper(
   system: System,
+  entityWhoAsk: string,
   entityName: string,
   api: Record<string, any>
 ) {
@@ -12,7 +13,7 @@ export function permissionWrapper(
 
       // Проверяем разрешения для данного метода API
       try {
-        system.permissions.checkPermissions(entityName, propName);
+        system.permissions.checkPermissions(entityWhoAsk, entityName, propName);
       } catch (error) {
         // Если разрешение не предоставлено, возвращаем функцию которая выбросит ошибку
         return (...args: any[]) => {
@@ -33,7 +34,11 @@ export function permissionWrapper(
           return (...args: any[]) => {
             // Дополнительная проверка разрешений при вызове метода
             try {
-              system.permissions.checkPermissions(entityName, propName);
+              system.permissions.checkPermissions(
+                entityWhoAsk,
+                entityName,
+                propName
+              );
               return method.apply(target, args);
             } catch (error) {
               throw new Error(

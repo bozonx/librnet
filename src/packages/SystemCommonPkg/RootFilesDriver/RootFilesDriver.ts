@@ -3,14 +3,9 @@ import type {
   BinTypes,
   BinTypesNames,
   DriverIndex,
-  FilesEventData,
 } from '../../../types/types.js';
 import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js';
-import {
-  FILE_ACTION,
-  IO_NAMES,
-  SystemEvents,
-} from '../../../types/constants.js';
+import { FILE_ACTION, IO_NAMES } from '../../../types/constants.js';
 import type {
   CopyOptions,
   MkdirOptions,
@@ -22,10 +17,8 @@ import type {
 } from '../../../types/io/FilesIoType.js';
 import type { System } from '../../../system/System.js';
 import { checkPermissions } from '../../../system/helpers/CheckPathPermission.js';
-import { resolveRealPath } from '@/system/helpers/helpers.js';
-import { FilesDriverLogic } from '@/system/driversLogic/FilesDriverLogic.js';
-import type { FilesIoType } from '@/types/io/FilesIoType.js';
-import type { IoBase } from '@/system/base/IoBase.js';
+import { RootDirDriverLogic } from '@/system/driversLogic/RootDirDriverLogic.js';
+import { clearAbsolutePath } from '@/system/helpers/helpers.js';
 
 export const FILE_PERM_DELIMITER = '|';
 
@@ -48,29 +41,6 @@ export interface RootFilesDriverProps {
   entityWhoAsk: string;
 }
 
-class RootDirDriver extends FilesDriverLogic {
-  constructor(
-    protected readonly system: System,
-    protected readonly rootDir: string
-  ) {
-    super(
-      system.io.getIo<FilesIoType & IoBase>(IO_NAMES.LocalFilesIo),
-      (data: FilesEventData) => {
-        this.system.events.emit(SystemEvents.localFiles, data);
-      }
-    );
-  }
-
-  // Make real path on external file system
-  protected preparePath(pathTo: string): string {
-    return resolveRealPath(
-      pathTo,
-      this.system.mountPoints.rootDir,
-      this.system.mountPoints.getMountPoints()
-    );
-  }
-}
-
 /**
  * Acces to the root files of the system
  *  - /programFiles
@@ -89,14 +59,14 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   RootFilesDriverProps,
   Record<string, any>
 > {
-  private rootDirDriver = new RootDirDriver(this.system, '/');
+  private rootDirDriver = new RootDirDriverLogic(this.system, '/');
 
   ////// READ ONLY METHODS
   async readTextFile(
     pathTo: string,
     options?: ReadTextFileOptions
   ): Promise<string> {
-    const preparedPath = this.rootDirDriver.clearPath(pathTo);
+    const preparedPath = clearAbsolutePath(pathTo);
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
@@ -107,7 +77,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
     pathTo: string,
     returnType?: BinTypesNames
   ): Promise<BinTypes> {
-    const preparedPath = this.rootDirDriver.clearPath(pathTo);
+    const preparedPath = clearAbsolutePath(pathTo);
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
@@ -115,7 +85,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   }
 
   async stat(pathTo: string): Promise<StatsSimplified | undefined> {
-    const preparedPath = this.rootDirDriver.clearPath(pathTo);
+    const preparedPath = clearAbsolutePath(pathTo);
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
@@ -123,7 +93,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   }
 
   async readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]> {
-    const preparedPath = this.rootDirDriver.clearPath(pathTo);
+    const preparedPath = clearAbsolutePath(pathTo);
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
@@ -131,7 +101,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   }
 
   async readlink(pathTo: string): Promise<string> {
-    const preparedPath = this.rootDirDriver.clearPath(pathTo);
+    const preparedPath = clearAbsolutePath(pathTo);
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
@@ -158,7 +128,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   }
 
   async isDir(pathToDir: string): Promise<boolean> {
-    const preparedPath = this.rootDirDriver.clearPath(pathToDir);
+    const preparedPath = clearAbsolutePath(pathToDir);
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
@@ -166,7 +136,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   }
 
   async isFile(pathToFile: string): Promise<boolean> {
-    const preparedPath = this.rootDirDriver.clearPath(pathToFile);
+    const preparedPath = clearAbsolutePath(pathToFile);
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
@@ -174,7 +144,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   }
 
   async isSymLink(pathToSymLink: string): Promise<boolean> {
-    const preparedPath = this.rootDirDriver.clearPath(pathToSymLink);
+    const preparedPath = clearAbsolutePath(pathToSymLink);
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
@@ -182,7 +152,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   }
 
   async isExists(pathToFileOrDir: string): Promise<boolean> {
-    const preparedPath = this.rootDirDriver.clearPath(pathToFileOrDir);
+    const preparedPath = clearAbsolutePath(pathToFileOrDir);
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
@@ -190,7 +160,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   }
 
   async isTextFileUtf8(pathTo: string): Promise<boolean> {
-    const preparedPath = this.rootDirDriver.clearPath(pathTo);
+    const preparedPath = clearAbsolutePath(pathTo);
 
     await this.checkPermissions([preparedPath], FILE_ACTION.read);
 
@@ -203,7 +173,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
     data: string,
     options?: WriteFileOptions
   ): Promise<void> {
-    const preparedPath = this.rootDirDriver.clearPath(pathTo);
+    const preparedPath = clearAbsolutePath(pathTo);
 
     await this.checkPermissions([preparedPath], FILE_ACTION.write);
     await this.rootDirDriver.appendFile(preparedPath, data, options);
@@ -214,7 +184,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
     data: string | Uint8Array,
     options?: WriteFileOptions
   ): Promise<void> {
-    const preparedPath = this.rootDirDriver.clearPath(pathTo);
+    const preparedPath = clearAbsolutePath(pathTo);
 
     await this.checkPermissions([preparedPath], FILE_ACTION.write);
     await this.rootDirDriver.writeFile(preparedPath, data, options);
@@ -222,7 +192,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
   async rm(paths: string[], options?: RmOptions): Promise<void> {
     const preparedPaths = paths.map((path) =>
-      this.rootDirDriver.clearPath(path)
+      clearAbsolutePath(path)
     );
 
     await this.checkPermissions(preparedPaths, FILE_ACTION.write);
@@ -231,8 +201,8 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
   async cp(files: [string, string][], options?: CopyOptions): Promise<void> {
     const preparedFiles: [string, string][] = files.map(([src, dest]) => [
-      this.rootDirDriver.clearPath(src),
-      this.rootDirDriver.clearPath(dest),
+      clearAbsolutePath(src),
+      clearAbsolutePath(dest),
     ]);
 
     await this.checkPermissions(
@@ -249,8 +219,8 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
   async rename(files: [string, string][]): Promise<void> {
     const preparedFiles: [string, string][] = files.map(([src, dest]) => [
-      this.rootDirDriver.clearPath(src),
-      this.rootDirDriver.clearPath(dest),
+      clearAbsolutePath(src),
+      clearAbsolutePath(dest),
     ]);
 
     await this.checkPermissions(preparedFiles.flat(), FILE_ACTION.write);
@@ -258,7 +228,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   }
 
   async mkdir(pathTo: string, options?: MkdirOptions): Promise<void> {
-    const preparedPath = this.rootDirDriver.clearPath(pathTo);
+    const preparedPath = clearAbsolutePath(pathTo);
 
     await this.checkPermissions([preparedPath], FILE_ACTION.write);
     await this.rootDirDriver.mkdir(preparedPath, options);
@@ -271,8 +241,8 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
    * @returns
    */
   async symlink(target: string, pathTo: string): Promise<void> {
-    const preparedTarget = this.rootDirDriver.clearPath(target);
-    const preparedPathTo = this.rootDirDriver.clearPath(pathTo);
+    const preparedTarget = clearAbsolutePath(target);
+    const preparedPathTo = clearAbsolutePath(pathTo);
 
     await this.checkPermissions(
       [preparedTarget, preparedPathTo],
@@ -289,9 +259,9 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
     force?: boolean
   ): Promise<void> {
     const preparedSrc = Array.isArray(src)
-      ? src.map((s) => this.rootDirDriver.clearPath(s))
-      : [this.rootDirDriver.clearPath(src)];
-    const preparedDestDir = this.rootDirDriver.clearPath(destDir);
+      ? src.map((s) => clearAbsolutePath(s))
+      : [clearAbsolutePath(src)];
+    const preparedDestDir = clearAbsolutePath(destDir);
 
     await this.checkPermissions(preparedSrc, FILE_ACTION.read);
     await this.checkPermissions([preparedDestDir], FILE_ACTION.write);
@@ -304,9 +274,9 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
     force?: boolean
   ): Promise<void> {
     const preparedSrc = Array.isArray(src)
-      ? src.map((s) => this.rootDirDriver.clearPath(s))
-      : [this.rootDirDriver.clearPath(src)];
-    const preparedDestDir = this.rootDirDriver.clearPath(destDir);
+      ? src.map((s) => clearAbsolutePath(s))
+      : [clearAbsolutePath(src)];
+    const preparedDestDir = clearAbsolutePath(destDir);
 
     await this.checkPermissions(
       [...preparedSrc, preparedDestDir],
@@ -317,7 +287,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   }
 
   async renameFile(file: string, newName: string): Promise<void> {
-    const preparedFile = this.rootDirDriver.clearPath(file);
+    const preparedFile = clearAbsolutePath(file);
 
     if (newName.includes('/') || newName.includes('\\')) {
       throw new Error('New name cannot contain slashes');
@@ -330,14 +300,14 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   }
 
   async rmRf(pathToFileOrDir: string): Promise<void> {
-    const preparedPath = this.rootDirDriver.clearPath(pathToFileOrDir);
+    const preparedPath = clearAbsolutePath(pathToFileOrDir);
 
     await this.checkPermissions([preparedPath], FILE_ACTION.write);
     await this.rootDirDriver.rmRf(preparedPath);
   }
 
   async mkDirP(pathToDir: string): Promise<void> {
-    const preparedPath = this.rootDirDriver.clearPath(pathToDir);
+    const preparedPath = clearAbsolutePath(pathToDir);
 
     await this.checkPermissions([preparedPath], FILE_ACTION.write);
     await this.rootDirDriver.mkDirP(preparedPath);

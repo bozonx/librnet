@@ -1,21 +1,14 @@
-import { pathJoin } from 'squidlet-lib';
+import { pathJoin, trimCharStart } from 'squidlet-lib';
 import type { LogLevel } from 'squidlet-lib';
 import type { System } from '../System';
 import {
-  IO_NAMES,
   LOCAL_DATA_SUB_DIRS,
-  LOG_FILE_EXT,
   ROOT_DIRS,
   SYNCED_DATA_SUB_DIRS,
 } from '@/types/constants';
-import type { IoBase } from '../base/IoBase';
-import type { FilesIoType } from '@/types/io/FilesIoType';
+import { clearAbsolutePath } from '../helpers/helpers';
 
 export class FileLogsManager {
-  private get filesIo(): FilesIoType & IoBase {
-    return this.system.io.getIo<FilesIoType & IoBase>(IO_NAMES.LocalFilesIo);
-  }
-
   constructor(private readonly system: System) {}
 
   /**
@@ -28,29 +21,13 @@ export class FileLogsManager {
     msg: string,
     logLevel: LogLevel
   ) {
-    const pathToLog = pathJoin(
-      '/',
-      isSynced ? ROOT_DIRS.syncedData : ROOT_DIRS.localData,
-      isSynced ? SYNCED_DATA_SUB_DIRS.logs : LOCAL_DATA_SUB_DIRS.logs,
-      entityName + '.' + LOG_FILE_EXT
+    const pathToLog = this.preparePath(entityName, isSynced, relPathToLog);
+
+    await this.system.localFiles.mkDirP(pathToLog);
+    await this.system.localFiles.appendFile(
+      pathToLog,
+      this.makeMsg(logLevel, msg)
     );
-
-    await this.filesIo.appendFile(pathToLog, msg);
-
-    // const fullPath = pathJoin(this.logDirPath, clearRelPath(pathToLog));
-
-    // // TODO: add date and time and log level
-    // const fullLog = data;
-    // // create dir if need
-    // await this.driver.mkDirP(pathDirname(fullPath));
-
-    // try {
-    //   await this.driver.appendFile(fullPath, fullLog);
-    // } catch (e) {
-    //   // TODO: ошибка должна быть только связанна с тем что файл уже существует
-    //   // TODO: а может appendFile уже подразумевает создание файла ????
-    //   throw e;
-    // }
 
     // TODO: поддержка ротации
   }
@@ -60,15 +37,33 @@ export class FileLogsManager {
     entityName: string,
     isSynced: boolean,
     relPathToLog: string,
-    linesCount: number = 100
+    linesCount: number = 100,
+    fromLine: number = 0
   ) {
-    const pathToLog = pathJoin(
+    const pathToLog = this.preparePath(entityName, isSynced, relPathToLog);
+
+    return await this.system.localFiles.readTextFile(pathToLog);
+  }
+
+  private preparePath(
+    entityName: string,
+    isSynced: boolean,
+    relPathToLog: string
+  ) {
+    const preparedRelPath = trimCharStart(clearAbsolutePath(relPathToLog), '/');
+
+    return pathJoin(
       '/',
       isSynced ? ROOT_DIRS.syncedData : ROOT_DIRS.localData,
       isSynced ? SYNCED_DATA_SUB_DIRS.logs : LOCAL_DATA_SUB_DIRS.logs,
-      entityName + '.' + LOG_FILE_EXT
+      entityName,
+      preparedRelPath
     );
+  }
 
-    return await this.filesIo.readTextFile(pathToLog);
+  private makeMsg(logLevel: LogLevel, msg: string) {
+    const date = new Date().toISOString();
+
+    return `${date} ${logLevel.toUpperCase()}: ${msg}\n`;
   }
 }

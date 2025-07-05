@@ -12,6 +12,7 @@ import { AppsManager } from './managers/AppsManager.js';
 import { ApiManager } from './managers/ApiManager.js';
 import { FileLogsManager } from './managers/FileLogsManager.js';
 import { MountPointsManager } from './managers/MountPointsManager.js';
+import { RootDirDriverLogic } from './driversLogic/RootDirDriverLogic.js';
 
 export class System {
   readonly events = new IndexedEventEmitter();
@@ -19,6 +20,7 @@ export class System {
   readonly log = new LogPublisher((...p) =>
     this.events.emit(SystemEvents.logger, ...p)
   );
+  readonly localFiles = new RootDirDriverLogic(this, this.ROOT_DIR);
   // managers
   readonly mountPoints = new MountPointsManager(this, this.ROOT_DIR);
   readonly packageManager = new PackageManager(this);

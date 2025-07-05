@@ -6,13 +6,12 @@ import {
 } from '../../types/constants.js';
 import type { Logger } from 'squidlet-lib';
 import type { System } from '../System';
-import { DirTrap } from '../driversLogic/DirTrap.js';
 import type { EntityManifest } from '@/types/types.js';
 import { EntityConfig } from '../driversLogic/EntityConfig.js';
 import { EntityLogFile } from '../driversLogic/EntityLogFile.js';
-import { DirTrapReadOnly } from '../driversLogic/DirTrapReadOnly.js';
 import { permissionWrapper } from '../helpers/permissionWrapper.js';
 import type DriverInstanceBase from '../base/DriverInstanceBase.js';
+import { DirTrapLogic } from '../driversLogic/DirTrapLogic.js';
 
 export class EntityBaseContext {
   // Server side context
@@ -47,39 +46,43 @@ export class EntityBaseContext {
   readonly syncedLog = new EntityLogFile(this.system, this.manifest, true);
 
   // local data of this app. Only for local machine
-  readonly localData = new DirTrap(
-    this.system,
+  readonly localData = new DirTrapLogic(
     pathJoin(
       '/',
       ROOT_DIRS.localData,
       LOCAL_DATA_SUB_DIRS.data,
       this.manifest.name
-    )
+    ),
+    false,
+    this.system
   );
   // syncronized data of this app between all the hosts
-  readonly syncedData = new DirTrap(
-    this.system,
+  readonly syncedData = new DirTrapLogic(
     pathJoin(
       '/',
       ROOT_DIRS.syncedData,
       SYNCED_DATA_SUB_DIRS.data,
       this.manifest.name
-    )
+    ),
+    false,
+    this.system
   );
   // temporary files of this app
-  readonly tmp = new DirTrap(
-    this.system,
+  readonly tmp = new DirTrapLogic(
     pathJoin(
       '/',
       ROOT_DIRS.localData,
       LOCAL_DATA_SUB_DIRS.tmp,
       this.manifest.name
-    )
+    ),
+    false,
+    this.system
   );
   // readonly program and assets files of this app
-  readonly myFiles = new DirTrapReadOnly(
-    this.system,
-    pathJoin('/', ROOT_DIRS.programFiles, this.manifest.name)
+  readonly myFiles = new DirTrapLogic(
+    pathJoin('/', ROOT_DIRS.programFiles, this.manifest.name),
+    true,
+    this.system
   );
 
   // TODO: use db key-value storage for cache
@@ -118,7 +121,12 @@ export class EntityBaseContext {
   serviceApi(serviceName: string) {
     const serviceApi = this.system.api.getServiceApi(serviceName);
 
-    return permissionWrapper(this.system, serviceName, serviceApi);
+    return permissionWrapper(
+      this.system,
+      this.manifest.name,
+      serviceName,
+      serviceApi
+    );
   }
 
   /**
@@ -127,6 +135,6 @@ export class EntityBaseContext {
   appApi(appName: string) {
     const appApi = this.system.api.getAppApi(appName);
 
-    return permissionWrapper(this.system, appName, appApi);
+    return permissionWrapper(this.system, this.manifest.name, appName, appApi);
   }
 }

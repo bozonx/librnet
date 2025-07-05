@@ -1,4 +1,4 @@
-import {makeUniqId} from 'squidlet-lib'
+import { clearRelPath, makeUniqId, trimCharStart } from 'squidlet-lib';
 import { pathJoin } from 'squidlet-lib';
 import type { MountPoint } from '../../types/types';
 import { REQUEST_ID_LENGTH } from '../../types/constants';
@@ -31,4 +31,9 @@ export function resolveRealPath(
   // TODO: resolve real path using mount points
 
   return pathJoin(rootDir, path);
+}
+
+// TODO: do it. remove urls and relative paths
+export function clearAbsolutePath(pathTo: string): string {
+  return trimCharStart(clearRelPath(pathTo), '/');
 }

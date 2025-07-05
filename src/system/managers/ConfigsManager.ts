@@ -7,23 +7,15 @@ import {
 } from '../../types/SystemCfg.js';
 import {
   CFG_FILE_EXT,
-  IO_NAMES,
   LOCAL_DATA_SUB_DIRS,
   ROOT_DIRS,
   SYNCED_DATA_SUB_DIRS,
 } from '../../types/constants.js';
-import type { FilesIoType } from '@/types/io/FilesIoType.js';
-import type { IoBase } from '../base/IoBase.js';
 
 const SYSTEM_MAIN_CFG_NAME = 'system.main';
 
 export class ConfigsManager {
   systemCfg!: SystemCfg;
-
-  // TODO: нужно хотябы для записи использовать драйвер иначе не поднимутся события
-  private get filesIo(): FilesIoType & IoBase {
-    return this.system.io.getIo<FilesIoType & IoBase>(IO_NAMES.LocalFilesIo);
-  }
 
   constructor(private readonly system: System) {}
 
@@ -52,7 +44,9 @@ export class ConfigsManager {
     );
 
     if (await this.isFileExists(cfgPath)) {
-      return JSON.parse(await this.filesIo.readTextFile(cfgPath)) as Config;
+      return JSON.parse(
+        await this.system.localFiles.readTextFile(cfgPath)
+      ) as Config;
     }
 
     return {} as Config;
@@ -63,7 +57,7 @@ export class ConfigsManager {
     newConfig: Record<string, any>,
     isSynced: boolean
   ) {
-    await this.filesIo.writeFile(
+    await this.system.localFiles.writeFile(
       pathJoin(
         '/',
         isSynced ? ROOT_DIRS.syncedData : ROOT_DIRS.localData,
@@ -94,7 +88,7 @@ export class ConfigsManager {
   }
 
   async deleteEntityConfig(entityName: string, isSynced: boolean) {
-    await this.filesIo.rm([
+    await this.system.localFiles.rm([
       pathJoin(
         '/',
         isSynced ? ROOT_DIRS.syncedData : ROOT_DIRS.localData,
@@ -105,6 +99,6 @@ export class ConfigsManager {
   }
 
   private async isFileExists(pathTo: string): Promise<boolean> {
-    return Boolean(await this.filesIo.stat(pathTo));
+    return this.system.localFiles.isExists(pathTo);
   }
 }

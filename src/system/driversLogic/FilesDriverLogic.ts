@@ -42,11 +42,6 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
   protected abstract preparePath(pathTo: string): string;
 
-  // TODO: Move to helpers
-  clearPath(pathTo: string): string {
-    return trimCharStart(clearRelPath(pathTo), '/');
-  }
-
   async readTextFile(
     pathTo: string,
     options?: ReadTextFileOptions
