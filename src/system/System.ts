@@ -8,7 +8,7 @@ import { PackageManager } from './managers/PackageManager.js';
 import { DriversManager } from './managers/DriversManager.js';
 import { afterInstall } from './afterInstall.js';
 import { AppsManager } from './managers/AppsManager.js';
-import { ApiManager } from './managers/ApiManager.js';
+import { EntitiesApiManager } from './managers/EntitiesApiManager.js';
 import { FileLogsManager } from './managers/FileLogsManager.js';
 import { MountPointsManager } from './managers/MountPointsManager.js';
 import { RootDirDriverLogic } from './driversLogic/RootDirDriverLogic.js';
@@ -29,7 +29,7 @@ export class System {
   readonly fileLogs = new FileLogsManager(this);
   readonly io = new IoManager(this);
   readonly drivers = new DriversManager(this);
-  readonly api = new ApiManager();
+  readonly api = new EntitiesApiManager();
   readonly systemApi = new SystemApiManager(this);
   readonly services = new ServicesManager(this);
   readonly apps = new AppsManager(this);

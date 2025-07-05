@@ -1,6 +1,6 @@
 import { EntityBaseContext } from './EntityBaseContext.js';
 import type { AppManifest } from '../../types/types.js';
-import type { ApiSet } from '../managers/ApiManager.js';
+import type { ApiSet } from '../managers/EntitiesApiManager.js';
 
 export class AppContext extends EntityBaseContext {
   get appManifest(): AppManifest {

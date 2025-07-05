@@ -1,6 +1,6 @@
 export type ApiSet = Record<string, (...args: any[]) => any | Promise<any>>;
 
-export class ApiManager {
+export class EntitiesApiManager {
   private appUiApiSet: Record<string, ApiSet> = {};
   private appApiSet: Record<string, ApiSet> = {};
   private serviceApiSet: Record<string, ApiSet> = {};
