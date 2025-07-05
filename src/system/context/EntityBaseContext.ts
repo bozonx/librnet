@@ -108,11 +108,11 @@ export class EntityBaseContext {
 
   async makeDriverInstance<T extends DriverInstanceBase<any>>(
     driverName: string,
-    params: Record<string, any>
+    props: Record<string, any>
   ): Promise<T> {
-    // TODO: use accessToken to make driver instance
-    // return this.system.drivers.getDriver<T>(driverName);
-    throw new Error('Not implemented yet');
+    const driver = this.system.drivers.getDriver(driverName);
+
+    return (await driver.makeInstance(props)) as T;
   }
 
   /**
