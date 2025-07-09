@@ -26,11 +26,8 @@ export enum SystemEvents {
   // appInitialized,
   // beforeDestroy,
   logger,
-  // TODO: review
   systemInited,
-  // TODO: review
   systemStarted,
-  // TODO: review
   systemDestroying,
   localFiles,
   // when service or app status changed.

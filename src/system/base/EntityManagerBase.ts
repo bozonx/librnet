@@ -5,28 +5,6 @@ import type { EntityManifest } from '../../types/types.js';
 import type { EntityBaseContext } from '../context/EntityBaseContext.js';
 
 // TODO: use status fallen
-// TODO: rise events on status change
-// TODO: в required может быть зацикленная зависимость - тогда
-//       переводить в ошибочный сетйт и не запускать
-
-// export const SERVICE_DESTROY_REASON = {
-//   noDependencies: 'noDependencies',
-//   systemDestroying: 'systemDestroying',
-// };
-
-// export const SERVICE_TYPES = {
-//   service: 'service',
-//   target: 'target',
-//   oneshot: 'oneshot', // может быть таймаут запуска
-//   interval: 'interval', // переодично запускается типа cron
-// };
-
-// export const SERVICE_TARGETS = {
-//   // only for system low level services
-//   root: 'root',
-//   // for not system services
-//   systemInitialized: 'systemInitialized',
-// };
 
 enum ENTITY_POSITIONS {
   manifest,
@@ -99,6 +77,15 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
       return;
     }
 
+    try {
+      this.checkDependencies(entityName);
+    } catch (e) {
+      this.system.log.error(
+        `EntityManager: "${entityName}" no meet dependencies on init: ${e}`
+      );
+      return this.setStatus(entityName, 'initError', String(e));
+    }
+
     const [, entityIndex, context] = this.entities[entityName];
 
     this.system.log.debug(`EntityManager: initializing entity "${entityName}"`);
@@ -146,6 +133,15 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
       return this.system.log.warn(
         `EntityManager: entity "${entityName}" has been already started`
       );
+    }
+
+    try {
+      this.checkDependencies(entityName);
+    } catch (e) {
+      this.system.log.error(
+        `EntityManager: "${entityName}" no meet dependencies on start: ${e}`
+      );
+      return this.setStatus(entityName, 'startError', String(e));
     }
 
     this.system.log.debug(`EntityManager: starting entity "${entityName}"`);
@@ -220,78 +216,38 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
     this.entities[manifest.name] = [manifest, entityIndex, context, 'loaded'];
   }
 
-  protected async checkDriverDependencies(serviceName: string, reason: string) {
-    // if (app.requireDriver) {
-    //   const found: string[] = this.system.drivers.getNames().filter((el) => {
-    //     if (app.requireDriver?.includes(el)) return true;
-    //   });
+  protected checkDependencies(entityName: string) {
+    const [manifest] = this.entities[entityName];
 
-    //   if (found.length !== app.requireDriver.length) {
-    //     this.system.log.warn(
-    //       `Application "${appName}" hasn't meet a dependency drivers "${app.requireDriver.join(
-    //         ', '
-    //       )}"`
-    //     );
-    //     // do not register the app if it doesn't meet his dependencies
-    //     delete this.apps[appName];
-
-    //     return;
-    //   }
-    // }
-
-    if (service.props.requireDriver) {
-      const found: string[] = this.ctx.drivers.getNames().filter((el) => {
-        if (service.props.requireDriver?.includes(el)) return true;
+    if (manifest.requireDriver) {
+      const found: string[] = this.system.drivers.getNames().filter((el) => {
+        if (manifest.requireDriver?.includes(el)) return true;
       });
 
-      if (found.length !== service.props.requireDriver.length) {
-        await this.refuseInitService(
-          serviceName,
-          `No drivers: ${arraysDifference(
+      if (found.length !== manifest.requireDriver.length) {
+        throw new Error(
+          `Missed drivers: ${arraysDifference(
             found,
-            service.props.requireDriver
+            manifest.requireDriver
           ).join()}`
         );
-
-        continue;
       }
     }
-  }
 
-  protected checkServiceDependencies() {
-    if (service.props.required) {
+    if (manifest.requireService) {
       const found: string[] = this.getNames().filter((el) => {
-        if (service.props.required?.includes(el)) return true;
+        if (manifest.requireService?.includes(el)) return true;
       });
 
-      if (found.length !== service.props.required.length) {
-        await this.refuseInitService(
-          serviceName,
-          `No services: ${arraysDifference(
+      if (found.length !== manifest.requireService.length) {
+        throw new Error(
+          `Missed services: ${arraysDifference(
             found,
-            service.props.required
+            manifest.requireService
           ).join()}`
         );
-
-        continue;
       }
     }
-  }
-
-  private async refuseInitService(serviceName: string, reason: string) {
-    await this.services[serviceName].destroy?.(
-      SERVICE_DESTROY_REASON.noDependencies as ServiceDestroyReason
-    );
-    // do not register the driver if ot doesn't meet his dependencies
-    delete this.services[serviceName];
-    // service will be deleted but status was saved
-    this.changeStatus(
-      serviceName,
-      SERVICE_STATUS.noDependencies as ServiceStatus
-    );
-    this.ctx.log.error(
-      `Failed initializing service "${serviceName}": ${reason}`
-    );
   }
 
   protected setStatus(
@@ -299,7 +255,7 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
     newStatus: EntityStatus,
     details?: any
   ) {
-    this.statuses[entityName] = newStatus;
+    this.entities[entityName][ENTITY_POSITIONS.status] = newStatus;
     // TODO: может разделять по типу всетаки
     this.system.events.emit(entityName, newStatus, details);
   }
