@@ -1,9 +1,10 @@
 import { arraysDifference } from 'squidlet-lib';
 import type { System } from '../System';
 import type { EntityStatus } from '../../types/constants.js';
-import type { EntityMain } from '../../types/types.js';
+import type { EntityManifest } from '../../types/types.js';
 import type { EntityBaseContext } from '../context/EntityBaseContext.js';
 
+// TODO: use status fallen
 // TODO: rise events on status change
 // TODO: в required может быть зацикленная зависимость - тогда
 //       переводить в ошибочный сетйт и не запускать
@@ -27,9 +28,18 @@ import type { EntityBaseContext } from '../context/EntityBaseContext.js';
 //   systemInitialized: 'systemInitialized',
 // };
 
+enum ENTITY_POSITIONS {
+  manifest,
+  onInit,
+  context,
+  status,
+}
+
 export class EntityManagerBase<Context extends EntityBaseContext> {
-  private entities: Record<string, EntityMain<Context>> = {};
-  private statuses: Record<string, EntityStatus> = {};
+  private entities: Record<
+    string,
+    [EntityManifest, (ctx: Context) => Promise<void>, Context, EntityStatus]
+  > = {};
 
   constructor(private readonly system: System) {}
 
@@ -37,12 +47,12 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
     return Object.keys(this.entities);
   }
 
-  getItem(entityName: string): EntityMain<Context> | undefined {
-    return this.entities[entityName];
+  getContext(entityName: string): Context | undefined {
+    return this.entities[entityName][ENTITY_POSITIONS.context];
   }
 
   getStatus(entityName: string): EntityStatus {
-    return this.statuses[entityName];
+    return this.entities[entityName][ENTITY_POSITIONS.status];
   }
 
   /**
@@ -77,62 +87,62 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
    * On system init or install
    */
   async initEntity(entityName: string) {
-    if (this.statuses[entityName] !== 'loaded') {
+    if (this.getStatus(entityName) !== 'loaded') {
       this.system.log.warn(
         `EntityManager: entity "${entityName}" has been already initialized`
       );
       return;
+    } else if (!this.entities[entityName]) {
+      this.system.log.warn(
+        `EntityManager: entity "${entityName}" has not been registered`
+      );
+      return;
     }
 
-    const entity = this.entities[entityName];
+    const [, entityIndex, context] = this.entities[entityName];
 
-    if (entity.onInit) {
-      this.system.log.debug(`EntityManager: initializing entity "${entityName}"`);
-      this.setStatus(entityName, 'initializing');
+    this.system.log.debug(`EntityManager: initializing entity "${entityName}"`);
+    this.setStatus(entityName, 'initializing');
 
-      try {
-        await entity.ctx.init();
-        await entity.onInit(entity.ctx);
-      } catch (e) {
-        this.system.log.error(
-          `EntityManager: entity "${entityName}" initialization error: ${e}`
-        );
-        this.setStatus(entityName, 'initError', String(e));
-        return;
-      }
-
-      this.setStatus(entityName, 'initialized');
+    try {
+      await context.init();
+      await entityIndex(context);
+    } catch (e) {
+      this.system.log.error(
+        `EntityManager: entity "${entityName}" initialization error: ${e}`
+      );
+      this.setStatus(entityName, 'initError', String(e));
+      return;
     }
+
+    this.setStatus(entityName, 'initialized');
   }
 
   /**
    * Destroy entity on system destroy or uninstall
    */
   async destroyEntity(entityName: string) {
-    const entity = this.entities[entityName];
+    const [, , context] = this.entities[entityName];
 
-    if (entity.onDestroy) {
-      this.system.log.debug(`EntityManager: destroying "${entityName}"`);
-      this.setStatus(entityName, 'destroying');
-      // TODO: добавить таймаут дестроя
-      try {
-        await entity.onDestroy(entity.ctx);
-        await entity.ctx.destroy();
+    this.system.log.debug(`EntityManager: destroying "${entityName}"`);
+    this.setStatus(entityName, 'destroying');
+    // TODO: добавить таймаут дестроя
+    try {
+      await context.$getHooks().onDestroy();
+      await context.destroy();
 
-        delete this.entities[entityName];
-        delete this.statuses[entityName];
-      } catch (e) {
-        this.system.log.error(`${entityName} destroyed with error: ${e}`);
-      }
+      delete this.entities[entityName];
+    } catch (e) {
+      this.system.log.error(`${entityName} destroyed with error: ${e}`);
     }
   }
 
   async startEntity(entityName: string) {
-    if (this.statuses[entityName] === 'starting') {
+    if (this.getStatus(entityName) === 'starting') {
       return this.system.log.warn(
         `EntityManager: entity "${entityName}" is already starting`
       );
-    } else if (this.statuses[entityName] === 'running') {
+    } else if (this.getStatus(entityName) === 'running') {
       return this.system.log.warn(
         `EntityManager: entity "${entityName}" has been already started`
       );
@@ -143,9 +153,9 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
 
     // TODO: add timeout
 
-    const entity = this.entities[entityName];
+    const [, , context] = this.entities[entityName];
     try {
-      await entity.onStart(entity.ctx);
+      await context.$getHooks().onStart();
     } catch (e) {
       this.system.log.error(
         `EntityManager: entity "${entityName}" start error: ${e}`
@@ -159,53 +169,56 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
   }
 
   async stopEntity(entityName: string) {
-    // TODO: пропустить если уже остановлен
-    this.system.log.debug(`AppManager: stopping app "${entityName}"`);
-
-    // TODO: add timeout
-    const app = this.apps[appName];
-
-    app.status = 'stopping';
-
-    if (app.onStop) {
-      try {
-        await app.onStop(app.ctx);
-      } catch (e) {
-        this.system.log.error(
-          `AppManager: app's "${appName}" stop error: ${e}`
-        );
-
-        app.status = 'stopError';
-
-        return;
-      }
+    if (this.getStatus(entityName) === 'stopping') {
+      return this.system.log.warn(
+        `EntityManager: entity "${entityName}" is already stopping`
+      );
+    } else if (this.getStatus(entityName) === 'stopped') {
+      return this.system.log.warn(
+        `EntityManager: entity "${entityName}" has been already stopped`
+      );
     }
 
-    app.status = 'stopped';
-  }
+    this.system.log.debug(`EntityManager: stopping entity "${entityName}"`);
+    this.setStatus(entityName, 'stopping');
 
-  /**
-   * Register app in the system in development mode.
-   * @param appIndex - app index function.
-   */
-  useEntity(appIndex: AppIndex) {
-    // TODO: пропустить если уже зарегистрирован
-    const appMain = appIndex();
-    const appName: string = appMain.manifest.name;
+    // TODO: add timeout
 
-    if (this.apps[appName]) {
-      this.system.log.warn(
-        `Can't register app "${appName}" because it has been already registered`
+    const [, , context] = this.entities[entityName];
+
+    try {
+      await context.$getHooks().onStop();
+    } catch (e) {
+      this.system.log.error(
+        `EntityManager: entity "${entityName}" stop error: ${e}`
       );
+
+      this.setStatus(entityName, 'stopError', String(e));
 
       return;
     }
 
-    this.apps[appName] = {
-      ...appMain,
-      ctx: new AppContext(this.system, appName),
-      status: 'loaded',
-    };
+    this.setStatus(entityName, 'stopped');
+  }
+
+  /**
+   * Register entity in the system in development mode.
+   * @param manifest - entity manifest.
+   * @param entityIndex - entity index function.
+   */
+  useEntity(
+    manifest: EntityManifest,
+    entityIndex: (ctx: Context) => Promise<void>
+  ) {
+    if (this.entities[manifest.name]) {
+      return this.system.log.warn(
+        `EntityManager: entity "${manifest.name}" has been already loaded`
+      );
+    }
+
+    const context = new Context(this.system, manifest);
+
+    this.entities[manifest.name] = [manifest, entityIndex, context, 'loaded'];
   }
 
   protected async checkDriverDependencies(serviceName: string, reason: string) {
@@ -282,7 +295,11 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
     );
   }
 
-  protected setStatus(entityName: string, newStatus: EntityStatus, details?: any) {
+  protected setStatus(
+    entityName: string,
+    newStatus: EntityStatus,
+    details?: any
+  ) {
     this.statuses[entityName] = newStatus;
     // TODO: может разделять по типу всетаки
     this.system.events.emit(entityName, newStatus, details);

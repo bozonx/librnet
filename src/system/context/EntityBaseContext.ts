@@ -4,6 +4,7 @@ import {
   ROOT_DIRS,
   SYNCED_DATA_SUB_DIRS,
   SYSTEM_API_SERVICE_NAME,
+  type EntityStatus,
 } from '../../types/constants.js';
 import type { Logger } from 'squidlet-lib';
 import type { System } from '../System';
@@ -18,6 +19,11 @@ export class EntityBaseContext {
   // Server side context
   // save here custom runtime data eg driver instances
   readonly context: Record<string, any> = {};
+  readonly _hooks = {
+    onDestroy: async () => {},
+    onStart: async () => {},
+    onStop: async () => {},
+  };
 
   // Events bus only for server
   readonly serverSideBus = new IndexedEventEmitter();
@@ -107,6 +113,10 @@ export class EntityBaseContext {
     this.system
   );
 
+  get status(): EntityStatus {
+    return this.system.entityManager.getStatus(this.entityManifest.name);
+  }
+
   // TODO: use db key-value storage for cache
   // readonly cacheLocal;
   // // data bases for this app
@@ -115,8 +125,7 @@ export class EntityBaseContext {
   constructor(
     protected readonly system: System,
     // manifest of the service or app
-    readonly entityManifest: EntityManifest,
-    protected readonly accessToken: string
+    readonly entityManifest: EntityManifest
   ) {}
 
   async init() {
@@ -126,6 +135,10 @@ export class EntityBaseContext {
 
   async destroy() {
     //
+  }
+
+  $getHooks() {
+    return this._hooks;
   }
 
   async makeDriverInstance<T extends DriverInstanceBase<any>>(
@@ -173,5 +186,17 @@ export class EntityBaseContext {
       appName,
       appApi
     );
+  }
+
+  onDestroy(hook: () => Promise<void>) {
+    this._hooks.onDestroy = hook;
+  }
+
+  onStart(hook: () => Promise<void>) {
+    this._hooks.onStart = hook;
+  }
+
+  onStop(hook: () => Promise<void>) {
+    this._hooks.onStop = hook;
   }
 }

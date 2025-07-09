@@ -10,8 +10,8 @@ import type { EntityBaseContext } from '@/system/context/EntityBaseContext.js';
 
 export type IoIndex = (ioSet: IoSetBase, ctx: IoContext) => IoBase;
 export type DriverIndex = (name: string, system: System) => DriverFactoryBase;
-export type ServiceIndex = () => ServiceMain;
-export type AppIndex = () => AppMain;
+export type ServiceIndex = (ctx: ServiceContext) => void;
+export type AppIndex = (ctx: AppContext) => void;
 
 // export type ServiceStatus = keyof typeof SERVICE_STATUS;
 // export type ServiceDestroyReason = keyof typeof SERVICE_DESTROY_REASON;
@@ -103,6 +103,7 @@ export interface IoManifest extends EntityManifest {
   type: 'io';
 }
 
+// TODO: for what?
 export type AnyEntityManifest =
   | AppManifest
   | ServiceManifest
@@ -114,22 +115,22 @@ export type AnyEntityManifest =
 //   status: EntityStatus;
 // }
 
-export interface EntityMain<Context extends EntityBaseContext = EntityBaseContext> {
-  ctx: Context;
-  manifest: EntityManifest;
-  onInit?: (ctx: Context) => Promise<void>;
-  onDestroy?: (ctx: Context) => Promise<void>;
-  onStart: (ctx: Context) => Promise<void>;
-  onStop: (ctx: Context) => Promise<void>;
-}
+// export interface EntityMain<Context extends EntityBaseContext = EntityBaseContext> {
+//   ctx: Context;
+//   manifest: EntityManifest;
+//   onInit?: (ctx: Context) => Promise<void>;
+//   onDestroy?: (ctx: Context) => Promise<void>;
+//   onStart: (ctx: Context) => Promise<void>;
+//   onStop: (ctx: Context) => Promise<void>;
+// }
 
-export interface AppMain extends EntityMain<AppContext> {
-  manifest: AppManifest;
-}
+// export interface AppMain extends EntityMain<AppContext> {
+//   manifest: AppManifest;
+// }
 
-export interface ServiceMain extends EntityMain<ServiceContext> {
-  manifest: ServiceManifest;
-}
+// export interface ServiceMain extends EntityMain<ServiceContext> {
+//   manifest: ServiceManifest;
+// }
 
 export interface FilesEventData {
   // Timestamp of the operation in milliseconds
