@@ -128,11 +128,14 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
   }
 
   async startEntity(entityName: string) {
-    if (this.statuses[entityName] === 'running') {
-      this.system.log.warn(
+    if (this.statuses[entityName] === 'starting') {
+      return this.system.log.warn(
+        `EntityManager: entity "${entityName}" is already starting`
+      );
+    } else if (this.statuses[entityName] === 'running') {
+      return this.system.log.warn(
         `EntityManager: entity "${entityName}" has been already started`
       );
-      return;
     }
 
     this.system.log.debug(`EntityManager: starting entity "${entityName}"`);
