@@ -4,12 +4,14 @@ import type { ApiSet } from '../managers/EntitiesApiManager.js';
 import type { EntityStatus } from '@/types/constants.js';
 
 export class AppContext extends EntityBaseContext {
+  readonly type = 'app' as const;
+
   get manifest(): AppManifest {
     return this.entityManifest as AppManifest;
   }
 
   get status(): EntityStatus {
-    return this.system.apps.getStatus(this.manifest.name);
+    return this.system.app.getStatus(this.manifest.name);
   }
 
   registerUiApi(apiSet: ApiSet) {

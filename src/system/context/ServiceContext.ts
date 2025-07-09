@@ -4,12 +4,14 @@ import type { ApiSet } from '../managers/EntitiesApiManager.js';
 import type { EntityStatus } from '@/types/constants.js';
 
 export class ServiceContext extends EntityBaseContext {
+  readonly type = 'service' as const;
+
   get manifest(): ServiceManifest {
     return this.entityManifest as ServiceManifest;
   }
 
   get status(): EntityStatus {
-    return this.system.services.getStatus(this.manifest.name);
+    return this.system.service.getStatus(this.manifest.name);
   }
 
   registerApi(apiSet: ApiSet) {

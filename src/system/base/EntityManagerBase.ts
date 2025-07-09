@@ -1,7 +1,7 @@
 import { arraysDifference } from 'squidlet-lib';
 import type { System } from '../System';
 import type { EntityStatus } from '../../types/constants.js';
-import type { EntityManifest } from '../../types/types.js';
+import type { EntityManifest, EntityType } from '../../types/types.js';
 import type { EntityBaseContext } from '../context/EntityBaseContext.js';
 
 // TODO: use status fallen
@@ -13,7 +13,9 @@ enum ENTITY_POSITIONS {
   status,
 }
 
-export class EntityManagerBase<Context extends EntityBaseContext> {
+export abstract class EntityManagerBase<Context extends EntityBaseContext> {
+  abstract readonly type: Extract<EntityType, 'app' | 'service'>;
+
   private entities: Record<
     string,
     [EntityManifest, (ctx: Context) => Promise<void>, Context, EntityStatus]
@@ -256,7 +258,6 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
     details?: any
   ) {
     this.entities[entityName][ENTITY_POSITIONS.status] = newStatus;
-    // TODO: может разделять по типу всетаки
-    this.system.events.emit(entityName, newStatus, details);
+    this.system.events.emit(this.type, entityName, newStatus, details);
   }
 }

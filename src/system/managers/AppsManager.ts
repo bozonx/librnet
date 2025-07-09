@@ -3,6 +3,8 @@ import { AppContext } from '../context/AppContext.js';
 import { EntityManagerBase } from '../base/EntityManagerBase.js';
 
 export class AppsManager extends EntityManagerBase<AppContext> {
+  readonly type = 'app' as const;
+
   /**
    * Register app in the system in development mode.
    * @param appOnInit - app on init function.

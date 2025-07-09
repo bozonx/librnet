@@ -31,8 +31,8 @@ export class System {
   readonly drivers = new DriversManager(this);
   readonly api = new EntitiesApiManager();
   readonly systemApi = new SystemApiManager(this);
-  readonly services = new ServicesManager(this);
-  readonly apps = new AppsManager(this);
+  readonly service = new ServicesManager(this);
+  readonly app = new AppsManager(this);
 
   get isDevMode() {
     return this.ENV_MODE === ENV_MODES.development;

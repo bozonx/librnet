@@ -3,6 +3,8 @@ import { EntityManagerBase } from '../base/EntityManagerBase.js';
 import { ServiceContext } from '../context/ServiceContext.js';
 
 export class ServicesManager extends EntityManagerBase<ServiceContext> {
+  readonly type = 'service' as const;
+
   /**
    * Register service in the system in development mode.
    * @param serviceOnInit - service on init function.

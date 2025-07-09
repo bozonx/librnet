@@ -8,14 +8,15 @@ import {
 } from '../../types/constants.js';
 import type { Logger } from 'squidlet-lib';
 import type { System } from '../System';
-import type { EntityManifest } from '@/types/types.js';
+import type { EntityManifest, EntityType } from '@/types/types.js';
 import { EntityConfig } from '../driversLogic/EntityConfig.js';
 import { EntityLogFile } from '../driversLogic/EntityLogFile.js';
 import { permissionWrapper } from '../helpers/permissionWrapper.js';
 import type DriverInstanceBase from '../base/DriverInstanceBase.js';
 import { DirTrapLogic } from '../driversLogic/DirTrapLogic.js';
 
-export class EntityBaseContext {
+export abstract class EntityBaseContext {
+  abstract readonly type: Extract<EntityType, 'app' | 'service'>;
   // Server side context
   // save here custom runtime data eg driver instances
   readonly context: Record<string, any> = {};
@@ -114,7 +115,7 @@ export class EntityBaseContext {
   );
 
   get status(): EntityStatus {
-    return this.system.entityManager.getStatus(this.entityManifest.name);
+    return this.system[this.type].getStatus(this.entityManifest.name);
   }
 
   // TODO: use db key-value storage for cache

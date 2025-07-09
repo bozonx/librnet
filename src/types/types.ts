@@ -61,8 +61,11 @@ export interface IoSetEnv {
 //   synced?: Record<string, any>;
 // }
 
+export type EntityType = 'app' | 'service' | 'driver' | 'io';
+
 // Manifest of a service or app
 export interface EntityManifest {
+  type: EntityType;
   // Unique name
   name: string;
   // If not set, it will be the same as the package version
@@ -86,6 +89,7 @@ export interface EntityManifest {
   requireDriver?: string[];
   requireService?: string[];
 }
+
 
 export interface AppManifest extends EntityManifest {
   type: 'app';
