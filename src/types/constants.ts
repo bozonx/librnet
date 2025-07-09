@@ -33,7 +33,8 @@ export enum SystemEvents {
   // TODO: review
   systemDestroying,
   localFiles,
-  // when service or app status changed. (entityName, EntityStatus)
+  // when service or app status changed.
+  //  (entityName, EntityStatus, details?)
   entityStatus,
 }
 
@@ -119,6 +120,7 @@ export type EntityStatus =
   | 'starting'
   | 'startError'
   | 'running'
+  // fallen on error from running state
   | 'fallen'
   | 'stopping'
   | 'stopError'

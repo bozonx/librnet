@@ -86,26 +86,22 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
 
     const entity = this.entities[entityName];
 
-    if (app.onInit) {
-      this.system.log.debug(`AppManager: initializing app "${appName}"`);
-
-      // TODO: статус навеное надо хранить отдльно
-      app.status = 'initializing';
+    if (entity.onInit) {
+      this.system.log.debug(`EntityManager: initializing entity "${entityName}"`);
+      this.setStatus(entityName, 'initializing');
 
       try {
-        await app.ctx.init();
-        await app.onInit(app.ctx);
+        await entity.ctx.init();
+        await entity.onInit(entity.ctx);
       } catch (e) {
         this.system.log.error(
-          `AppManager: app's "${appName}" start error: ${e}`
+          `EntityManager: entity "${entityName}" initialization error: ${e}`
         );
-
-        app.status = 'initError';
-
+        this.setStatus(entityName, 'initError', String(e));
         return;
       }
 
-      app.status = 'initialized';
+      this.setStatus(entityName, 'initialized');
     }
   }
 
@@ -117,7 +113,7 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
 
     if (entity.onDestroy) {
       this.system.log.debug(`EntityManager: destroying "${entityName}"`);
-      this.changeStatus(entityName, 'destroying');
+      this.setStatus(entityName, 'destroying');
       // TODO: добавить таймаут дестроя
       try {
         await entity.onDestroy(entity.ctx);
@@ -127,36 +123,36 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
         delete this.statuses[entityName];
       } catch (e) {
         this.system.log.error(`${entityName} destroyed with error: ${e}`);
-        // then ignore an error
       }
     }
   }
 
   async startEntity(entityName: string) {
-    // TODO: пропустить если уже запущен
-    this.system.log.debug(`AppManager: starting app "${entityName}"`);
-
-    // TODO: add timeout
-    // TODO: import app code or get from this.apps
-    const app = this.apps[appName];
-
-    app.status = 'starting';
-
-    if (app.onStart) {
-      try {
-        await app.onStart(app.ctx);
-      } catch (e) {
-        this.system.log.error(
-          `AppManager: app's "${appName}" start error: ${e}`
-        );
-
-        app.status = 'initError';
-
-        return;
-      }
+    if (this.statuses[entityName] === 'running') {
+      this.system.log.warn(
+        `EntityManager: entity "${entityName}" has been already started`
+      );
+      return;
     }
 
-    app.status = 'started';
+    this.system.log.debug(`EntityManager: starting entity "${entityName}"`);
+    this.setStatus(entityName, 'starting');
+
+    // TODO: add timeout
+
+    const entity = this.entities[entityName];
+    try {
+      await entity.onStart(entity.ctx);
+    } catch (e) {
+      this.system.log.error(
+        `EntityManager: entity "${entityName}" start error: ${e}`
+      );
+      this.setStatus(entityName, 'startError', String(e));
+
+      return;
+    }
+
+    this.setStatus(entityName, 'running');
   }
 
   async stopEntity(entityName: string) {
@@ -283,9 +279,9 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
     );
   }
 
-  protected changeStatus(entityName: string, newStatus: EntityStatus) {
+  protected setStatus(entityName: string, newStatus: EntityStatus, details?: any) {
     this.statuses[entityName] = newStatus;
     // TODO: может разделять по типу всетаки
-    this.system.events.emit(entityName, newStatus);
+    this.system.events.emit(entityName, newStatus, details);
   }
 }

@@ -114,15 +114,13 @@ export type AnyEntityManifest =
 //   status: EntityStatus;
 // }
 
-export interface EntityMain<
-  Context extends EntityBaseContext = EntityBaseContext
-> {
+export interface EntityMain<Context extends EntityBaseContext = EntityBaseContext> {
   ctx: Context;
   manifest: EntityManifest;
   onInit?: (ctx: Context) => Promise<void>;
   onDestroy?: (ctx: Context) => Promise<void>;
-  onStart?: (ctx: Context) => Promise<void>;
-  onStop?: (ctx: Context) => Promise<void>;
+  onStart: (ctx: Context) => Promise<void>;
+  onStop: (ctx: Context) => Promise<void>;
 }
 
 export interface AppMain extends EntityMain<AppContext> {
