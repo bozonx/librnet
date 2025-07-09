@@ -4,6 +4,7 @@ import type { AnyEntityManifest } from '@/types/types.js';
 import {
   DRIVER_NAMES,
   ENTITY_MANIFEST_FILE_NAME,
+  LOCAL_DATA_SUB_DIRS,
   ROOT_DIRS,
   SYSTEM_ENTITY,
 } from '@/types/constants.js';
@@ -58,19 +59,34 @@ export class PackageManager {
     }
 
     await this.system.localFiles.mkdir(
-      pathJoin('/', ROOT_DIRS.programFiles, manifest.name)
+      pathJoin(
+        '/',
+        ROOT_DIRS.localData,
+        LOCAL_DATA_SUB_DIRS.programFiles,
+        manifest.name
+      )
     );
 
     await archiveFiles.extractToDest(
       '/' + trimChar(manifest.distDir, '/'),
-      pathJoin('/', ROOT_DIRS.programFiles, manifest.name),
+      pathJoin(
+        '/',
+        ROOT_DIRS.localData,
+        LOCAL_DATA_SUB_DIRS.programFiles,
+        manifest.name
+      ),
       pathToPkg
     );
   }
 
   async uninstall(entityName: string) {
     await this.system.localFiles.rmRf(
-      pathJoin('/', ROOT_DIRS.programFiles, entityName)
+      pathJoin(
+        '/',
+        ROOT_DIRS.localData,
+        LOCAL_DATA_SUB_DIRS.programFiles,
+        entityName
+      )
     );
   }
 
@@ -78,7 +94,7 @@ export class PackageManager {
     entytyName: string
   ): Promise<AnyEntityManifest | undefined> {
     const programFilesDirItems = await this.system.localFiles.readdir(
-      ROOT_DIRS.programFiles
+      pathJoin('/', ROOT_DIRS.localData, LOCAL_DATA_SUB_DIRS.programFiles)
     );
 
     if (!programFilesDirItems.find((item) => item === entytyName)) {
@@ -86,7 +102,12 @@ export class PackageManager {
     }
 
     const manifestContent = await this.system.localFiles.readTextFile(
-      pathJoin(ROOT_DIRS.programFiles, entytyName, ENTITY_MANIFEST_FILE_NAME)
+      pathJoin(
+        ROOT_DIRS.localData,
+        LOCAL_DATA_SUB_DIRS.programFiles,
+        entytyName,
+        ENTITY_MANIFEST_FILE_NAME
+      )
     );
 
     return yaml.parse(manifestContent);

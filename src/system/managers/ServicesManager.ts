@@ -1,7 +1,10 @@
-import {arraysDifference} from 'squidlet-lib'
-import type {System} from '../System.js'
-import {ServiceContext} from '../context/ServiceContext.js'
-import type {ServiceDestroyReason, ServiceIndex, ServiceStatus, SubprogramError} from '../../types/types.js'
+import type { System } from '../System.js';
+import type {
+  ServiceDestroyReason,
+  ServiceIndex,
+  ServiceStatus,
+  SubprogramError,
+} from '../../types/types.js';
 import type { ServiceBase } from '../base/ServiceBase.js';
 import {
   EVENT_DELIMITER,
@@ -9,62 +12,40 @@ import {
   SERVICE_DESTROY_REASON,
   SERVICE_STATUS,
   ServiceEvents,
-} from '../../types/constants.js'
+} from '../../types/constants.js';
+import { EntityManagerBase } from '../base/EntityManagerBase.js';
 
-export class ServicesManager {
-  private services: Record<string, ServiceBase> = {};
-  // private statuses: Record<string, ServiceStatus> = {}
-
-  // TODO: наверное добавить логику что если один сервис остановился то этот тоже должен останоиться
-  // TODO: так же можно останавливать только после того как этот сервис остановился
-  // TODO: если сервис упад - статус fallen - нужно остановить
-  //       все сервисы у которых он в required
-
-  // TODO: добавить Taragets
+export class ServicesManager extends EntityManagerBase {
   // TODO: в required может быть зацикленная зависимость - тогда
   //       переводить в ошибочный сетйт и не запускать
-
   // TODO: use restartTries
 
   constructor(private readonly system: System) {}
+
+  async initApp(appName: string) {
+    await this.initEntity(appName);
+  }
+
+  async startApp(appName: string) {
+    await this.startEntity(appName);
+  }
+
+  async stopApp(appName: string) {
+    await this.stopEntity(appName);
+  }
+
+  /**
+   * Register app in the system in development mode.
+   * @param appIndex - app index function.
+   */
+  useApp(appIndex: AppIndex) {
+    this.useEntity(appIndex);
+  }
 
   async init() {
     for (const serviceName of Object.keys(this.services)) {
       const service = this.services[serviceName];
 
-      if (service.props.requireDriver) {
-        const found: string[] = this.ctx.drivers.getNames().filter((el) => {
-          if (service.props.requireDriver?.includes(el)) return true;
-        });
-
-        if (found.length !== service.props.requireDriver.length) {
-          await this.refuseInitService(
-            serviceName,
-            `No drivers: ${arraysDifference(
-              found,
-              service.props.requireDriver
-            ).join()}`
-          );
-
-          continue;
-        }
-      } else if (service.props.required) {
-        const found: string[] = this.getNames().filter((el) => {
-          if (service.props.required?.includes(el)) return true;
-        });
-
-        if (found.length !== service.props.required.length) {
-          await this.refuseInitService(
-            serviceName,
-            `No services: ${arraysDifference(
-              found,
-              service.props.required
-            ).join()}`
-          );
-
-          continue;
-        }
-      }
       // load service config
       const serviceCfg: Record<string, any> | undefined =
         await this.system.configs.loadServiceConfig(serviceName);
@@ -280,22 +261,6 @@ export class ServicesManager {
 
   private makeEventName(eventName: ServiceEvents): string {
     return RootEvents.service + EVENT_DELIMITER + eventName;
-  }
-
-  private async refuseInitService(serviceName: string, reason: string) {
-    await this.services[serviceName].destroy?.(
-      SERVICE_DESTROY_REASON.noDependencies as ServiceDestroyReason
-    );
-    // do not register the driver if ot doesn't meet his dependencies
-    delete this.services[serviceName];
-    // service will be deleted but status was saved
-    this.changeStatus(
-      serviceName,
-      SERVICE_STATUS.noDependencies as ServiceStatus
-    );
-    this.ctx.log.error(
-      `Failed initializing service "${serviceName}": ${reason}`
-    );
   }
 
   private handleServiceFall(err: SubprogramError, serviceName: string) {

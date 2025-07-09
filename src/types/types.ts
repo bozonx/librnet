@@ -110,9 +110,8 @@ export interface EntityManifest {
   repository?: string;
   // bugs of the entity
   bugs?: string;
-  // requireDriver?: string[];
-  // requireService?: string[];
-  // requireApp?: string[];
+  requireDriver?: string[];
+  requireService?: string[];
 }
 
 export interface AppManifest extends EntityManifest {
