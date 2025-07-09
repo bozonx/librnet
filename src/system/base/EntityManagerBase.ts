@@ -41,7 +41,7 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
     [EntityManifest, (ctx: Context) => Promise<void>, Context, EntityStatus]
   > = {};
 
-  constructor(private readonly system: System) {}
+  constructor(protected readonly system: System) {}
 
   getNames(): string[] {
     return Object.keys(this.entities);
@@ -208,15 +208,14 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
    */
   useEntity(
     manifest: EntityManifest,
-    entityIndex: (ctx: Context) => Promise<void>
+    entityIndex: (ctx: Context) => Promise<void>,
+    context: Context
   ) {
     if (this.entities[manifest.name]) {
       return this.system.log.warn(
         `EntityManager: entity "${manifest.name}" has been already loaded`
       );
     }
-
-    const context = new Context(this.system, manifest);
 
     this.entities[manifest.name] = [manifest, entityIndex, context, 'loaded'];
   }

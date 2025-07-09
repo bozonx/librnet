@@ -1,13 +1,15 @@
-import type { ServiceIndex } from '../../types/types.js';
+import type { ServiceManifest, ServiceOnInit } from '../../types/types.js';
 import { EntityManagerBase } from '../base/EntityManagerBase.js';
-import type { ServiceContext } from '../context/ServiceContext.js';
+import { ServiceContext } from '../context/ServiceContext.js';
 
 export class ServicesManager extends EntityManagerBase<ServiceContext> {
   /**
    * Register service in the system in development mode.
-   * @param serviceIndex - service index function.
+   * @param serviceOnInit - service on init function.
    */
-  use(serviceIndex: ServiceIndex) {
-    this.useEntity(serviceIndex);
+  use(manifest: ServiceManifest, serviceOnInit: ServiceOnInit) {
+    const context = new ServiceContext(this.system, manifest);
+
+    this.useEntity(manifest, serviceOnInit, context);
   }
 }

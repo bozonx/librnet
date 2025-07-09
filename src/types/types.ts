@@ -10,8 +10,8 @@ import type { EntityBaseContext } from '@/system/context/EntityBaseContext.js';
 
 export type IoIndex = (ioSet: IoSetBase, ctx: IoContext) => IoBase;
 export type DriverIndex = (name: string, system: System) => DriverFactoryBase;
-export type ServiceIndex = (ctx: ServiceContext) => void;
-export type AppIndex = (ctx: AppContext) => void;
+export type ServiceOnInit = (ctx: ServiceContext) => Promise<void>;
+export type AppOnInit = (ctx: AppContext) => Promise<void>;
 
 // export type ServiceStatus = keyof typeof SERVICE_STATUS;
 // export type ServiceDestroyReason = keyof typeof SERVICE_DESTROY_REASON;

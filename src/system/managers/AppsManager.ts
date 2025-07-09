@@ -1,13 +1,15 @@
-import type { AppIndex } from '../../types/types.js';
-import type { AppContext } from '../context/AppContext.js';
+import type { AppManifest, AppOnInit } from '../../types/types.js';
+import { AppContext } from '../context/AppContext.js';
 import { EntityManagerBase } from '../base/EntityManagerBase.js';
 
 export class AppsManager extends EntityManagerBase<AppContext> {
   /**
    * Register app in the system in development mode.
-   * @param appIndex - app index function.
+   * @param appOnInit - app on init function.
    */
-  use(appIndex: AppIndex) {
-    this.useEntity(appIndex);
+  use(manifest: AppManifest, appOnInit: AppOnInit) {
+    const context = new AppContext(this.system, manifest);
+
+    this.useEntity(manifest, appOnInit, context);
   }
 }
