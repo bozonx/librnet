@@ -26,21 +26,26 @@ export enum SystemEvents {
   // appInitialized,
   // beforeDestroy,
   logger,
+  // TODO: review
   systemInited,
+  // TODO: review
   systemStarted,
+  // TODO: review
   systemDestroying,
   localFiles,
+  // when service or app status changed. (entityName, EntityStatus)
+  entityStatus,
 }
 
 // TODO: review
-export enum RootEvents {
-  service,
-}
+// export enum RootEvents {
+//   service,
+// }
 
 // TODO: review
-export enum ServiceEvents {
-  status,
-}
+// export enum ServiceEvents {
+//   status,
+// }
 
 // TODO: review, move to network service
 export enum NETWORK_CODES {

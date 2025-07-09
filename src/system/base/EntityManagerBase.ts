@@ -46,7 +46,7 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
   }
 
   /**
-   * On system init or install
+   * On system init
    */
   async init() {
     if (this.system.isProdMode) {
@@ -59,40 +59,12 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
   }
 
   /**
-   * On system destroy or uninstall
+   * On system destroy
    */
   async destroy() {
     for (const entityName of Object.keys(this.entities)) {
-      const entity = this.entities[entityName];
-
-      if (entity.onDestroy) {
-        this.system.log.debug(`EntityManager: destroying "${entityName}"`);
-        this.statuses[entityName] = 'destroying';
-        // TODO: emit event
-        // TODO: добавить таймаут дестроя
-        try {
-          await entity.onDestroy(entity.ctx);
-          await entity.ctx.destroy();
-
-          delete this.entities[entityName];
-        } catch (e) {
-          this.system.log.error(`${appName} stopping with error: ${e}`);
-          // then ignore an error
-        }
-      }
+      await this.destroyEntity(entityName);
     }
-  }
-
-  async doInit(appName: string) {
-    await this.initEntity(appName);
-  }
-
-  async start(appName: string) {
-    await this.startEntity(appName);
-  }
-
-  async stop(appName: string) {
-    await this.stopEntity(appName);
   }
 
   async startAll() {
@@ -101,8 +73,17 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
     }
   }
 
-  protected async initEntity(entityName: string) {
-    // TODO: пропустить если уже инициализирован
+  /**
+   * On system init or install
+   */
+  async initEntity(entityName: string) {
+    if (this.statuses[entityName] !== 'loaded') {
+      this.system.log.warn(
+        `EntityManager: entity "${entityName}" has been already initialized`
+      );
+      return;
+    }
+
     const entity = this.entities[entityName];
 
     if (app.onInit) {
@@ -128,7 +109,30 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
     }
   }
 
-  protected async startEntity(entityName: string) {
+  /**
+   * Destroy entity on system destroy or uninstall
+   */
+  async destroyEntity(entityName: string) {
+    const entity = this.entities[entityName];
+
+    if (entity.onDestroy) {
+      this.system.log.debug(`EntityManager: destroying "${entityName}"`);
+      this.changeStatus(entityName, 'destroying');
+      // TODO: добавить таймаут дестроя
+      try {
+        await entity.onDestroy(entity.ctx);
+        await entity.ctx.destroy();
+
+        delete this.entities[entityName];
+        delete this.statuses[entityName];
+      } catch (e) {
+        this.system.log.error(`${entityName} destroyed with error: ${e}`);
+        // then ignore an error
+      }
+    }
+  }
+
+  async startEntity(entityName: string) {
     // TODO: пропустить если уже запущен
     this.system.log.debug(`AppManager: starting app "${entityName}"`);
 
@@ -155,7 +159,7 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
     app.status = 'started';
   }
 
-  protected async stopEntity(entityName: string) {
+  async stopEntity(entityName: string) {
     // TODO: пропустить если уже остановлен
     this.system.log.debug(`AppManager: stopping app "${entityName}"`);
 
@@ -279,16 +283,9 @@ export class EntityManagerBase<Context extends EntityBaseContext> {
     );
   }
 
-  private changeStatus(serviceName: string, newStatus: ServiceStatus) {
-    this.statuses[serviceName] = newStatus;
-    this.ctx.events.emit(
-      this.makeEventName(ServiceEvents.status),
-      serviceName,
-      newStatus
-    );
-  }
-
-  private makeEventName(eventName: ServiceEvents): string {
-    return RootEvents.service + EVENT_DELIMITER + eventName;
+  protected changeStatus(entityName: string, newStatus: EntityStatus) {
+    this.statuses[entityName] = newStatus;
+    // TODO: может разделять по типу всетаки
+    this.system.events.emit(entityName, newStatus);
   }
 }
