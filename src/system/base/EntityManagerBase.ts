@@ -1,8 +1,35 @@
 import { arraysDifference } from 'squidlet-lib';
 import type { System } from '../System';
+import type { EntityStatus } from '../../types/constants.js';
+import type { EntityMain } from '../../types/types.js';
+import type { EntityBaseContext } from '../context/EntityBaseContext.js';
 
-export class EntityManagerBase<Item> {
-  private entities: Record<string, Item> = {};
+// TODO: rise events on status change
+// TODO: в required может быть зацикленная зависимость - тогда
+//       переводить в ошибочный сетйт и не запускать
+
+// export const SERVICE_DESTROY_REASON = {
+//   noDependencies: 'noDependencies',
+//   systemDestroying: 'systemDestroying',
+// };
+
+// export const SERVICE_TYPES = {
+//   service: 'service',
+//   target: 'target',
+//   oneshot: 'oneshot', // может быть таймаут запуска
+//   interval: 'interval', // переодично запускается типа cron
+// };
+
+// export const SERVICE_TARGETS = {
+//   // only for system low level services
+//   root: 'root',
+//   // for not system services
+//   systemInitialized: 'systemInitialized',
+// };
+
+export class EntityManagerBase<Context extends EntityBaseContext> {
+  private entities: Record<string, EntityMain<Context>> = {};
+  private statuses: Record<string, EntityStatus> = {};
 
   constructor(private readonly system: System) {}
 
@@ -10,10 +37,17 @@ export class EntityManagerBase<Item> {
     return Object.keys(this.entities);
   }
 
-  getItem(appName: string): Item | undefined {
-    return this.entities[appName];
+  getItem(entityName: string): EntityMain<Context> | undefined {
+    return this.entities[entityName];
   }
 
+  getStatus(entityName: string): EntityStatus {
+    return this.statuses[entityName];
+  }
+
+  /**
+   * On system init or install
+   */
   async init() {
     if (this.system.isProdMode) {
       // TODO: load apps manifest and register apps in production mode
@@ -24,25 +58,41 @@ export class EntityManagerBase<Item> {
     }
   }
 
+  /**
+   * On system destroy or uninstall
+   */
   async destroy() {
-    for (const appName of Object.keys(this.apps)) {
-      const app = this.apps[appName];
+    for (const entityName of Object.keys(this.entities)) {
+      const entity = this.entities[entityName];
 
-      if (app.onDestroy) {
-        this.system.log.debug(`AppManager: destroying the app "${appName}"`);
-        app.status = 'destroying';
+      if (entity.onDestroy) {
+        this.system.log.debug(`EntityManager: destroying "${entityName}"`);
+        this.statuses[entityName] = 'destroying';
+        // TODO: emit event
         // TODO: добавить таймаут дестроя
         try {
-          await app.onDestroy(app.ctx);
-          await app.ctx.destroy();
+          await entity.onDestroy(entity.ctx);
+          await entity.ctx.destroy();
 
-          delete this.apps[appName];
+          delete this.entities[entityName];
         } catch (e) {
-          this.system.log.error(`App "${appName} stopping with error: ${e}"`);
+          this.system.log.error(`${appName} stopping with error: ${e}`);
           // then ignore an error
         }
       }
     }
+  }
+
+  async doInit(appName: string) {
+    await this.initEntity(appName);
+  }
+
+  async start(appName: string) {
+    await this.startEntity(appName);
+  }
+
+  async stop(appName: string) {
+    await this.stopEntity(appName);
   }
 
   async startAll() {
@@ -52,11 +102,13 @@ export class EntityManagerBase<Item> {
   }
 
   protected async initEntity(entityName: string) {
+    // TODO: пропустить если уже инициализирован
     const entity = this.entities[entityName];
 
     if (app.onInit) {
       this.system.log.debug(`AppManager: initializing app "${appName}"`);
 
+      // TODO: статус навеное надо хранить отдльно
       app.status = 'initializing';
 
       try {
@@ -77,6 +129,7 @@ export class EntityManagerBase<Item> {
   }
 
   protected async startEntity(entityName: string) {
+    // TODO: пропустить если уже запущен
     this.system.log.debug(`AppManager: starting app "${entityName}"`);
 
     // TODO: add timeout
@@ -103,6 +156,7 @@ export class EntityManagerBase<Item> {
   }
 
   protected async stopEntity(entityName: string) {
+    // TODO: пропустить если уже остановлен
     this.system.log.debug(`AppManager: stopping app "${entityName}"`);
 
     // TODO: add timeout
@@ -132,6 +186,7 @@ export class EntityManagerBase<Item> {
    * @param appIndex - app index function.
    */
   useEntity(appIndex: AppIndex) {
+    // TODO: пропустить если уже зарегистрирован
     const appMain = appIndex();
     const appName: string = appMain.manifest.name;
 
@@ -146,7 +201,7 @@ export class EntityManagerBase<Item> {
     this.apps[appName] = {
       ...appMain,
       ctx: new AppContext(this.system, appName),
-      status: 'none',
+      status: 'loaded',
     };
   }
 
@@ -222,5 +277,18 @@ export class EntityManagerBase<Item> {
     this.ctx.log.error(
       `Failed initializing service "${serviceName}": ${reason}`
     );
+  }
+
+  private changeStatus(serviceName: string, newStatus: ServiceStatus) {
+    this.statuses[serviceName] = newStatus;
+    this.ctx.events.emit(
+      this.makeEventName(ServiceEvents.status),
+      serviceName,
+      newStatus
+    );
+  }
+
+  private makeEventName(eventName: ServiceEvents): string {
+    return RootEvents.service + EVENT_DELIMITER + eventName;
   }
 }

@@ -1,38 +1,22 @@
-import type {IndexedEventEmitter, Logger} from 'squidlet-lib'
-import type {System} from '../System.js'
-import type { DriversManager } from '../managers/DriversManager.js';
+import { EntityBaseContext } from './EntityBaseContext.js';
+import type { ServiceManifest } from '../../types/types.js';
+import type { ApiSet } from '../managers/EntitiesApiManager.js';
+import type { EntityStatus } from '@/types/constants.js';
 
-
-export class ServiceContext {
-  private readonly system: System;
-
-  get log(): Logger {
-    return this.system.log;
+export class ServiceContext extends EntityBaseContext {
+  get manifest(): ServiceManifest {
+    return this.entityManifest as ServiceManifest;
   }
 
-  get drivers(): DriversManager {
-    return this.system.drivers;
+  get status(): EntityStatus {
+    return this.system.services.getStatus(this.manifest.name);
   }
 
-  get events(): IndexedEventEmitter {
-    return this.system.events;
+  registerApi(apiSet: ApiSet) {
+    this.system.api.registerServiceApi(this.manifest.name, apiSet);
   }
 
-  getServiceApi<T = Record<string, any>>(serviceName: string): T | undefined {
-    return this.system.services.getServiceApi<T>(serviceName);
+  registerExternalApi(apiSet: ApiSet) {
+    this.system.api.registerServiceExternalApi(this.manifest.name, apiSet);
   }
-
-  constructor(system: System) {
-    this.system = system;
-  }
-
-  // async init() {
-  // }
-  //
-  // async destroy() {
-  // }
-
-  // getAppUiStaticFiles(appName: string): string[] | undefined {
-  //   return this.system.appsUi.getUi(appName)
-  // }
 }

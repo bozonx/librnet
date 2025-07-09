@@ -1,5 +1,4 @@
 import type { IoBase } from '../system/base/IoBase.js';
-import type { ServiceBase } from '../system/base/ServiceBase.js';
 import type { ServiceContext } from '../system/context/ServiceContext.js';
 import type { IoContext } from '../system/context/IoContext.js';
 import type { EnvMode, EntityStatus } from './constants.js';
@@ -7,10 +6,11 @@ import type { IoSetBase } from '@/system/base/IoSetBase.js';
 import type { AppContext } from '@/system/context/AppContext.js';
 import type { System } from '@/system/System.js';
 import type { DriverFactoryBase } from '@/system/base/DriverFactoryBase.js';
+import type { EntityBaseContext } from '@/system/context/EntityBaseContext.js';
 
 export type IoIndex = (ioSet: IoSetBase, ctx: IoContext) => IoBase;
 export type DriverIndex = (name: string, system: System) => DriverFactoryBase;
-export type ServiceIndex = (ctx: ServiceContext) => ServiceBase;
+export type ServiceIndex = () => ServiceMain;
 export type AppIndex = () => AppMain;
 
 // export type ServiceStatus = keyof typeof SERVICE_STATUS;
@@ -109,25 +109,28 @@ export type AnyEntityManifest =
   | DriverManifest
   | IoManifest;
 
-export interface EntityItem {
-  // requireDriver?: string[];
-  status: EntityStatus;
+// export interface EntityItem {
+//   // requireDriver?: string[];
+//   status: EntityStatus;
+// }
+
+export interface EntityMain<
+  Context extends EntityBaseContext = EntityBaseContext
+> {
+  ctx: Context;
+  manifest: EntityManifest;
+  onInit?: (ctx: Context) => Promise<void>;
+  onDestroy?: (ctx: Context) => Promise<void>;
+  onStart?: (ctx: Context) => Promise<void>;
+  onStop?: (ctx: Context) => Promise<void>;
 }
 
-export interface AppMain {
+export interface AppMain extends EntityMain<AppContext> {
   manifest: AppManifest;
-  onInit?: (ctx: AppContext) => Promise<void>;
-  onDestroy?: (ctx: AppContext) => Promise<void>;
-  onStart?: (ctx: AppContext) => Promise<void>;
-  onStop?: (ctx: AppContext) => Promise<void>;
 }
 
-export interface ServiceMain {
+export interface ServiceMain extends EntityMain<ServiceContext> {
   manifest: ServiceManifest;
-  onInit?: (ctx: ServiceContext) => Promise<void>;
-  onDestroy?: (ctx: ServiceContext) => Promise<void>;
-  onStart?: (ctx: ServiceContext) => Promise<void>;
-  onStop?: (ctx: ServiceContext) => Promise<void>;
 }
 
 export interface FilesEventData {

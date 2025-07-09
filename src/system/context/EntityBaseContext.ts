@@ -25,26 +25,42 @@ export class EntityBaseContext {
   readonly toClientBus = new IndexedEventEmitter();
 
   // local user's config files of this app
-  readonly localConfig = new EntityConfig(this.system, this.manifest, false);
+  readonly localConfig = new EntityConfig(
+    this.system,
+    this.entityManifest,
+    false
+  );
   // synced user's config files of this app
-  readonly syncedConfig = new EntityConfig(this.system, this.manifest, true);
+  readonly syncedConfig = new EntityConfig(
+    this.system,
+    this.entityManifest,
+    true
+  );
 
   readonly consoleLog: Logger = {
     debug: (msg: string) =>
-      this.system.log.debug(`[${this.manifest.name}]: ${msg}`),
+      this.system.log.debug(`[${this.entityManifest.name}]: ${msg}`),
     info: (msg: string) =>
-      this.system.log.info(`[${this.manifest.name}]: ${msg}`),
+      this.system.log.info(`[${this.entityManifest.name}]: ${msg}`),
     warn: (msg: string) =>
-      this.system.log.warn(`[${this.manifest.name}]: ${msg}`),
+      this.system.log.warn(`[${this.entityManifest.name}]: ${msg}`),
     error: (msg: string) =>
-      this.system.log.error(`[${this.manifest.name}]: ${msg}`),
+      this.system.log.error(`[${this.entityManifest.name}]: ${msg}`),
     log: (msg: string) =>
-      this.system.log.log(`[${this.manifest.name}]: ${msg}`),
+      this.system.log.log(`[${this.entityManifest.name}]: ${msg}`),
   };
   // local files log of this app
-  readonly localLog = new EntityLogFile(this.system, this.manifest, false);
+  readonly localLog = new EntityLogFile(
+    this.system,
+    this.entityManifest,
+    false
+  );
   // synced files log of this app
-  readonly syncedLog = new EntityLogFile(this.system, this.manifest, true);
+  readonly syncedLog = new EntityLogFile(
+    this.system,
+    this.entityManifest,
+    true
+  );
 
   // local data of this app. Only for local machine
   readonly localData = new DirTrapLogic(
@@ -52,7 +68,7 @@ export class EntityBaseContext {
       '/',
       ROOT_DIRS.local,
       LOCAL_DATA_SUB_DIRS.data,
-      this.manifest.name
+      this.entityManifest.name
     ),
     false,
     this.system
@@ -63,14 +79,19 @@ export class EntityBaseContext {
       '/',
       ROOT_DIRS.synced,
       SYNCED_DATA_SUB_DIRS.data,
-      this.manifest.name
+      this.entityManifest.name
     ),
     false,
     this.system
   );
   // temporary files of this app
   readonly tmp = new DirTrapLogic(
-    pathJoin('/', ROOT_DIRS.local, LOCAL_DATA_SUB_DIRS.tmp, this.manifest.name),
+    pathJoin(
+      '/',
+      ROOT_DIRS.local,
+      LOCAL_DATA_SUB_DIRS.tmp,
+      this.entityManifest.name
+    ),
     false,
     this.system
   );
@@ -80,7 +101,7 @@ export class EntityBaseContext {
       '/',
       ROOT_DIRS.local,
       LOCAL_DATA_SUB_DIRS.programs,
-      this.manifest.name
+      this.entityManifest.name
     ),
     true,
     this.system
@@ -94,7 +115,7 @@ export class EntityBaseContext {
   constructor(
     protected readonly system: System,
     // manifest of the service or app
-    readonly manifest: EntityManifest,
+    readonly entityManifest: EntityManifest,
     protected readonly accessToken: string
   ) {}
 
@@ -124,7 +145,7 @@ export class EntityBaseContext {
       // Emitate system api service
       return permissionWrapper(
         this.system,
-        this.manifest.name,
+        this.entityManifest.name,
         serviceName,
         this.system.systemApi
       );
@@ -134,7 +155,7 @@ export class EntityBaseContext {
 
     return permissionWrapper(
       this.system,
-      this.manifest.name,
+      this.entityManifest.name,
       serviceName,
       serviceApi
     );
@@ -146,6 +167,11 @@ export class EntityBaseContext {
   appApi(appName: string) {
     const appApi = this.system.api.getAppApi(appName);
 
-    return permissionWrapper(this.system, this.manifest.name, appName, appApi);
+    return permissionWrapper(
+      this.system,
+      this.entityManifest.name,
+      appName,
+      appApi
+    );
   }
 }
