@@ -50,7 +50,7 @@ export class EntityBaseContext {
   readonly localData = new DirTrapLogic(
     pathJoin(
       '/',
-      ROOT_DIRS.localData,
+      ROOT_DIRS.local,
       LOCAL_DATA_SUB_DIRS.data,
       this.manifest.name
     ),
@@ -61,7 +61,7 @@ export class EntityBaseContext {
   readonly syncedData = new DirTrapLogic(
     pathJoin(
       '/',
-      ROOT_DIRS.syncedData,
+      ROOT_DIRS.synced,
       SYNCED_DATA_SUB_DIRS.data,
       this.manifest.name
     ),
@@ -70,18 +70,18 @@ export class EntityBaseContext {
   );
   // temporary files of this app
   readonly tmp = new DirTrapLogic(
-    pathJoin(
-      '/',
-      ROOT_DIRS.localData,
-      LOCAL_DATA_SUB_DIRS.tmp,
-      this.manifest.name
-    ),
+    pathJoin('/', ROOT_DIRS.local, LOCAL_DATA_SUB_DIRS.tmp, this.manifest.name),
     false,
     this.system
   );
   // readonly program and assets files of this app
   readonly myFiles = new DirTrapLogic(
-    pathJoin('/', ROOT_DIRS.programFiles, this.manifest.name),
+    pathJoin(
+      '/',
+      ROOT_DIRS.local,
+      LOCAL_DATA_SUB_DIRS.programs,
+      this.manifest.name
+    ),
     true,
     this.system
   );

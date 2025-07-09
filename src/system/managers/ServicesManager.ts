@@ -42,26 +42,24 @@ export class ServicesManager extends EntityManagerBase<ServiceItem> {
   //       переводить в ошибочный сетйт и не запускать
   // TODO: use restartTries
 
-  constructor(private readonly system: System) {}
-
-  async initApp(appName: string) {
-    await this.initEntity(appName);
+  async initService(serviceName: string) {
+    await this.initEntity(serviceName);
   }
 
-  async startApp(appName: string) {
-    await this.startEntity(appName);
+  async startService(serviceName: string) {
+    await this.startEntity(serviceName);
   }
 
-  async stopApp(appName: string) {
-    await this.stopEntity(appName);
+  async stopService(serviceName: string) {
+    await this.stopEntity(serviceName);
   }
 
   /**
-   * Register app in the system in development mode.
+   * Register service in the system in development mode.
    * @param appIndex - app index function.
    */
-  useApp(appIndex: AppIndex) {
-    this.useEntity(appIndex);
+  useService(serviceIndex: ServiceIndex) {
+    this.useEntity(serviceIndex);
   }
 
   async init() {
