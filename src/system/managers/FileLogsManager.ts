@@ -54,7 +54,7 @@ export class FileLogsManager {
 
     return pathJoin(
       '/',
-      isSynced ? ROOT_DIRS.syncedData : ROOT_DIRS.localData,
+      isSynced ? ROOT_DIRS.synced : ROOT_DIRS.local,
       isSynced ? SYNCED_DATA_SUB_DIRS.logs : LOCAL_DATA_SUB_DIRS.logs,
       entityName,
       preparedRelPath

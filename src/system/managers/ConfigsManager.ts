@@ -42,7 +42,7 @@ export class ConfigsManager {
   ): Promise<Config> {
     const cfgPath = pathJoin(
       '/',
-      isSynced ? ROOT_DIRS.syncedData : ROOT_DIRS.localData,
+      isSynced ? ROOT_DIRS.synced : ROOT_DIRS.local,
       isSynced ? SYNCED_DATA_SUB_DIRS.configs : LOCAL_DATA_SUB_DIRS.configs,
       `${entityName}.${CFG_FILE_EXT}`
     );
@@ -64,7 +64,7 @@ export class ConfigsManager {
     await this.system.localFiles.writeFile(
       pathJoin(
         '/',
-        isSynced ? ROOT_DIRS.syncedData : ROOT_DIRS.localData,
+        isSynced ? ROOT_DIRS.synced : ROOT_DIRS.local,
         isSynced ? SYNCED_DATA_SUB_DIRS.configs : LOCAL_DATA_SUB_DIRS.configs,
         `${entityName}.${CFG_FILE_EXT}`
       ),
@@ -95,7 +95,7 @@ export class ConfigsManager {
     await this.system.localFiles.rm([
       pathJoin(
         '/',
-        isSynced ? ROOT_DIRS.syncedData : ROOT_DIRS.localData,
+        isSynced ? ROOT_DIRS.synced : ROOT_DIRS.local,
         isSynced ? SYNCED_DATA_SUB_DIRS.configs : LOCAL_DATA_SUB_DIRS.configs,
         `${entityName}.${CFG_FILE_EXT}`
       ),

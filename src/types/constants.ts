@@ -63,17 +63,16 @@ export type EnvMode = keyof typeof ENV_MODES;
 
 // root dirs
 export const ROOT_DIRS = {
-  localData: 'localData',
+  local: 'local',
+  // TODO: так обще можно называть?
   // Synced only using internal synchronization
-  syncedData: 'syncedData',
-  // synced home dir using watch
-  home: 'home',
+  synced: 'synced',
   // mounted filesystems
   mnt: 'mnt',
 };
 export const LOCAL_DATA_SUB_DIRS = {
   // Installed files of IO, drivers, services and apps
-  programFiles: 'programFiles',
+  programs: 'programs',
   // Local data files of services and apps
   data: 'data',
   // Databases of services and apps
@@ -92,6 +91,8 @@ export const SYNCED_DATA_SUB_DIRS = {
   trash: 'trash',
   // versions of user files
   versions: 'versions',
+  // synced home dir using watch
+  home: 'home',
 };
 export const HOME_SUB_DIRS = {
   Downloads: 'Downloads',
@@ -104,48 +105,33 @@ export const HOME_SUB_DIRS = {
 //// virtual synced storage root dir
 // export const SYNCED_STORAGE_ROOT_DIR = 'Storage';
 
-export const SERVICE_STATUS = {
-  // just instantiated
+export type EntityStatus =
+  | 'loaded'
+  | 'initializing'
+  | 'initError'
+  | 'initialized'
+  | 'destroying'
+  | 'starting'
+  | 'startError'
+  | 'running'
+  | 'fallen'
+  | 'stopping'
+  | 'stopError'
+  | 'stopped';
+
+export const ENTITY_STATUS: Record<EntityStatus, EntityStatus> = {
   loaded: 'loaded',
-  // has not met some dependencies. Service has been destroyed and removed in this case
-  noDependencies: 'noDependencies',
-  // wait while service which is it depends on will be started
-  wait: 'wait',
-  // was falled if it was in running state
-  fallen: 'fallen',
-  // init is in progress
   initializing: 'initializing',
+  initError: 'initError',
   initialized: 'initialized',
-  // initError: 'initError',
-  starting: 'starting',
-  restarting: 'restarting',
-  // after successfully run
-  running: 'running',
-  // startError: 'startError',
-  stopping: 'stopping',
-  stopped: 'stopped',
-  // stopError: 'stopError',
   destroying: 'destroying',
-  destroyed: 'destroyed',
-};
-
-export const SERVICE_DESTROY_REASON = {
-  noDependencies: 'noDependencies',
-  systemDestroying: 'systemDestroying',
-};
-
-export const SERVICE_TYPES = {
-  service: 'service',
-  target: 'target',
-  oneshot: 'oneshot', // может быть таймаут запуска
-  interval: 'interval', // переодично запускается типа cron
-};
-
-export const SERVICE_TARGETS = {
-  // only for system low level services
-  root: 'root',
-  // for not system services
-  systemInitialized: 'systemInitialized',
+  starting: 'starting',
+  startError: 'startError',
+  running: 'running',
+  fallen: 'fallen',
+  stopping: 'stopping',
+  stopError: 'stopError',
+  stopped: 'stopped',
 };
 
 export const IO_NAMES = {
@@ -169,10 +155,10 @@ export const DRIVER_NAMES = {
 };
 
 // system services which have api
-export const SYSTEM_SERVICE_NAMES = {
-  Network: 'Network',
-  // PublicApiService: 'PublicApiService',
-  Sessions: 'Sessions',
+export const SERVICE_NAMES = {
+  // Network: 'Network',
+  // // PublicApiService: 'PublicApiService',
+  // Sessions: 'Sessions',
 };
 
 export const IO_SET_TYPES = {

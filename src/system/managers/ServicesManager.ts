@@ -1,21 +1,43 @@
 import type { System } from '../System.js';
 import type {
-  ServiceDestroyReason,
+  EntityItem,
   ServiceIndex,
-  ServiceStatus,
+  ServiceMain,
   SubprogramError,
 } from '../../types/types.js';
 import type { ServiceBase } from '../base/ServiceBase.js';
 import {
   EVENT_DELIMITER,
   RootEvents,
-  SERVICE_DESTROY_REASON,
-  SERVICE_STATUS,
   ServiceEvents,
 } from '../../types/constants.js';
 import { EntityManagerBase } from '../base/EntityManagerBase.js';
+import type { ServiceContext } from '../context/ServiceContext.js';
 
-export class ServicesManager extends EntityManagerBase {
+// export const SERVICE_DESTROY_REASON = {
+//   noDependencies: 'noDependencies',
+//   systemDestroying: 'systemDestroying',
+// };
+
+// export const SERVICE_TYPES = {
+//   service: 'service',
+//   target: 'target',
+//   oneshot: 'oneshot', // может быть таймаут запуска
+//   interval: 'interval', // переодично запускается типа cron
+// };
+
+// export const SERVICE_TARGETS = {
+//   // only for system low level services
+//   root: 'root',
+//   // for not system services
+//   systemInitialized: 'systemInitialized',
+// };
+
+export interface ServiceItem extends EntityItem, ServiceMain {
+  ctx: ServiceContext;
+}
+
+export class ServicesManager extends EntityManagerBase<ServiceItem> {
   // TODO: в required может быть зацикленная зависимость - тогда
   //       переводить в ошибочный сетйт и не запускать
   // TODO: use restartTries

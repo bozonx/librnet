@@ -61,8 +61,8 @@ export class PackageManager {
     await this.system.localFiles.mkdir(
       pathJoin(
         '/',
-        ROOT_DIRS.localData,
-        LOCAL_DATA_SUB_DIRS.programFiles,
+        ROOT_DIRS.local,
+        LOCAL_DATA_SUB_DIRS.programs,
         manifest.name
       )
     );
@@ -71,8 +71,8 @@ export class PackageManager {
       '/' + trimChar(manifest.distDir, '/'),
       pathJoin(
         '/',
-        ROOT_DIRS.localData,
-        LOCAL_DATA_SUB_DIRS.programFiles,
+        ROOT_DIRS.local,
+        LOCAL_DATA_SUB_DIRS.programs,
         manifest.name
       ),
       pathToPkg
@@ -81,12 +81,7 @@ export class PackageManager {
 
   async uninstall(entityName: string) {
     await this.system.localFiles.rmRf(
-      pathJoin(
-        '/',
-        ROOT_DIRS.localData,
-        LOCAL_DATA_SUB_DIRS.programFiles,
-        entityName
-      )
+      pathJoin('/', ROOT_DIRS.local, LOCAL_DATA_SUB_DIRS.programs, entityName)
     );
   }
 
@@ -94,7 +89,7 @@ export class PackageManager {
     entytyName: string
   ): Promise<AnyEntityManifest | undefined> {
     const programFilesDirItems = await this.system.localFiles.readdir(
-      pathJoin('/', ROOT_DIRS.localData, LOCAL_DATA_SUB_DIRS.programFiles)
+      pathJoin('/', ROOT_DIRS.local, LOCAL_DATA_SUB_DIRS.programs)
     );
 
     if (!programFilesDirItems.find((item) => item === entytyName)) {
@@ -103,8 +98,8 @@ export class PackageManager {
 
     const manifestContent = await this.system.localFiles.readTextFile(
       pathJoin(
-        ROOT_DIRS.localData,
-        LOCAL_DATA_SUB_DIRS.programFiles,
+        ROOT_DIRS.local,
+        LOCAL_DATA_SUB_DIRS.programs,
         entytyName,
         ENTITY_MANIFEST_FILE_NAME
       )
