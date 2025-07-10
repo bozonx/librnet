@@ -6,7 +6,6 @@ import type { IoSetBase } from '@/system/base/IoSetBase.js';
 import type { AppContext } from '@/system/context/AppContext.js';
 import type { System } from '@/system/System.js';
 import type { DriverFactoryBase } from '@/system/base/DriverFactoryBase.js';
-import type { EntityBaseContext } from '@/system/context/EntityBaseContext.js';
 
 export type IoIndex = (ioSet: IoSetBase, ctx: IoContext) => IoBase;
 export type DriverIndex = (name: string, system: System) => DriverFactoryBase;
@@ -90,7 +89,6 @@ export interface EntityManifest {
   requireService?: string[];
 }
 
-
 export interface AppManifest extends EntityManifest {
   type: 'app';
 }
@@ -158,3 +156,4 @@ export interface MountPoint {
   src: MountPointDefinition;
   dest: MountPointDefinition;
 }
+

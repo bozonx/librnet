@@ -149,6 +149,7 @@ export interface WsServerIoType {
   ): Promise<void>;
 
   // TODO: почему бы не указать параметр silent?
+  // TODO: замем?
   /**
    * Destroy the connection and not rise an close event
    */

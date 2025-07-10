@@ -110,6 +110,8 @@ export class WsServerIo
     if (!connectionItem) return;
 
     connectionItem.close();
+
+    // TODO: чем отличается от closeConnection? и почему не удаляется инстанс?
   }
 
   protected startServer(serverId: string, props: WsServerProps): ServerItem {

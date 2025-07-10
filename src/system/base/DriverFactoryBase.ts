@@ -25,11 +25,12 @@ export abstract class DriverFactoryBase<
     system: System,
     driver: DriverFactoryBase<any, any>,
     props: Props,
-    commonProps: any,
+    common: any,
+    injectCb: (instance: Instance) => Promise<void>,
     destroyCb?: () => Promise<void>
   ) => Instance;
   // Put here common functions and properties for all instances
-  protected commonProps: Record<string, any> = {};
+  protected common: Record<string, any> = {};
   private _localCfg: Record<string, any> = {};
   private _syncedCfg: Record<string, any> = {};
 
@@ -81,8 +82,9 @@ export abstract class DriverFactoryBase<
     const instance = new this.SubDriverClass(
       this.system,
       this,
-      structuredClone(instanceProps),
-      this.commonProps,
+      structuredClone(await this.makeInstanceProps(instanceProps)),
+      this.common,
+      (instance: Instance) => this.inject(instance),
       this.destroyCb.bind(this, instanceId)
     );
 
@@ -92,6 +94,8 @@ export abstract class DriverFactoryBase<
     return instance;
   }
 
+  protected async inject(instance: Instance) {}
+
   /**
    * Overload this method to make more precise match instance by props
    * @param instanceProps
@@ -99,6 +103,15 @@ export abstract class DriverFactoryBase<
    */
   protected makeMatchString(instanceProps: Props): string {
     return JSON.stringify(instanceProps);
+  }
+
+  /**
+   * Overload this method to add some props
+   * @param instanceProps
+   * @returns
+   */
+  protected async makeInstanceProps(instanceProps: Props): Promise<Props> {
+    return instanceProps;
   }
 
   /**

@@ -21,6 +21,8 @@ export class PackageManager {
    * @param force - force install package.
    */
   async installFromFile(pathToPkg: string, force: boolean = false) {
+    // TODO: check required, see EntityManger base
+
     const archiveDriver = this.system.drivers.getDriver<ArchiveDriver>(
       DRIVER_NAMES.ArchiveDriver
     );
