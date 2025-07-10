@@ -1,14 +1,14 @@
 import {deepGet, deepSet} from 'squidlet-lib'
-import type { ServiceIndex, SubprogramError } from '../../../types/types.js';
-import type { ServiceContext } from '../../../system/context/ServiceContext.js';
+import type { ServiceIndex, SubprogramError } from '../../types/types.js';
+import type { ServiceContext } from '../../system/context/ServiceContext.js';
 import { ServiceBase } from '../../../system/base/ServiceBase.js';
 import {
   NETWORK_CODES,
   SYSTEM_SERVICE_NAMES,
-} from '../../../types/constants.js';
-import type { ServiceProps } from '../../../types/ServiceProps.js';
+} from '../../types/constants.js';
+import type { ServiceProps } from '../../types/ServiceProps.js';
 import type {NetworkServiceApi} from '../Network/NetworkService.js'
-import type { NetworkIncomeRequest } from '../../NetworkSubSystem/Network.js';
+import type { NetworkIncomeRequest } from '../NetworkSubSystem/Network.js';
 
 
 export interface PublicApiServiceApi {

@@ -15,7 +15,7 @@ import type {
 import type {
   WsServerDriver,
   WsServerInstance,
-} from '../../SystemCommonPkg/WsServerDriver/WsServerDriver.js';
+} from '../WsServerDriver/WsServerDriver.js';
 import { requestError } from '../../../helpers/helpers.js';
 import type { RequestError } from '../../../helpers/helpers.js';
 import type {
