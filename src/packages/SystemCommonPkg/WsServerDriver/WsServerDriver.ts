@@ -4,8 +4,8 @@ import {
   type HttpRequest,
   type HttpResponse,
 } from 'squidlet-lib';
-import type { DriverIndex } from '../../../types/types.js';
-import { IO_NAMES } from '../../../types/constants.js';
+import type { DriverIndex, DriverManifest } from '../../../types/types.js';
+import { IO_NAMES, SystemEvents } from '../../../types/constants.js';
 import { WsServerEvent } from '../../../types/io/WsServerIoType.js';
 import type {
   WsServerIoFullType,
@@ -18,16 +18,22 @@ import type { DriverInstanceClass } from '@/system/base/DriverInstanceBase.js';
 
 // TODO: а оно надо??? может лучше сессию использовать?
 // export const SETCOOKIE_LABEL = '__SET_COOKIE__';
+// TODO: наверное прикрутить сессию чтобы считать что клиент ещё подключен
+// TODO: отслежитьвать статус соединения - connected, wait, reconnect ...
+// TODO: check permissions
+// TODO: можно ли установить cookie? стандартным способом?
+// TODO: отслеживать статус соединения с io
+// TODO: а если сервер сам неожиданно отвалился?
 
 export interface WsServerDriverProps extends WsServerProps {
   serverId: string;
 }
 
 export const WsServerDriverIndex: DriverIndex = (
-  name: string,
+  manifest: DriverManifest,
   system: System
 ) => {
-  return new WsServerDriver(system, name) as unknown as DriverFactoryBase<
+  return new WsServerDriver(system, manifest) as unknown as DriverFactoryBase<
     WsServerInstance,
     Record<string, any>
   >;
@@ -55,23 +61,36 @@ export class WsServerDriver extends DriverFactoryBase<
 
     this.serverHandlerIndex = await this.common.io.on(
       (eventName: WsServerEvent, serverId: string, ...p: any[]) => {
+        // rise system event
+        this.system.events.emit(
+          SystemEvents.wsServer,
+          eventName,
+          serverId,
+          ...p
+        );
+
         const instance = this.instances.find(
           (instance) => instance.serverId === serverId
         );
 
-        if (!instance) {
+        if (instance) {
+          this.logToConsole(instance, eventName, ...p);
+        }
+
+        // skip listening and serverClosed events because
+        //   they will be hanled on server start and destroy
+        if (
+          eventName === WsServerEvent.listening ||
+          eventName === WsServerEvent.serverClosed
+        )
+          return;
+
+        if (instance) {
+          instance.$handleServerEvent(eventName, ...p);
+        } else {
           this.system.log.warn(
             `WsServerDriver: Can't find instance of Ws server "${serverId}"`
           );
-        } else {
-          if (eventName === WsServerEvent.listening) {
-            startedPromised.resolve();
-
-            return;
-          }
-          // TODO: что если сервер сам неожиданно отвалился
-
-          instance.$handleServerEvent(eventName, ...p);
         }
       }
     );
@@ -97,6 +116,17 @@ export class WsServerDriver extends DriverFactoryBase<
     const startedPromised = new Promised<void>();
 
     // TODO: use timeout
+
+    const handlerIndex = await this.common.io.on(
+      (eventName: WsServerEvent, serverId: string, ...p: any[]) => {
+        if (eventName === WsServerEvent.listening) {
+          startedPromised.resolve();
+
+          this.common.io.off(handlerIndex);
+        }
+      }
+    );
+
     await startedPromised;
 
     return {
@@ -108,124 +138,75 @@ export class WsServerDriver extends DriverFactoryBase<
   protected async destroyCb(instanceId: number): Promise<void> {
     await super.destroyCb(instanceId);
     await this.common.io.stopServer(this.instances[instanceId].serverId);
+    // TODO: ожидать событие останоки сервера
+  }
+
+  protected async validateInstanceProps(
+    instanceProps: WsServerProps
+  ): Promise<void> {
+    // TODO: проверить права на localhost и внешний сервер
+    // TODO: проверить в менеджере портов что порт не занят
+  }
+
+  protected logToConsole(
+    instance: WsServerInstance,
+    eventName: WsServerEvent,
+    ...p: any[]
+  ) {
+    switch (eventName) {
+      case WsServerEvent.listening:
+        this.system.log.info(
+          `WsServerDriver: Starting ws server: ${instance.props.host}:${instance.props.port}`
+        );
+        break;
+      case WsServerEvent.serverClosed:
+        this.system.log.debug(
+          `WsServerDriver: destroying websocket server: ${instance.props.host}:${instance.props.port}`
+        );
+        break;
+      case WsServerEvent.newConnection:
+        this.system.log.debug(
+          `WsServerDriver: new connection on ws server ${instance.props.host}:${
+            instance.props.port
+          }, connection id ${p[0]}, ${JSON.stringify(p[1])}`
+        );
+        break;
+      case WsServerEvent.connectionClose:
+        this.system.log.debug(
+          `WsServerDriver: connection ${p[0]} has been closed on server ${
+            instance.props.host
+          }:${instance.props.port} has been closed. Code ${p[1]}. Reason: ${
+            p[2] || ''
+          }`
+        );
+        break;
+      case WsServerEvent.connectionMessage:
+        this.system.log.debug(
+          `WsServerDriver: income message on connection ${p[0]} on server ${instance.props.host}:${instance.props.port}, data length ${p[1].length}`
+        );
+        break;
+      case WsServerEvent.connectionUnexpectedResponse:
+        this.system.log.error(
+          `WsServerDriver: unexpected response on connection ${
+            p[0]
+          } on ws server ${instance.props.host}:${
+            instance.props.port
+          }. ${JSON.stringify(p[1])}`
+        );
+        break;
+      case WsServerEvent.connectionError:
+        this.system.log.error(
+          `WsServerDriver: error of connection ${p[0]} on ws server ${instance.props.host}:${instance.props.port}. ${p[1]}`
+        );
+        break;
+      case WsServerEvent.serverError:
+        this.system.log.error(
+          `WsServerDriver: error on ws server ${instance.props.host}:${instance.props.port}. ${p[0]}`
+        );
+        break;
+    }
   }
 }
-
-// export class WsServerDriver2 extends DriverFactoryBase<
-//   WsServerInstance,
-//   WsServerProps
-// > {
-//   protected SubDriverClass = WsServerInstance;
-
-//   async init(cfg?: Record<string, any>) {
-//     await super.init(cfg);
-
-//     const wsServerIo = this.ctx.io.getIo<WsServerIoFullType>(
-//       IO_NAMES.WsServerIo
-//     );
-
-//     // TODO: лучше чтобы драйвер слушал один раз и раздовал по серверам
-//     // TODO: отслеживать статус соединения с io
-//     // TODO: отслеживать таймаут для поднятия сервера - если не получилось то повторить
-
-//     await wsServerIo.on(
-//       (eventName: WsServerEvent, serverId: string, ...p: any[]) => {
-//         const instance = this.instances[serverId];
-
-//         if (!instance) {
-//           this.ctx.log.warn(`Can't find instance of Ws server "${serverId}"`);
-
-//           return;
-//         }
-
-//         if (eventName === WsServerEvent.serverClosed) {
-//           //clearTimeout(listeningTimeout)
-//           instance.handleServerClose();
-//         } else if (eventName === WsServerEvent.serverStarted) {
-//           //clearTimeout(listeningTimeout)
-//           instance.handleServerListening();
-//         } else if (eventName === WsServerEvent.serverError) {
-//           instance.handleServerError(p[0]);
-//         } else if (eventName === WsServerEvent.newConnection) {
-//           instance.handleNewConnection(p[0], p[1]);
-//         }
-//         // Connection
-//         else if (eventName === WsServerEvent.connectionClose) {
-//           instance.handleConnectionClose(p[0], p[1], p[2]);
-//         } else if (eventName === WsServerEvent.connectionMessage) {
-//           instance.handleIncomeMessage(p[0], p[1]);
-//         } else if (eventName === WsServerEvent.connectionError) {
-//           instance.handleConnectionError(p[0], p[1]);
-//         } else if (eventName === WsServerEvent.connectionUnexpectedResponse) {
-//           instance.handleConnectionUnexpectedResponse(p[0], p[1]);
-//         }
-//       }
-//     );
-//   }
-
-//   protected makeInstanceId(
-//     props: WsServerProps,
-//     cfg?: Record<string, any>
-//   ): string {
-//     return `${props.host}:${props.port}`;
-//   }
-// }
-
-function debugLog(system: System, ...p: any[]) {
-  this.system.log.info(
-    `... Starting ws server: ${this.props.host}:${this.props.port}`
-  );
-  this.system.log.debug(
-    `... destroying websocket server: ${this.props.host}:${this.props.port}`
-  );
-  this.system.log.debug(
-    `WsServerLogic.send from ${this.props.host}:${this.props.port} to connection ${connectionId}, data length ${data.length}`
-  );
-  this.system.log.debug(
-    `WsServerLogic server ${this.props.host}:${this.props.port} manually closes connection ${connectionId}`
-  );
-  this.system.log.debug(
-    `WsServerLogic server ${this.props.host}:${this.props.port} destroys connection ${connectionId}`
-  );
-  this.system.log.debug(
-    `WsServerLogic: server ${this.props.host}:${this.props.port} started listening`
-  );
-  this.ctx.log.log(
-    `Ws server "${this.props.host}:${this.props.port}" has been already closed, you can't manipulate it any more!`
-  );
-  this.ctx.log.error(
-    `Error on ws server ${this.props.host}:${this.props.port}. ${err}`
-  );
-  this.ctx.log.debug(
-    `WsServerLogic: server ${this.props.host}:${
-      this.props.port
-    } received a new connection ${connectionId}, ${JSON.stringify(params)}`
-  );
-  this.ctx.log.debug(
-    `WsServerLogic connection ${connectionId} has been closed on server ${
-      this.props.host
-    }:${this.props.port} has been closed. Code ${code}. Reason: ${reason || ''}`
-  );
-  this.ctx.log.debug(
-    `WsServerLogic income message on server ${this.props.host}:${this.props.port}, connection id ${connectionId}, data length ${data.length}`
-  );
-  this.ctx.log.error(
-    `Unexpected response on ws server ${this.props.host}:${
-      this.props.port
-    } connection ${connectionId}. ${JSON.stringify(params)}`
-  );
-  this.ctx.log.error(
-    `Error on ws server ${this.props.host}:${this.props.port} connection ${connectionId}. ${err}`
-  );
-}
-
-// TODO: наверное прикрутить сессию чтобы считать что клиент ещё подключен
-// TODO: отслежитьвать статус соединения - connected, wait, reconnect ...
-
-// TODO: rise events
-// TODO: поднимать события вместо дебаг сообщений, а их делать в отдельном менеджере
-// TODO: check permissions
-// TODO: можно ли установить cookie? стандартным способом?
 
 export class WsServerInstance extends DriverInstanceBase<
   WsServerDriverProps,
@@ -246,6 +227,10 @@ export class WsServerInstance extends DriverInstanceBase<
    * Send message to client
    */
   send = (connectionId: string, data: string | Uint8Array): Promise<void> => {
+    this.system.log.debug(
+      `WsServerInstance.send from ${this.props.host}:${this.props.port} to connection ${connectionId}, data length ${data.length}`
+    );
+
     return this.common.io.send(this.serverId, connectionId, data);
   };
 
@@ -301,7 +286,7 @@ export class WsServerInstance extends DriverInstanceBase<
     return this.events.addListener(WsServerEvent.serverError, cb);
   }
 
-  removeListener(handlerIndex: number) {
+  off(handlerIndex: number) {
     this.events.removeListener(handlerIndex);
   }
 

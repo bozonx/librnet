@@ -6,7 +6,7 @@ import { HttpClientDriverIndex } from './HttpClientDriver/HttpClientDriver.js';
 import { WsClientDriverIndex } from './WsClientDriver/WsClientDriver.js';
 import { WsServerDriverIndex } from './WsServerDriver/WsServerDriver.js';
 import {NetworkServiceIndex} from '../../services/Network/NetworkService.js'
-import { PublicApiServiceIndex } from './PublicApiService/PublicApiService.js';
+import { PublicApiServiceIndex } from '../AppsSubsystemPkg/PublicApiService/PublicApiService.js';
 import {SessionsServiceIndex} from '../../services/Sessions/SessionsService.js'
 import {ChannelServiceIndex} from '../../services/ChannelsService/ChannelsService.js'
 import {ClusterServiceIndex} from '../../services/ClusterService/ClusterService.js'
