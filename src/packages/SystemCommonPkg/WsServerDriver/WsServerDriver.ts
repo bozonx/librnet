@@ -80,6 +80,7 @@ export class WsServerDriver extends DriverFactoryBase<
 
             return;
           }
+          // TODO: что если сервер сам неожиданно отвалился
 
           instance.$handleServerEvent(eventName, ...p);
         }
@@ -96,10 +97,6 @@ export class WsServerDriver extends DriverFactoryBase<
   }
 
   // TODO:  destroy server
-
-  protected async inject(instance: WsServerInstance) {
-    // await instance.wsServerIo.on(instance.$handleServerEvent.bind(instance));
-  }
 }
 
 // export class WsServerDriver2 extends DriverFactoryBase<
@@ -212,7 +209,6 @@ function debugLog(system: System, ...p: any[]) {
 
 // TODO: наверное прикрутить сессию чтобы считать что клиент ещё подключен
 // TODO: отслежитьвать статус соединения - connected, wait, reconnect ...
-// TODO: что если сервер сам неожиданно отвалился
 
 // TODO: rise events
 // TODO: поднимать события вместо дебаг сообщений, а их делать в отдельном менеджере
@@ -224,47 +220,15 @@ export class WsServerInstance extends DriverInstanceBase<
   Record<string, any>
 > {
   readonly events = new IndexedEventEmitter<(...args: any[]) => void>();
+
   get serverId(): string {
     return this.props.serverId;
   }
 
-  // private serverId?: string;
-  // private _startedPromised = new Promised<void>();
-
-  // it fulfils when server is start listening
-  // get startedPromise(): Promised<void> {
-  //   return this._startedPromised;
-  // }
-
-  // private get wsServerIo(): WsServerIoFullType {
-  //   return this.system.io.getIo<WsServerIoFullType>(IO_NAMES.WsServerIo);
-  // }
-
-  // async init() {
-  //   // this.serverId = await this.wsServerIo.newServer(this.props);
-  // }
-
   async destroy() {
     await super.destroy();
     this.events.destroy();
-
-    // TODO: сервер удолжен уничтожаться на стороне драйвера
-
-    // TODO: review
-    //await this.removeListeners()
-    // TODO: use destroyServer - it removes all the events before destroy
-    // TODO: не должно поднять события
-
-    // if (!this.serverId) return;
-
-    // await this.wsServerIo.stopServer(this.serverId);
-
-    // delete this.serverId;
   }
-
-  // isInitialized(): boolean {
-  //   return Boolean(this.serverId);
-  // }
 
   /**
    * Send message to client
@@ -274,7 +238,7 @@ export class WsServerInstance extends DriverInstanceBase<
   };
 
   /**
-   * Force closing a connection.
+   * Explicitly closing a connection.
    * Close event will be risen
    */
   closeConnection(
@@ -330,13 +294,6 @@ export class WsServerInstance extends DriverInstanceBase<
   }
 
   $handleServerEvent(eventName: WsServerEvent, ...p: any[]) {
-    // if (eventName === WsServerEvent.listening) {
-    //   // this._startedPromised.resolve();
-    //   this.events.emit(WsServerEvent.listening);
-    // } else if (eventName === WsServerEvent.serverClosed) {
-    //   // this.serverId = '';
-    //   // this.events.destroy();
-    // } else
     if (eventName === WsServerEvent.connectionUnexpectedResponse) {
       this.events.emit(
         WsServerEvent.connectionError,
@@ -344,7 +301,7 @@ export class WsServerInstance extends DriverInstanceBase<
         ...p
       );
     } else {
-      // other events
+      // all other events
       this.events.emit(eventName, ...p);
     }
   }

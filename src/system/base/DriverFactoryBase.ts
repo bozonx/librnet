@@ -1,5 +1,7 @@
 import type { System } from '../System.js';
 import type DriverInstanceBase from './DriverInstanceBase.js';
+import type { DriverInstanceClass } from './DriverInstanceBase.js';
+import type { DriverManifest } from '@/types/types.js';
 
 /**
  * This factory creates instances of sub drivers and keeps them in the memory.
@@ -21,14 +23,7 @@ export abstract class DriverFactoryBase<
 
   protected instances: Instance[] = [];
   // Specify your sub driver class
-  protected abstract SubDriverClass: new (
-    system: System,
-    driver: DriverFactoryBase<any, any>,
-    props: Props,
-    common: any,
-    injectCb: (instance: Instance) => Promise<void>,
-    destroyCb?: () => Promise<void>
-  ) => Instance;
+  protected abstract SubDriverClass: DriverInstanceClass<Instance, Props>;
   // Put here common functions and properties for all instances
   protected common: Record<string, any> = {};
   private _localCfg: Record<string, any> = {};
@@ -42,13 +37,17 @@ export abstract class DriverFactoryBase<
     return structuredClone(this._syncedCfg);
   }
 
+  get manifest(): DriverManifest {
+    return this._manifest;
+  }
+
   get name(): string {
-    return this._name;
+    return this._manifest.name;
   }
 
   constructor(
     protected readonly system: System,
-    private readonly _name: string
+    private readonly _manifest: DriverManifest
   ) {}
 
   async init(
@@ -84,7 +83,6 @@ export abstract class DriverFactoryBase<
       this,
       structuredClone(await this.makeInstanceProps(instanceProps)),
       this.common,
-      (instance: Instance) => this.inject(instance),
       this.destroyCb.bind(this, instanceId)
     );
 
@@ -93,8 +91,6 @@ export abstract class DriverFactoryBase<
 
     return instance;
   }
-
-  protected async inject(instance: Instance) {}
 
   /**
    * Overload this method to make more precise match instance by props

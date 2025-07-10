@@ -1,14 +1,17 @@
 import type { IoBase } from '../system/base/IoBase.js';
 import type { ServiceContext } from '../system/context/ServiceContext.js';
 import type { IoContext } from '../system/context/IoContext.js';
-import type { EnvMode, EntityStatus } from './constants.js';
+import type { EnvMode } from './constants.js';
 import type { IoSetBase } from '@/system/base/IoSetBase.js';
 import type { AppContext } from '@/system/context/AppContext.js';
 import type { System } from '@/system/System.js';
 import type { DriverFactoryBase } from '@/system/base/DriverFactoryBase.js';
 
 export type IoIndex = (ioSet: IoSetBase, ctx: IoContext) => IoBase;
-export type DriverIndex = (name: string, system: System) => DriverFactoryBase;
+export type DriverIndex = (
+  manifest: DriverManifest,
+  system: System
+) => DriverFactoryBase;
 export type ServiceOnInit = (ctx: ServiceContext) => Promise<void>;
 export type AppOnInit = (ctx: AppContext) => Promise<void>;
 
