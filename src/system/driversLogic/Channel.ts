@@ -1,28 +1,46 @@
-import type { ServiceContext } from '../context/ServiceContext.js';
+import type { DefaultHandler, IndexedEvents } from 'squidlet-lib';
+
+// TODO: serialize/deserialize object
+// TODO: status, error, request marker
 
 export class Channel {
   constructor(
-    protected readonly serviceContext: ServiceContext,
-    protected readonly channelName: string
+    protected readonly events: IndexedEvents<DefaultHandler>,
+    protected readonly doSend: (message: string | Uint8Array) => Promise<void>,
+    protected readonly doDestroy: () => Promise<void>
   ) {}
 
-  send(message: string | Uint8Array) {
-    // this.serviceContext.system.wsServer.send(this.channelName, message);
+  async destroy() {
+    await this.doDestroy();
   }
 
-  close() {
-    // this.serviceContext.system.wsServer.close(this.channelName);
+  /**
+   * Send message to channel
+   * It waits while message is sent but do not wait for response
+   * @param message - message to send
+   */
+  async send(...p: any[]) {
+    //
   }
 
-  onMessage(cb: (message: string | Uint8Array) => void) {
-    // this.serviceContext.system.wsServer.on(this.channelName, eventName, callback);
+  /**
+   * Send message to channel and wait for response
+   * @param message - message to send
+   * @returns response message
+   */
+  async request(...p: any[]): Promise<any[]> {
+    // TODO: use timeout
   }
 
-  // onError(callback: (error: any) => void) {
-  //   this.serviceContext.system.wsServer.onError(this.channelName, callback);
-  // }
+  onMessage(cb: (...p: any[]) => void): number {
+    return this.events.addListener(cb);
+  }
+
+  onRequest(cb: (...p: any[]) => Promise<any[]>): number {
+    return this.events.addListener(cb);
+  }
 
   off(handlerIndex: number) {
-    // this.serviceContext.system.wsServer.off(this.channelName, eventName, callback);
+    this.events.removeListener(handlerIndex);
   }
 }
