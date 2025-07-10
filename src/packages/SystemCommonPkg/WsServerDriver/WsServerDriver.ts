@@ -48,6 +48,8 @@ export class WsServerDriver extends DriverFactoryBase<
     io: this.system.io.getIo<WsServerIoFullType>(IO_NAMES.WsServerIo),
   };
 
+  private serverHandlerIndex: number = -1;
+
   protected makeMatchString(instanceProps: WsServerProps): string {
     if (instanceProps.path) {
       return `${instanceProps.host}:${instanceProps.port}${instanceProps.path}`;
@@ -59,11 +61,41 @@ export class WsServerDriver extends DriverFactoryBase<
   protected async makeInstanceProps(
     instanceProps: WsServerProps
   ): Promise<WsServerDriverProps> {
+    const serverId = await this.common.io.newServer(instanceProps);
+    const startedPromised = new Promised<void>();
+
+    this.serverHandlerIndex = await this.common.io.on(
+      (eventName: WsServerEvent, serverId: string, ...p: any[]) => {
+        const instance = this.instances.find(
+          (instance) => instance.serverId === serverId
+        );
+
+        if (!instance) {
+          this.system.log.warn(
+            `WsServerDriver: Can't find instance of Ws server "${serverId}"`
+          );
+        } else {
+          if (eventName === WsServerEvent.listening) {
+            startedPromised.resolve();
+
+            return;
+          }
+
+          instance.$handleServerEvent(eventName, ...p);
+        }
+      }
+    );
+
+    // TODO: use timeout
+    await startedPromised;
+
     return {
       ...instanceProps,
-      serverId: this.makeMatchString(instanceProps),
+      serverId,
     };
   }
+
+  // TODO:  destroy server
 
   protected async inject(instance: WsServerInstance) {
     // await instance.wsServerIo.on(instance.$handleServerEvent.bind(instance));
@@ -297,7 +329,7 @@ export class WsServerInstance extends DriverInstanceBase<
     this.events.removeListener(handlerIndex);
   }
 
-  protected $handleServerEvent(eventName: WsServerEvent, ...p: any[]) {
+  $handleServerEvent(eventName: WsServerEvent, ...p: any[]) {
     // if (eventName === WsServerEvent.listening) {
     //   // this._startedPromised.resolve();
     //   this.events.emit(WsServerEvent.listening);
