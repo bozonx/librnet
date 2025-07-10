@@ -114,7 +114,7 @@ export interface WsServerIoType {
 
   // TODO: почему не поднимается событие ??
   /**
-   * Destroy server and don't rise a close event.
+   * Destroy all the servers and don't rise a close event.
    */
   destroy: () => Promise<void>;
 

@@ -114,7 +114,7 @@ export abstract class DriverFactoryBase<
    * Just remove instance from this.instances
    * @param instanceId
    */
-  private async destroyCb(instanceId: number): Promise<void> {
+  protected async destroyCb(instanceId: number): Promise<void> {
     this.instances.splice(instanceId, 1);
   }
 

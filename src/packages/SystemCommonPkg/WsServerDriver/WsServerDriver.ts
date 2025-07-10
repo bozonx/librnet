@@ -50,19 +50,8 @@ export class WsServerDriver extends DriverFactoryBase<
 
   private serverHandlerIndex: number = -1;
 
-  protected makeMatchString(instanceProps: WsServerProps): string {
-    if (instanceProps.path) {
-      return `${instanceProps.host}:${instanceProps.port}${instanceProps.path}`;
-    }
-
-    return `${instanceProps.host}:${instanceProps.port}`;
-  }
-
-  protected async makeInstanceProps(
-    instanceProps: WsServerProps
-  ): Promise<WsServerDriverProps> {
-    const serverId = await this.common.io.newServer(instanceProps);
-    const startedPromised = new Promised<void>();
+  async init(...p: any[]) {
+    await super.init(...p);
 
     this.serverHandlerIndex = await this.common.io.on(
       (eventName: WsServerEvent, serverId: string, ...p: any[]) => {
@@ -86,6 +75,26 @@ export class WsServerDriver extends DriverFactoryBase<
         }
       }
     );
+  }
+
+  async destroy(destroyReason: string) {
+    await super.destroy(destroyReason);
+    await this.common.io.off(this.serverHandlerIndex);
+  }
+
+  protected makeMatchString(instanceProps: WsServerProps): string {
+    if (instanceProps.path) {
+      return `${instanceProps.host}:${instanceProps.port}${instanceProps.path}`;
+    }
+
+    return `${instanceProps.host}:${instanceProps.port}`;
+  }
+
+  protected async makeInstanceProps(
+    instanceProps: WsServerProps
+  ): Promise<WsServerDriverProps> {
+    const serverId = await this.common.io.newServer(instanceProps);
+    const startedPromised = new Promised<void>();
 
     // TODO: use timeout
     await startedPromised;
@@ -96,7 +105,10 @@ export class WsServerDriver extends DriverFactoryBase<
     };
   }
 
-  // TODO:  destroy server
+  protected async destroyCb(instanceId: number): Promise<void> {
+    await super.destroyCb(instanceId);
+    await this.common.io.stopServer(this.instances[instanceId].serverId);
+  }
 }
 
 // export class WsServerDriver2 extends DriverFactoryBase<
