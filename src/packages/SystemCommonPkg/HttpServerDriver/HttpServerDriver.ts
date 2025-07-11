@@ -162,7 +162,36 @@ export class HttpServerDriver extends DriverFactoryBase<
     }
   }
 
-  // TODO: add  logToConsole
+  protected logToConsole(
+    instance: HttpServerInstance,
+    eventName: HttpServerEvent,
+    ...p: any[]
+  ) {
+    switch (eventName) {
+      case HttpServerEvent.listening:
+        this.system.log.info(
+          `HttpServerDriver: Starting http server: ${instance.props.host}:${instance.props.port}`
+        );
+        break;
+      case HttpServerEvent.serverClosed:
+        this.system.log.info(
+          `HttpServerDriver: destroying http server: ${instance.props.host}:${instance.props.port}`
+        );
+        break;
+      case HttpServerEvent.serverError:
+        this.system.log.error(
+          `HttpServerDriver: error on http server ${instance.props.host}:${instance.props.port}. ${p[0]}`
+        );
+        break;
+      case HttpServerEvent.request:
+        this.system.log.debug(
+          `HttpServerDriver: new request id ${p[0]} on http server ${
+            instance.props.host
+          }:${instance.props.port}. ${JSON.stringify(p[1])}`
+        );
+        break;
+    }
+  }
 }
 
 export class HttpServerInstance extends DriverInstanceBase<HttpServerDriverInstanceProps> {
