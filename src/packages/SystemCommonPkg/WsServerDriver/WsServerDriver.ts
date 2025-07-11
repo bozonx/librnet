@@ -95,17 +95,14 @@ export class WsServerDriver extends DriverFactoryBase<
   }
 
   protected makeMatchString(instanceProps: WsServerDriverProps): string {
-    if (instanceProps.path) {
-      return `${instanceProps.host}:${instanceProps.port}${instanceProps.path}`;
-    }
-
     return `${instanceProps.host}:${instanceProps.port}`;
   }
 
   protected async makeInstanceProps(
     instanceProps: WsServerDriverProps
   ): Promise<WsServerDriverInstanceProps> {
-    const serverId = await this.common.io.newServer(instanceProps);
+    const { entityWhoAsk, ...rest } = instanceProps;
+    const serverId = await this.common.io.newServer(rest);
     const startedPromised = new Promised<void>();
 
     // TODO: use timeout
@@ -229,10 +226,7 @@ export class WsServerDriver extends DriverFactoryBase<
   }
 }
 
-export class WsServerInstance extends DriverInstanceBase<
-  WsServerDriverInstanceProps,
-  Record<string, any>
-> {
+export class WsServerInstance extends DriverInstanceBase<WsServerDriverInstanceProps> {
   readonly events = new IndexedEventEmitter<(...args: any[]) => void>();
 
   get serverId(): string {

@@ -31,6 +31,7 @@ export enum SystemEvents {
   systemDestroying,
   localFiles,
   wsServer,
+  httpServer,
   // when service or app status changed.
   //  ('app'|'service', entityName, EntityStatus, details?)
   entityStatus,

@@ -110,7 +110,7 @@ export class HttpServerIo
       this.events.emit(HttpServerEvent.serverError, serverId, String(err))
     );
     server.on('close', () =>
-      this.events.emit(HttpServerEvent.serverClose, serverId)
+      this.events.emit(HttpServerEvent.serverClosed, serverId)
     );
     server.on('listening', () => this.handleServerStartListening(serverId));
     server.on('request', (req: IncomingMessage, res: ServerResponse) =>

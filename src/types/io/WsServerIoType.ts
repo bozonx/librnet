@@ -23,7 +23,6 @@ export interface WsServerProps {
   host: string;
   // The port where to bind the server
   port: number;
-  path?: string;
 }
 
 // TODO: review

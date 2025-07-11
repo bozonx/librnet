@@ -5,18 +5,19 @@ import type { IoBase } from '../../system/base/IoBase.js';
 export enum HttpServerEvent {
   request,
   listening,
-  serverClose,
+  serverClosed,
   serverError,
 }
 
-export type HttpRequestHandler = (requestId: number, request: HttpRequest) => void;
+export type HttpRequestHandler = (
+  requestId: number,
+  request: HttpRequest
+) => void;
 
 export interface HttpServerProps {
   host: string;
   port: number;
-  // TODO: path разве нельзя передать
 }
-
 
 export interface HttpServerIoType {
   /**
@@ -30,7 +31,7 @@ export interface HttpServerIoType {
    * on server close. Depend on http server close
    */
   on(
-    cb: (eventName: HttpServerEvent.serverClose, serverId: string) => void
+    cb: (eventName: HttpServerEvent.serverClosed, serverId: string) => void
   ): Promise<number>;
 
   /**

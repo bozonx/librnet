@@ -1,77 +1,183 @@
-import type { HttpRequest } from 'squidlet-lib';
-import type { DriverContext } from '../../../system/context/DriverContext.js';
-import type { DriverIndex } from '../../../types/types.js';
-import DriverFactoryBase from '../../../system/base/DriverFactoryBase.js';
+import { IndexedEventEmitter, Promised } from 'squidlet-lib';
+import type { DriverIndex, DriverManifest } from '../../../types/types.js';
 import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js';
-import { IO_NAMES } from '../../../types/constants.js';
+import { IO_NAMES, SystemEvents } from '../../../types/constants.js';
 import { HttpServerEvent } from '../../../types/io/HttpServerIoType.js';
 import type {
   HttpServerIoFullType,
-  HttpServerIoType,
   HttpServerProps,
 } from '../../../types/io/HttpServerIoType.js';
-import HttpServerDriverLogic from './HttpServerDriverLogic.js';
 import type {
   HttpDriverRequest,
   HttpDriverResponse,
 } from './HttpServerDriverLogic.js';
-import { IoBase } from '../../../system/base/IoBase.js';
+import type { System } from '@/system/System.js';
+import { DriverFactoryBase } from '@/system/base/DriverFactoryBase.js';
 
-export const HttpServerDriverIndex: DriverIndex = (ctx: DriverContext) => {
-  return new HttpServerDriver(ctx);
+export interface HttpServerDriverProps extends HttpServerProps {
+  entityWhoAsk: string;
+}
+
+export interface HttpServerDriverInstanceProps extends HttpServerDriverProps {
+  serverId: string;
+}
+
+export const HttpServerDriverIndex: DriverIndex = (
+  manifest: DriverManifest,
+  system: System
+) => {
+  return new HttpServerDriver(system, manifest) as unknown as DriverFactoryBase<
+    HttpServerInstance,
+    Record<string, any>
+  >;
 };
 
-export class HttpServerInstance extends DriverInstanceBase<HttpServerProps> {
-  logic!: HttpServerDriverLogic;
+export class HttpServerDriver extends DriverFactoryBase<
+  HttpServerInstance,
+  HttpServerProps
+> {
+  readonly requireIo = [IO_NAMES.HttpServerIo];
+  protected SubDriverClass = HttpServerInstance;
 
-  private get httpServerIo(): HttpServerIoFullType {
-    return this.ctx.io.getIo<HttpServerIoFullType>(IO_NAMES.HttpServerIo);
-  }
+  protected common = {
+    io: this.system.io.getIo<HttpServerIoFullType>(IO_NAMES.HttpServerIo),
+  };
 
-  private get closedMsg() {
-    return `Http server "${this.props.host}:${this.props.port}" has been already closed`;
-  }
+  private serverHandlerIndex: number = -1;
 
-  // it fulfils when server is start listening
-  get startedPromise(): Promise<void> {
-    if (!this.logic) {
-      throw new Error(`HttpServer.startedPromise: ${this.closedMsg}`);
-    }
+  async init(...p: any[]) {
+    await super.init(...p);
 
-    return this.logic.startedPromise;
-  }
-
-  async init() {
-    this.logic = new HttpServerDriverLogic(
-      this.httpServerIo,
-      this.props,
-      () => {
-        this.ctx.log.error(
-          `HttpServer: ${this.closedMsg}, you can't manipulate it any more!`
+    this.serverHandlerIndex = await this.common.io.on(
+      (eventName: HttpServerEvent, serverId: string, ...p: any[]) => {
+        // rise system event
+        this.system.events.emit(
+          SystemEvents.httpServer,
+          eventName,
+          serverId,
+          ...p
         );
-      },
-      this.ctx.log.debug,
-      this.ctx.log.info,
-      this.ctx.log.error
+
+        const instance = this.instances.find(
+          (instance) => instance.serverId === serverId
+        );
+
+        if (instance) {
+          this.logToConsole(instance, eventName, ...p);
+        }
+
+        // skip listening and serverClosed events because
+        //   they will be hanled on server start and destroy
+        if (
+          eventName === HttpServerEvent.listening ||
+          eventName === HttpServerEvent.serverClosed
+        )
+          return;
+
+        if (instance) {
+          instance.$handleServerEvent(eventName, ...p);
+        } else {
+          this.system.log.warn(
+            `WsServerDriver: Can't find instance of Ws server "${serverId}"`
+          );
+        }
+      }
+    );
+  }
+
+  async destroy(destroyReason: string) {
+    await super.destroy(destroyReason);
+    await this.common.io.off(this.serverHandlerIndex);
+  }
+
+  protected makeMatchString(instanceProps: HttpServerDriverProps): string {
+    return `${instanceProps.host}:${instanceProps.port}`;
+  }
+
+  protected async makeInstanceProps(
+    instanceProps: HttpServerDriverProps
+  ): Promise<HttpServerDriverInstanceProps> {
+    const { entityWhoAsk, ...rest } = instanceProps;
+    const serverId = await this.common.io.newServer(rest);
+    const startedPromised = new Promised<void>();
+
+    // TODO: use timeout
+
+    const handlerIndex = await this.common.io.on(
+      (eventName: HttpServerEvent, serverId: string, ...p: any[]) => {
+        if (eventName === HttpServerEvent.listening) {
+          startedPromised.resolve();
+
+          this.common.io.off(handlerIndex);
+        }
+      }
     );
 
-    await this.logic.init();
+    await startedPromised;
+
+    return {
+      ...instanceProps,
+      serverId,
+    };
+  }
+
+  protected async destroyCb(instanceId: number): Promise<void> {
+    await super.destroyCb(instanceId);
+    await this.common.io.stopServer(this.instances[instanceId].serverId);
+    // TODO: ожидать событие останоки сервера
+  }
+
+  protected async validateInstanceProps(
+    instanceProps: HttpServerDriverProps
+  ): Promise<void> {
+    await super.validateInstanceProps(instanceProps);
+
+    if (
+      instanceProps.host === 'localhost' ||
+      instanceProps.host === '127.0.0.1'
+    ) {
+      const isPermitted = await this.system.permissions.checkPermissions(
+        instanceProps.entityWhoAsk,
+        this.name,
+        'localhost'
+      );
+
+      if (!isPermitted) {
+        throw new Error('Permission for localhost denied');
+      }
+    } else {
+      const isPermitted = await this.system.permissions.checkPermissions(
+        instanceProps.entityWhoAsk,
+        this.name,
+        '0.0.0.0'
+      );
+
+      if (!isPermitted) {
+        throw new Error('Permission for 0.0.0.0 denied');
+      }
+    }
+
+    if (await this.system.ports.isTcpPortFree(instanceProps.port)) {
+      throw new Error(`TCP port ${instanceProps.port} is already in use`);
+    }
+  }
+
+  // TODO: add  logToConsole
+}
+
+export class HttpServerInstance extends DriverInstanceBase<HttpServerDriverInstanceProps> {
+  readonly events = new IndexedEventEmitter<(...args: any[]) => void>();
+
+  get serverId(): string {
+    return this.props.serverId;
   }
 
   async destroy() {
-    await this.logic.destroy();
+    await super.destroy();
+    this.events.destroy();
   }
 
-  async start() {
-    // TODO: WTF ???
-  }
-
-  async stop(force?: boolean) {
-    if (!this.logic) throw new Error(`HttpServer.stop: ${this.onRequest}`);
-
-    return this.logic.closeServer(force);
-  }
-
+  // TODO: review
   onRequest(
     cb: (request: HttpDriverRequest) => Promise<HttpDriverResponse>
   ): number {
@@ -80,75 +186,15 @@ export class HttpServerInstance extends DriverInstanceBase<HttpServerProps> {
     return this.logic.onRequest(cb);
   }
 
-  removeRequestListener(handlerIndex: number) {
-    if (!this.logic)
-      throw new Error(`HttpServer.removeRequestListener: ${this.onRequest}`);
-
-    this.logic.removeRequestListener(handlerIndex);
+  onServerError(cb: (err: string) => void): number {
+    return this.events.addListener(HttpServerEvent.serverError, cb);
   }
 
-  // handleServerListening() {
-  //   this.logic.handleServerListening()
-  // }
-  //
-  // handleServerClose() {
-  //   this.logic.handleServerClose()
-  // }
-  //
-  // handleServerError(err: string) {
-  //   this.logic.handleServerError(err)
-  // }
-  //
-  // handleServerRequest(requestId: number, request: HttpRequest) {
-  //   this.logic.handleServerRequest(requestId, request)
-  // }
-}
-
-export class HttpServerDriver extends DriverFactoryBase<
-  HttpServerInstance,
-  HttpServerProps
-> {
-  protected SubDriverClass = HttpServerInstance;
-
-  async init(cfg?: Record<string, any>) {
-    await super.init(cfg);
-
-    const httpServerIo = this.ctx.io.getIo<HttpServerIoFullType>(
-      IO_NAMES.HttpServerIo
-    );
-
-    // TODO: лучше чтобы драйвер слушал один раз и раздовал по серверам
-
-    await httpServerIo.on(
-      (eventName: HttpServerEvent, serverId: string, ...p: any[]) => {
-        // serverId is host:port
-        const instance = this.instances[serverId];
-
-        if (!instance) {
-          this.ctx.log.warn(`Can't find instance of HTTP server "${serverId}"`);
-
-          return;
-        }
-
-        if (eventName === HttpServerEvent.serverClose) {
-          //clearTimeout(listeningTimeout)
-          instance.logic.handleServerClose();
-        } else if (eventName === HttpServerEvent.listening) {
-          //clearTimeout(listeningTimeout)
-          instance.logic.handleServerListening();
-        } else if (eventName === HttpServerEvent.serverError) {
-          instance.logic.handleServerError(p[0]);
-        } else if (eventName === HttpServerEvent.request) {
-          instance.logic.handleServerRequest(p[0], p[1]);
-        }
-      }
-    );
+  off(handlerIndex: number) {
+    this.events.removeListener(handlerIndex);
   }
 
-  protected makeInstanceId(
-    props: HttpServerProps,
-    cfg?: Record<string, any>
-  ): string {
-    return `${props.host}:${props.port}`;
+  $handleServerEvent(eventName: HttpServerEvent, ...p: any[]) {
+    this.events.emit(eventName, ...p);
   }
 }
