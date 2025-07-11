@@ -20,6 +20,8 @@ export class IoManager {
   }
 
   async initIoSetsAndFilesIo() {
+    // TODO: use Promise.allSettled([
+    // TODO: add timeout for each item
     // Init all the ioSets
     for (const ioSet of Object.values(this.ioSets)) {
       const promised = new Promised();
@@ -31,6 +33,7 @@ export class IoManager {
       }
     }
 
+    // TODO: WTF?
     // init only FileIo
     await this.initIo(IO_NAMES.LocalFilesIo);
   }
@@ -39,6 +42,8 @@ export class IoManager {
    * It initializes all the IOs except FilesIo
    */
   async initIos() {
+    // TODO: use Promise.allSettled([
+    // TODO: add timeout for each item
     for (const io of Object.values(this.ios)) {
       if (io.name === IO_NAMES.LocalFilesIo) continue;
 
@@ -47,6 +52,8 @@ export class IoManager {
   }
 
   async destroy() {
+    // TODO: use Promise.allSettled([
+    // TODO: add timeout for each item
     for (const ioName of Object.keys(this.ios)) {
       await this.destroyIo(ioName);
       delete this.ios[ioName];

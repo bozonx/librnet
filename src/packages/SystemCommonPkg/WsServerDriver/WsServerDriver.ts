@@ -14,18 +14,15 @@ import type {
 import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js';
 import type { System } from '@/system/System.js';
 import { DriverFactoryBase } from '@/system/base/DriverFactoryBase.js';
-import type { DriverInstanceClass } from '@/system/base/DriverInstanceBase.js';
 
-// TODO: а оно надо??? может лучше сессию использовать?
-// export const SETCOOKIE_LABEL = '__SET_COOKIE__';
-// TODO: наверное прикрутить сессию чтобы считать что клиент ещё подключен
-// TODO: отслежитьвать статус соединения - connected, wait, reconnect ...
-// TODO: check permissions
 // TODO: можно ли установить cookie? стандартным способом?
-// TODO: отслеживать статус соединения с io
 // TODO: а если сервер сам неожиданно отвалился?
 
 export interface WsServerDriverProps extends WsServerProps {
+  entityWhoAsk: string;
+}
+
+export interface WsServerDriverInstanceProps extends WsServerDriverProps {
   serverId: string;
 }
 
@@ -44,11 +41,7 @@ export class WsServerDriver extends DriverFactoryBase<
   WsServerDriverProps
 > {
   readonly requireIo = [IO_NAMES.WsServerIo];
-  protected SubDriverClass = WsServerInstance as unknown as DriverInstanceClass<
-    WsServerDriverProps,
-    Record<string, any>,
-    WsServerDriver<any, any>
-  >;
+  protected SubDriverClass = WsServerInstance;
 
   protected common = {
     io: this.system.io.getIo<WsServerIoFullType>(IO_NAMES.WsServerIo),
@@ -101,7 +94,7 @@ export class WsServerDriver extends DriverFactoryBase<
     await this.common.io.off(this.serverHandlerIndex);
   }
 
-  protected makeMatchString(instanceProps: WsServerProps): string {
+  protected makeMatchString(instanceProps: WsServerDriverProps): string {
     if (instanceProps.path) {
       return `${instanceProps.host}:${instanceProps.port}${instanceProps.path}`;
     }
@@ -110,8 +103,8 @@ export class WsServerDriver extends DriverFactoryBase<
   }
 
   protected async makeInstanceProps(
-    instanceProps: WsServerProps
-  ): Promise<WsServerDriverProps> {
+    instanceProps: WsServerDriverProps
+  ): Promise<WsServerDriverInstanceProps> {
     const serverId = await this.common.io.newServer(instanceProps);
     const startedPromised = new Promised<void>();
 
@@ -142,10 +135,38 @@ export class WsServerDriver extends DriverFactoryBase<
   }
 
   protected async validateInstanceProps(
-    instanceProps: WsServerProps
+    instanceProps: WsServerDriverProps
   ): Promise<void> {
-    // TODO: проверить права на localhost и внешний сервер
-    // TODO: проверить в менеджере портов что порт не занят
+    await super.validateInstanceProps(instanceProps);
+
+    if (
+      instanceProps.host === 'localhost' ||
+      instanceProps.host === '127.0.0.1'
+    ) {
+      const isPermitted = await this.system.permissions.checkPermissions(
+        instanceProps.entityWhoAsk,
+        this.name,
+        'localhost'
+      );
+
+      if (!isPermitted) {
+        throw new Error('Permission for localhost denied');
+      }
+    } else {
+      const isPermitted = await this.system.permissions.checkPermissions(
+        instanceProps.entityWhoAsk,
+        this.name,
+        '0.0.0.0'
+      );
+
+      if (!isPermitted) {
+        throw new Error('Permission for 0.0.0.0 denied');
+      }
+    }
+
+    if (await this.system.ports.isTcpPortFree(instanceProps.port)) {
+      throw new Error(`TCP port ${instanceProps.port} is already in use`);
+    }
   }
 
   protected logToConsole(
@@ -160,7 +181,7 @@ export class WsServerDriver extends DriverFactoryBase<
         );
         break;
       case WsServerEvent.serverClosed:
-        this.system.log.debug(
+        this.system.log.info(
           `WsServerDriver: destroying websocket server: ${instance.props.host}:${instance.props.port}`
         );
         break;
@@ -209,7 +230,7 @@ export class WsServerDriver extends DriverFactoryBase<
 }
 
 export class WsServerInstance extends DriverInstanceBase<
-  WsServerDriverProps,
+  WsServerDriverInstanceProps,
   Record<string, any>
 > {
   readonly events = new IndexedEventEmitter<(...args: any[]) => void>();
@@ -303,12 +324,3 @@ export class WsServerInstance extends DriverInstanceBase<
     }
   }
 }
-
-// TODO: оно нужно ???
-// async setCookie(connectionId: string, cookie: string) {
-//   const data = `${SETCOOKIE_LABEL}${cookie}`;
-//
-//   this.ctx.log.debug(`WsServerLogic.setCookie from ${this.props.host}:${this.props.port} to connection ${connectionId}, ${data}`);
-//
-//   return this.wsServerIo.send(this.serverId, connectionId, data);
-// }

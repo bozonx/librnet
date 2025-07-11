@@ -12,6 +12,8 @@ export class DriversManager {
   }
 
   async init() {
+    // TODO: use Promise.allSettled([
+    // TODO: add timeout for each item
     for (const driverName of this.getNames()) {
       const driver = this.drivers[driverName];
       const foundRequiredIoNames: string[] = this.system.io
@@ -32,6 +34,8 @@ export class DriversManager {
   }
 
   async destroy() {
+    // TODO: use Promise.allSettled([
+    // TODO: add timeout for each item
     for (const driverName of this.getNames()) {
       const driver = this.drivers[driverName];
 

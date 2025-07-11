@@ -39,6 +39,8 @@ export abstract class EntityManagerBase<Context extends EntityBaseContext> {
    * On system init
    */
   async init() {
+    // TODO: use Promise.allSettled([
+    // TODO: add timeout for each item
     if (this.system.isProdMode) {
       // TODO: load apps manifest and register apps in production mode
     }
@@ -52,6 +54,7 @@ export abstract class EntityManagerBase<Context extends EntityBaseContext> {
    * On system destroy
    */
   async destroy() {
+    // TODO: use Promise.allSettled([
     for (const entityName of Object.keys(this.entities)) {
       await this.destroyEntity(entityName);
     }

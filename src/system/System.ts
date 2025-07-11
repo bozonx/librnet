@@ -13,6 +13,7 @@ import { FileLogsManager } from './managers/FileLogsManager.js';
 import { MountPointsManager } from './managers/MountPointsManager.js';
 import { RootDirDriverLogic } from './driversLogic/RootDirDriverLogic.js';
 import { SystemApiManager } from './managers/SystemApiManager.js';
+import { PortsManager } from './managers/PortsManager.js';
 
 export class System {
   readonly events = new IndexedEventEmitter();
@@ -23,6 +24,7 @@ export class System {
   readonly localFiles = new RootDirDriverLogic(this, this.ROOT_DIR);
   // managers
   readonly mountPoints = new MountPointsManager(this, this.ROOT_DIR);
+  readonly ports = new PortsManager(this);
   readonly packageManager = new PackageManager(this);
   readonly configs = new ConfigsManager(this);
   readonly permissions = new PermissionsManager(this);
@@ -64,12 +66,13 @@ export class System {
       await this.io.initIos();
       await this.drivers.init();
 
+      // TODO: вынести в установщик
       if (this.JUST_INSTALLED) {
         await afterInstall(this);
       }
 
-      await this.services.init();
-      await this.apps.init();
+      await this.service.init();
+      await this.app.init();
       // notify that system is inited
       this.events.emit(SystemEvents.systemInited);
     } catch (e) {
@@ -81,15 +84,10 @@ export class System {
     try {
       this.events.emit(SystemEvents.systemDestroying);
 
-      // TODO: add timeout for each item
-
-      // it will call destroy functions step by step
-      await Promise.allSettled([
-        this.apps.destroy(),
-        this.services.destroy(),
-        this.drivers.destroy(),
-        this.io.destroy(),
-      ]);
+      await this.app.destroy();
+      await this.service.destroy();
+      await this.drivers.destroy();
+      await this.io.destroy();
 
       this.events.destroy();
     } catch (e) {
@@ -100,8 +98,8 @@ export class System {
   async start() {
     try {
       // start system's and user's services
-      await this.services.startAll();
-      await this.apps.startAll();
+      await this.service.startAll();
+      await this.app.startAll();
       // notify that system is started
       this.events.emit(SystemEvents.systemStarted);
     } catch (e) {
