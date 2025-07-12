@@ -192,6 +192,11 @@ export class HttpServerDriver extends DriverFactoryBase<
           }:${instance.props.port}. ${JSON.stringify(p[1])}`
         );
         break;
+      default:
+        this.system.log.warn(
+          `HttpServerDriver: Unrecognized event ${eventName} on server ${instance.props.host}:${instance.props.port}`
+        );
+        break;
     }
   }
 }

@@ -220,6 +220,11 @@ export class WsServerDriver extends DriverFactoryBase<
           `WsServerDriver: error on ws server ${instance.props.host}:${instance.props.port}. ${p[0]}`
         );
         break;
+      default:
+        this.system.log.warn(
+          `WsServerDriver: Unrecognized event ${eventName} on server ${instance.props.host}:${instance.props.port}`
+        );
+        break;
     }
   }
 }

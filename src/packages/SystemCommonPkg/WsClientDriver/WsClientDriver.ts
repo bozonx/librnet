@@ -1,4 +1,4 @@
-import { IndexedEventEmitter } from 'squidlet-lib';
+import { IndexedEventEmitter, parseUrl } from 'squidlet-lib';
 import { DriverFactoryBase } from '../../../system/base/DriverFactoryBase.js';
 import { IO_NAMES, SystemEvents } from '../../../types/constants.js';
 import type { DriverIndex, DriverManifest } from '../../../types/types.js';
@@ -9,7 +9,6 @@ import {
   type WsClientProps,
   WsClientEvent,
 } from '../../../types/io/WsClientIoType.js';
-import { WsServerEvent } from '@/types/io/WsServerIoType.js';
 
 export enum WsClientStatus {
   disconnected = 'disconnected',
@@ -117,15 +116,23 @@ export class WsClientDriver extends DriverFactoryBase<
   ): Promise<void> {
     await super.validateInstanceProps(instanceProps);
 
+    const host = parseUrl(instanceProps.url).host;
+
+    if (!host) {
+      throw new Error(`Invalid url ${instanceProps.url}`);
+    }
+
     const isPermitted = await this.system.permissions.checkPermissions(
       instanceProps.entityWhoAsk,
       this.name,
-      // TODO: извлечь только домен или ip адрес
-      instanceProps.url
+      host
     );
 
     if (!isPermitted) {
-      throw new Error(`Permission for url ${instanceProps.url} denied`);
+      // TODO: в сообщения об ошибках добавить entityWhoAsk
+      throw new Error(
+        `WsClientDriver: Permission for host ${host} denied for ${instanceProps.entityWhoAsk}`
+      );
     }
   }
 
@@ -134,9 +141,34 @@ export class WsClientDriver extends DriverFactoryBase<
     eventName: WsClientEvent,
     ...p: any[]
   ) {
-    this.system.log.info(
-      `WsClientDriver: ${instance.connectionId} ${eventName} ${p.length} bytes`
-    );
+    switch (eventName) {
+      case WsClientEvent.open:
+        this.system.log.info(`WsClientDriver: ${instance.connectionId} open`);
+        break;
+      case WsClientEvent.close:
+        this.system.log.info(`WsClientDriver: ${instance.connectionId} close`);
+        break;
+      case WsClientEvent.message:
+        this.system.log.info(
+          `WsClientDriver: ${instance.connectionId} message ${p[0]} bytes`
+        );
+        break;
+      case WsClientEvent.error:
+        this.system.log.error(
+          `WsClientDriver: ${instance.connectionId} error ${p[0]}`
+        );
+        break;
+      case WsClientEvent.unexpectedResponse:
+        this.system.log.error(
+          `WsClientDriver: ${instance.connectionId} unexpected response ${p[0]}`
+        );
+        break;
+      default:
+        this.system.log.warn(
+          `WsClientDriver: Unrecognized event ${eventName} on connection ${instance.connectionId}`
+        );
+        break;
+    }
   }
 }
 
@@ -157,6 +189,10 @@ export class WsClientInstance extends DriverInstanceBase<WsClientDriverInstanceP
    * @param data - data to send
    */
   send(data: string | Uint8Array) {
+    this.system.log.debug(
+      `WsClientInstance.send from ${this.props.url} to connection ${this.connectionId}, data length ${data.length}`
+    );
+
     this.common.io.send(this.connectionId, data);
   }
 
