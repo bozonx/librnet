@@ -9,6 +9,7 @@ import {
   type WsClientProps,
   WsClientEvent,
 } from '../../../types/io/WsClientIoType.js';
+import { WsServerEvent } from '@/types/io/WsServerIoType.js';
 
 export enum WsClientStatus {
   disconnected = 'disconnected',
@@ -64,12 +65,78 @@ export class WsClientDriver extends DriverFactoryBase<
           connectionId,
           ...p
         );
+
+        const instance = this.instances.find(
+          (instance) => instance.connectionId === connectionId
+        );
+
+        if (instance) {
+          this.logToConsole(instance, eventName, ...p);
+        }
+
+        if (instance) {
+          instance.$handleDriverEvent(eventName, ...p);
+        } else {
+          this.system.log.warn(
+            `WsClientDriver: Can't find instance of Ws client "${connectionId}"`
+          );
+        }
       }
     );
   }
 
   async destroy(destroyReason: string) {
     await super.destroy(destroyReason);
+    await this.common.io.off(this.handlerIndex);
+  }
+
+  protected makeMatchString(instanceProps: WsClientDriverProps): string {
+    return `${instanceProps.url}`;
+  }
+
+  protected async makeInstanceProps(
+    instanceProps: WsClientDriverProps
+  ): Promise<WsClientDriverInstanceProps> {
+    const { entityWhoAsk, ...rest } = instanceProps;
+    const connectionId = await this.common.io.newConnection(rest);
+
+    return {
+      ...instanceProps,
+      connectionId,
+    };
+  }
+
+  protected async destroyCb(instanceId: number): Promise<void> {
+    await super.destroyCb(instanceId);
+    await this.common.io.close(this.instances[instanceId].connectionId);
+    // TODO: ожидать событие закрытия соединения
+  }
+
+  protected async validateInstanceProps(
+    instanceProps: WsClientDriverProps
+  ): Promise<void> {
+    await super.validateInstanceProps(instanceProps);
+
+    const isPermitted = await this.system.permissions.checkPermissions(
+      instanceProps.entityWhoAsk,
+      this.name,
+      // TODO: извлечь только домен или ip адрес
+      instanceProps.url
+    );
+
+    if (!isPermitted) {
+      throw new Error(`Permission for url ${instanceProps.url} denied`);
+    }
+  }
+
+  protected logToConsole(
+    instance: WsClientInstance,
+    eventName: WsClientEvent,
+    ...p: any[]
+  ) {
+    this.system.log.info(
+      `WsClientDriver: ${instance.connectionId} ${eventName} ${p.length} bytes`
+    );
   }
 }
 
