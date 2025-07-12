@@ -1,4 +1,9 @@
-import { IndexedEventEmitter, Promised } from 'squidlet-lib';
+import {
+  IndexedEventEmitter,
+  Promised,
+  type HttpResponse,
+  type HttpRequest,
+} from 'squidlet-lib';
 import type { DriverIndex, DriverManifest } from '../../../types/types.js';
 import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js';
 import { IO_NAMES, SystemEvents } from '../../../types/constants.js';
@@ -7,10 +12,6 @@ import type {
   HttpServerIoFullType,
   HttpServerProps,
 } from '../../../types/io/HttpServerIoType.js';
-import type {
-  HttpDriverRequest,
-  HttpDriverResponse,
-} from './HttpServerDriverLogic.js';
 import type { System } from '@/system/System.js';
 import { DriverFactoryBase } from '@/system/base/DriverFactoryBase.js';
 
@@ -206,16 +207,28 @@ export class HttpServerInstance extends DriverInstanceBase<HttpServerDriverInsta
     this.events.destroy();
   }
 
-  // TODO: review
-  onRequest(
-    cb: (request: HttpDriverRequest) => Promise<HttpDriverResponse>
-  ): number {
-    if (!this.logic) throw new Error(`HttpServer.onMessage: ${this.onRequest}`);
-
-    return this.logic.onRequest(cb);
+  /**
+   * Send response to client after you have handled a request.
+   * @param requestId - request id
+   * @param response - response
+   */
+  async sendResponse(requestId: number, response: HttpResponse) {
+    await this.common.io.sendResponse(this.serverId, requestId, response);
   }
 
-  onServerError(cb: (err: string) => void): number {
+  /**
+   * Listen new request.
+   * You have to call sendResponse after you have handled a request.
+   * @param cb - callback
+   * @returns handler index
+   */
+  onRequest(
+    cb: (requestId: number, request: HttpRequest) => void | Promise<void>
+  ): number {
+    return this.events.addListener(HttpServerEvent.request, cb);
+  }
+
+  onServerError(cb: (err: string) => void | Promise<void>): number {
     return this.events.addListener(HttpServerEvent.serverError, cb);
   }
 

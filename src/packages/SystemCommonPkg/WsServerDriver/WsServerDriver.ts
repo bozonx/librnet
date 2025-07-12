@@ -269,7 +269,9 @@ export class WsServerInstance extends DriverInstanceBase<WsServerDriverInstanceP
   /**
    * Listen income messages
    */
-  onMessage(cb: (connectionId: string, data: Uint8Array) => void): number {
+  onMessage(
+    cb: (connectionId: string, data: Uint8Array) => void | Promise<void>
+  ): number {
     return this.events.addListener(WsServerEvent.connectionMessage, cb);
   }
 
@@ -277,7 +279,7 @@ export class WsServerInstance extends DriverInstanceBase<WsServerDriverInstanceP
    * It rises when new connection is come.
    */
   onConnection(
-    cb: (connectionId: string, request: HttpRequest) => void
+    cb: (connectionId: string, request: HttpRequest) => void | Promise<void>
   ): number {
     return this.events.addListener(WsServerEvent.newConnection, cb);
   }
@@ -286,18 +288,26 @@ export class WsServerInstance extends DriverInstanceBase<WsServerDriverInstanceP
    * Listen any connection close
    */
   onConnectionClose(
-    cb: (connectionId: string, code?: number, reason?: string) => void
+    cb: (
+      connectionId: string,
+      code?: number,
+      reason?: string
+    ) => void | Promise<void>
   ): number {
     return this.events.addListener(WsServerEvent.connectionClose, cb);
   }
 
   onConnectionError(
-    cb: (connectionId: string, err: string, response?: HttpResponse) => void
+    cb: (
+      connectionId: string,
+      err: string,
+      response?: HttpResponse
+    ) => void | Promise<void>
   ): number {
     return this.events.addListener(WsServerEvent.connectionError, cb);
   }
 
-  onServerError(cb: (err: string) => void): number {
+  onServerError(cb: (err: string) => void | Promise<void>): number {
     return this.events.addListener(WsServerEvent.serverError, cb);
   }
 
