@@ -1,3 +1,4 @@
+import type { IoBase } from '@/system/base/IoBase';
 import type { HttpResponse } from 'squidlet-lib';
 
 export enum WsClientEvent {
@@ -20,7 +21,7 @@ export enum WsCloseStatus {
 
 export type OnMessageHandler = (data: string | Uint8Array) => void;
 
-export interface WebSocketClientProps {
+export interface WsClientProps {
   url: string;
   headers?: { [index: string]: string };
 }
@@ -55,9 +56,12 @@ export interface WsClientIoType {
   ): Promise<number>;
   off(handlerIndex: number): Promise<void>;
 
-  newConnection(props: WebSocketClientProps): Promise<string>;
-  reConnect(connectionId: string, props: WebSocketClientProps): Promise<void>;
+  newConnection(props: WsClientProps): Promise<string>;
+  // TODO: зачем это в Io? это же должно к драйверу относиться
+  reConnect(connectionId: string, props: WsClientProps): Promise<void>;
   send(connectionId: string, data: string | Uint8Array): Promise<void>;
   close(connectionId: string, code?: number, reason?: string): Promise<void>;
   // destroyConnection   (connectionId: string): Promise<void>;
 }
+
+export type WsClientIoFullType = WsClientIoType & IoBase;

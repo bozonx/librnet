@@ -3,6 +3,7 @@ import type {
   BinTypes,
   BinTypesNames,
   DriverIndex,
+  DriverManifest,
 } from '../../../types/types.js';
 import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js';
 import { FILE_ACTION, IO_NAMES } from '../../../types/constants.js';
@@ -17,16 +18,16 @@ import type {
 } from '../../../types/io/FilesIoType.js';
 import type { System } from '../../../system/System.js';
 import { checkPermissions } from '../../../system/helpers/CheckPathPermission.js';
-import { RootDirDriverLogic } from '@/system/driversLogic/RootDirDriverLogic.js';
-import { clearAbsolutePath } from '@/system/helpers/helpers.js';
+import { RootDirDriverLogic } from '../../../system/driversLogic/RootDirDriverLogic.js';
+import { clearAbsolutePath } from '../../../system/helpers/helpers.js';
 
 export const FILE_PERM_DELIMITER = '|';
 
 export const RootFilesDriverIndex: DriverIndex = (
-  name: string,
+  manifest: DriverManifest,
   system: System
 ) => {
-  return new RootFilesDriver(system, name);
+  return new RootFilesDriver(system, manifest);
 };
 
 export class RootFilesDriver extends DriverFactoryBase<

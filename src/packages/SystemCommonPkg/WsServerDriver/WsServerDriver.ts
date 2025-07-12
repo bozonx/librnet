@@ -30,10 +30,7 @@ export const WsServerDriverIndex: DriverIndex = (
   manifest: DriverManifest,
   system: System
 ) => {
-  return new WsServerDriver(system, manifest) as unknown as DriverFactoryBase<
-    WsServerInstance,
-    Record<string, any>
-  >;
+  return new WsServerDriver(system, manifest);
 };
 
 export class WsServerDriver extends DriverFactoryBase<
@@ -47,13 +44,14 @@ export class WsServerDriver extends DriverFactoryBase<
     io: this.system.io.getIo<WsServerIoFullType>(IO_NAMES.WsServerIo),
   };
 
-  private serverHandlerIndex: number = -1;
+  private handlerIndex: number = -1;
 
   async init(...p: any[]) {
     await super.init(...p);
 
-    this.serverHandlerIndex = await this.common.io.on(
+    this.handlerIndex = await this.common.io.on(
       (eventName: WsServerEvent, serverId: string, ...p: any[]) => {
+        // TODO: подсчитать количество байтов в сообщении
         // rise system event
         this.system.events.emit(
           SystemEvents.wsServer,
@@ -79,7 +77,7 @@ export class WsServerDriver extends DriverFactoryBase<
           return;
 
         if (instance) {
-          instance.$handleServerEvent(eventName, ...p);
+          instance.$handleDriverEvent(eventName, ...p);
         } else {
           this.system.log.warn(
             `WsServerDriver: Can't find instance of Ws server "${serverId}"`
@@ -91,7 +89,7 @@ export class WsServerDriver extends DriverFactoryBase<
 
   async destroy(destroyReason: string) {
     await super.destroy(destroyReason);
-    await this.common.io.off(this.serverHandlerIndex);
+    await this.common.io.off(this.handlerIndex);
   }
 
   protected makeMatchString(instanceProps: WsServerDriverProps): string {
@@ -315,7 +313,7 @@ export class WsServerInstance extends DriverInstanceBase<WsServerDriverInstanceP
     this.events.removeListener(handlerIndex);
   }
 
-  $handleServerEvent(eventName: WsServerEvent, ...p: any[]) {
+  $handleDriverEvent(eventName: WsServerEvent, ...p: any[]) {
     if (eventName === WsServerEvent.connectionUnexpectedResponse) {
       this.events.emit(
         WsServerEvent.connectionError,

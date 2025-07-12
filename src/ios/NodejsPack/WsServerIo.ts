@@ -142,10 +142,8 @@ export class WsServerIo
   }
 
   protected makeServerId(props: WsServerProps): string {
-    return (
-      `${props.host}:${props.port}` +
-      (props.path ? `/${trimCharStart(props.path, '/')}` : '')
-    );
+    return `${props.host}:${props.port}`;
+    // (props.path ? `/${trimCharStart(props.path, '/')}` : '')
   }
 
   protected async destroyServer(serverItem: ServerItem): Promise<void> {
