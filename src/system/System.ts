@@ -1,4 +1,4 @@
-import { IndexedEventEmitter, LOG_LEVELS, LogPublisher } from 'squidlet-lib';
+import { IndexedEventEmitter, LogPublisher } from 'squidlet-lib';
 import { IoManager } from './managers/IoManager.js';
 import { ServicesManager } from './managers/ServicesManager.js';
 import { ConfigsManager } from './managers/ConfigsManager.js';
@@ -16,11 +16,12 @@ import { EnvModes, SystemEvents, type SystemEnv } from '../types/types.js';
 
 export class System {
   readonly events = new IndexedEventEmitter();
-  // this is console logger
-  readonly log = new LogPublisher((logLevel: LogLevel, ...p: any[]) => {
-    this.events.emit(SystemEvents.logger, logLevel, ...p);
-    this.consoleLogger(logLevel, ...p);
-  });
+  readonly log = new LogPublisher((...p: any[]) =>
+    this.events.emit(SystemEvents.logger, ...p)
+  );
+
+  // this is access to local files only for system purposes
+  // It doesn't check permissions but rises events
   readonly localFiles = new RootDirDriverLogic(this, this.env.ROOT_DIR);
   // managers
   readonly mountPoints = new MountPointsManager(this, this.env.ROOT_DIR);
@@ -30,9 +31,9 @@ export class System {
   readonly permissions = new PermissionsManager(this);
   readonly fileLogs = new FileLogsManager(this);
   readonly io = new IoManager(this);
-  readonly drivers = new DriversManager(this);
   readonly api = new EntitiesApiManager();
   readonly systemApi = new SystemApiManager(this);
+  readonly drivers = new DriversManager(this);
   readonly service = new ServicesManager(this);
   readonly app = new AppsManager(this);
 
@@ -52,10 +53,7 @@ export class System {
     return structuredClone(this._env);
   }
 
-  constructor(
-    private readonly _env: SystemEnv,
-    private readonly consoleLogger: (logLevel: LogLevel, ...p: any[]) => void
-  ) {}
+  constructor(private readonly _env: SystemEnv) {}
 
   async init() {
     try {

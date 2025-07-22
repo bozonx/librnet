@@ -1,6 +1,5 @@
-import { LOG_LEVELS, type LogLevel } from 'squidlet-lib';
+import { type LogLevels } from 'squidlet-lib';
 import { System } from '../../system/System.js';
-import { ConsoleLoggerPkg } from '../../packages/ConsoleLoggerPkg/index.js';
 import { SystemCommonPkg } from '../../packages/SystemCommonPkg/index.js';
 import { ioSetLocalPkg } from '../../packages/IoSetLocalPkg/index.js';
 import { FilesIoIndex } from '../../ios/NodejsPack/LocalFilesIo.js';
@@ -43,14 +42,17 @@ export async function startSystem(
     ENV_MODE,
   });
 
-  // TODO: why??? it is not IO
-  system.use(ConsoleLoggerPkg({ logLevel: LOG_LEVELS.debug as LogLevel }));
+  system.events.addListener(SystemEvents.logger, (...p) => {
+    console.log(...p);
+  });
+
+  // system.use(ConsoleLoggerPkg({ logLevel: LOG_LEVELS.debug as LogLevel }));
   // use packages
   system.use(
     ioSetLocalPkg(
       [
         FilesIoIndex,
-        SysInfoIoIndex,
+        // SysInfoIoIndex,
         HttpClientIoIndex,
         HttpServerIoIndex,
         WsClientIoIndex,
