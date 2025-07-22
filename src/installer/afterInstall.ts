@@ -1,4 +1,4 @@
-import type { System } from './System.js';
+import type { System } from '../system/System.js';
 import {
   LOCAL_DATA_SUB_DIRS,
   ROOT_DIRS,

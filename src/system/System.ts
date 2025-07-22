@@ -1,12 +1,10 @@
-import { IndexedEventEmitter, LogPublisher} from 'squidlet-lib'
-import { ENV_MODES, SystemEvents, type EnvMode } from '../types/constants.js';
+import { IndexedEventEmitter, LOG_LEVELS, LogPublisher } from 'squidlet-lib';
 import { IoManager } from './managers/IoManager.js';
 import { ServicesManager } from './managers/ServicesManager.js';
 import { ConfigsManager } from './managers/ConfigsManager.js';
 import { PermissionsManager } from './managers/PermissionsManager.js';
 import { PackageManager } from './managers/PackageManager.js';
 import { DriversManager } from './managers/DriversManager.js';
-import { afterInstall } from './afterInstall.js';
 import { AppsManager } from './managers/AppsManager.js';
 import { EntitiesApiManager } from './managers/EntitiesApiManager.js';
 import { FileLogsManager } from './managers/FileLogsManager.js';
@@ -14,16 +12,18 @@ import { MountPointsManager } from './managers/MountPointsManager.js';
 import { RootDirDriverLogic } from './driversLogic/RootDirDriverLogic.js';
 import { SystemApiManager } from './managers/SystemApiManager.js';
 import { PortsManager } from './managers/PortsManager.js';
+import { EnvModes, SystemEvents, type SystemEnv } from '../types/types.js';
 
 export class System {
   readonly events = new IndexedEventEmitter();
   // this is console logger
-  readonly log = new LogPublisher((...p) =>
-    this.events.emit(SystemEvents.logger, ...p)
-  );
-  readonly localFiles = new RootDirDriverLogic(this, this.ROOT_DIR);
+  readonly log = new LogPublisher((logLevel: LogLevel, ...p: any[]) => {
+    this.events.emit(SystemEvents.logger, logLevel, ...p);
+    this.consoleLogger(logLevel, ...p);
+  });
+  readonly localFiles = new RootDirDriverLogic(this, this.env.ROOT_DIR);
   // managers
-  readonly mountPoints = new MountPointsManager(this, this.ROOT_DIR);
+  readonly mountPoints = new MountPointsManager(this, this.env.ROOT_DIR);
   readonly ports = new PortsManager(this);
   readonly packageManager = new PackageManager(this);
   readonly configs = new ConfigsManager(this);
@@ -37,25 +37,25 @@ export class System {
   readonly app = new AppsManager(this);
 
   get isDevMode() {
-    return this.ENV_MODE === ENV_MODES.development;
+    return this.env.ENV_MODE === EnvModes.development;
   }
 
   get isProdMode() {
-    return this.ENV_MODE === ENV_MODES.production;
+    return this.env.ENV_MODE === EnvModes.production;
   }
 
   get isTestMode() {
-    return this.ENV_MODE === ENV_MODES.test;
+    return this.env.ENV_MODE === EnvModes.test;
+  }
+
+  get env() {
+    return structuredClone(this._env);
   }
 
   constructor(
-    readonly ENV_MODE: ENV_MODES = ENV_MODES.production,
-    private readonly ROOT_DIR: string,
-    readonly EXT_DIRS?: string[],
-    readonly JUST_INSTALLED: boolean = false
-  ) {
-    // TODO: receive  logger from outside
-  }
+    private readonly _env: SystemEnv,
+    private readonly consoleLogger: (logLevel: LogLevel, ...p: any[]) => void
+  ) {}
 
   async init() {
     try {
@@ -66,12 +66,6 @@ export class System {
       await this.io.initIos();
       await this.drivers.init();
       this.events.emit(SystemEvents.driversInitialized);
-
-      // TODO: вынести в установщик
-      if (this.JUST_INSTALLED) {
-        await afterInstall(this);
-      }
-
       await this.service.init();
       this.events.emit(SystemEvents.servicesInitialized);
       await this.app.init();

@@ -38,6 +38,13 @@ export interface MountPoint {
   dest: MountPointDefinition;
 }
 
+export interface SystemEnv {
+  ROOT_DIR: string;
+  FILES_UID: number;
+  FILES_GID: number;
+  ENV_MODE: EnvModes;
+}
+
 export enum EnvModes {
   development = 'development',
   production = 'production',

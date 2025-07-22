@@ -1,6 +1,6 @@
 # Librnet
 
-Easy make IoT devices and local net of devices which can be managed by master
+Personal decentralised OS based on overlay network.
 
 ## Development
 
@@ -19,41 +19,35 @@ npx tsx ./_testIo/testFiles.ts
 npx tsx ./_testIo/testHttp.ts
 ```
 
-### App backendd standalone dev mode
+## Production
 
 ```bash
-npx tsx ./src/packages/AppsSubsystemPkg/standalone.ts
+npm run build
 ```
 
+In production mode the main config file `~/.config/librnet/config.json`
+will be read. It contains the next parameters:
 
-
--------
-
+- ROOT_DIR which points to the root dir of librnet's files.
+- FILES_UID
+- FILES_GID
 
 ## Environment variables
 
-* ROOT_DIR - if set then it will be a default root dir for all the other dirs.
-  It can be absolute or relative to PWD
-* FILES_UID - uid for all the files on unix-like systems
-* FILES_GID - gid for all the files on unix-like systems
+- ROOT_DIR - if set then it will be used as a root dir instead of
+  config file of user's home. It have to be an absolute.
+- FILES_UID - uid for all the files on unix-like systems
+- FILES_GID - gid for all the files on unix-like systems
+- ENV_MODE - production, development or test
 
-You can overwrite some dir paths. Set absolute or PWD relative path.
-For production please prefer absolute paths.
-By default, these paths will be under ROOT_DIR.
+FILES_UID and FILES_GID are used for ROOT_DIR and default rights of external dirs
 
-* APP_FILES_DIR - path to dir `/appFiles`
-* APP_DATA_LOCAL_DIR - path to dir `/appDataLocal`
-* APP_DATA_SYNCED_DIR - path to dir `/appDataSynced`
-* CACHE_LOCAL_DIR - path to dir `/cacheLocal`
-* CFG_LOCAL_DIR - path to dir `/cfgLocal`
-* CFG_SYNCED_DIR - path to dir `/cfgSynced`
-* DB_DIR - path to dir `/db`
-* LOG_DIR - path to dir `/log`
-* TMP_LOCAL_DIR - path to dir `/tmp`
-* USER_HOME_DIR - path to dir `/home`
-* EXT_DIRS - JSON object which specifies external dirs which are pointed to any
-  external dir of local system. Like EXT_DIRS='{"myExtDir": "/home/userName/Downloads"}'.
-  They have to be absolute. To call it use `/external/myExtDir/someFile.jpg`
+
+-------
+-------
+
+
+
 
 ## File structure
 

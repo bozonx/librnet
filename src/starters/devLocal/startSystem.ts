@@ -1,28 +1,49 @@
-import { System } from '@/system/System.js';
-import { LOG_LEVELS } from 'squidlet-lib';
-import type { LogLevel } from 'squidlet-lib';
-import { ConsoleLoggerPkg } from '@/packages/ConsoleLoggerPkg/index.js';
-import { SystemCommonPkg } from '@/packages/SystemCommonPkg/index.js';
-import { ioSetLocalPkg } from '@/packages/IoSetLocalPkg/index.js';
-import { FilesIoIndex } from '@/ios/NodejsPack/LocalFilesIo.js';
-import { SysInfoIoIndex } from '@/_not_used/ios/NodejsLinuxPack/SysInfoIo.js';
-import { HttpClientIoIndex } from '@/ios/NodejsPack/HttpClientIo.js';
-import { HttpServerIoIndex } from '@/ios/NodejsPack/HttpServerIo.js';
-import { WsClientIoIndex } from '@/ios/NodejsPack/WsClientIo.js';
-import { WsServerIoIndex } from '@/ios/NodejsPack/WsServerIo.js';
-import { SystemEvents, type EnvMode } from '@/types/constants.js';
+import { LOG_LEVELS, type LogLevel } from 'squidlet-lib';
+import { System } from '../../system/System.js';
+import { ConsoleLoggerPkg } from '../../packages/ConsoleLoggerPkg/index.js';
+import { SystemCommonPkg } from '../../packages/SystemCommonPkg/index.js';
+import { ioSetLocalPkg } from '../../packages/IoSetLocalPkg/index.js';
+import { FilesIoIndex } from '../../ios/NodejsPack/LocalFilesIo.js';
+import { HttpClientIoIndex } from '../../ios/NodejsPack/HttpClientIo.js';
+import { HttpServerIoIndex } from '../../ios/NodejsPack/HttpServerIo.js';
+import { WsClientIoIndex } from '../../ios/NodejsPack/WsClientIo.js';
+import { WsServerIoIndex } from '../../ios/NodejsPack/WsServerIo.js';
+import { EnvModes, SystemEvents } from '../../types/types.js';
+
+// const EXT_DIRS = process.env.EXT_DIRS as unknown as string[];
+// const JUST_INSTALLED =
+//   typeof process.env.JUST_INSTALLED === 'string'
+//     ? process.env.JUST_INSTALLED === 'true'
+//     : false;
+
+// TODO: make dirs
+
+export function ConsoleLoggerPkg(options: {
+  logLevel: LogLevel;
+}): PackageIndex {
+  const consoleLogger = new ConsoleLogger(options.logLevel);
+
+  return (ctx: PackageContext) => {
+    // add console logger
+    ctx.events.addListener(SystemEvents.logger, handleLogEvent(consoleLogger));
+  };
+}
 
 export async function startSystem(
   ROOT_DIR: string,
-  ENV_MODE?: EnvMode,
-  FILES_UID?: number,
-  FILES_GID?: number,
-  EXT_DIRS?: string[],
-  JUST_INSTALLED?: boolean,
-  middleware?: (system: System) => Promise<void>
+  FILES_UID: number = 100,
+  FILES_GID: number = 100,
+  ENV_MODE: EnvModes = EnvModes.development,
+  beforeInit?: (system: System) => Promise<void>
 ) {
-  const system = new System(ENV_MODE, ROOT_DIR, EXT_DIRS, JUST_INSTALLED);
+  const system = new System({
+    ROOT_DIR,
+    FILES_UID,
+    FILES_GID,
+    ENV_MODE,
+  });
 
+  // TODO: why??? it is not IO
   system.use(ConsoleLoggerPkg({ logLevel: LOG_LEVELS.debug as LogLevel }));
   // use packages
   system.use(
@@ -44,7 +65,7 @@ export async function startSystem(
   );
   system.use(SystemCommonPkg());
 
-  await middleware?.(system);
+  await beforeInit?.(system);
 
   // init the system
   await system.init();
