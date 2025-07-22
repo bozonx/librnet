@@ -1,7 +1,6 @@
 import type { IoBase } from '../system/base/IoBase.js';
 import type { ServiceContext } from '../system/context/ServiceContext.js';
 import type { IoContext } from '../system/context/IoContext.js';
-import type { EnvMode } from './constants.js';
 import type { IoSetBase } from '@/system/base/IoSetBase.js';
 import type { AppContext } from '@/system/context/AppContext.js';
 import type { System } from '@/system/System.js';

@@ -13,7 +13,12 @@ export const DEFAULT_HTTP_LOCAL_PORT = 41808;
 export const DEFAULT_WSS_EXTERNAL_PORT = 41809;
 export const REQUEST_ID_LENGTH = 8;
 
-//export const SERVER_STARTING_TIMEOUT_SEC = 60
+
+export enum EnvModes {
+  development = 'development',
+  production = 'production',
+  test = 'test',
+}
 
 export enum SystemEvents {
   driversInitialized = 'driversInitialized',
@@ -37,139 +42,119 @@ export enum SystemEvents {
   entityStatus = 'entityStatus',
 }
 
-// TODO: review, move to network service
-export enum NETWORK_CODES {
-  success,
-  badRequest,
-  // error of remote method
-  payloadHandlerError,
-  // error while request or response process
-  fatalError,
-  noCategory,
+export enum RootDirs {
+  local = 'local',
+  // Synced only using internal synchronization
+  synced = 'synced',
+  // mounted filesystems
+  mnt = 'mnt',
+}
+export enum LocalDataSubDirs {
+  // Installed files of IO, drivers, services and apps
+  programs = 'programs',
+  // Local data files of services and apps
+  data = 'data',
+  // Local databases of services and apps
+  db = 'db',
+  // Local configs of all the entities
+  configs = 'configs',
+  // Local logs of all the entities
+  logs = 'logs',
+  // Local cache of all the entities
+  cache = 'cache',
+  // Local tmp files of all the entities
+  tmp = 'tmp',
+}
+export enum SyncedDataSubDirs {
+  // Synced data of services and apps
+  data = 'data',
+  // Synced databases of services and apps
+  db = 'db',
+  // Synced configs of all the entities
+  configs = 'configs',
+  // Synced logs of all the entities
+  logs = 'logs',
+  // Synced trash of user's files
+  trash = 'trash',
+  // Synced versions of user's files
+  versions = 'versions',
+  home = 'home',
+}
+export enum HomeSubDirs {
+  Downloads = 'Downloads',
+  Documents = 'Documents',
+  Media = 'Media',
 }
 
-export const ENV_MODES = {
-  development: 'development',
-  production: 'production',
-  test: 'test',
-};
-
-export type EnvMode = keyof typeof ENV_MODES;
-
-// root dirs
-export const ROOT_DIRS = {
-  local: 'local',
-  // TODO: так обще можно называть?
-  // Synced only using internal synchronization
-  synced: 'synced',
-  // mounted filesystems
-  mnt: 'mnt',
-};
-export const LOCAL_DATA_SUB_DIRS = {
-  // Installed files of IO, drivers, services and apps
-  programs: 'programs',
-  // Local data files of services and apps
-  data: 'data',
-  // Databases of services and apps
-  db: 'db',
-  configs: 'configs',
-  logs: 'logs',
-  cache: 'cache',
-  tmp: 'tmp',
-};
-export const SYNCED_DATA_SUB_DIRS = {
-  // Synced data of io, drivers, services and apps
-  data: 'data',
-  db: 'db',
-  configs: 'configs',
-  logs: 'logs',
-  trash: 'trash',
-  // versions of user files
-  versions: 'versions',
-  // synced home dir using watch
-  home: 'home',
-};
-export const HOME_SUB_DIRS = {
-  Downloads: 'Downloads',
-  Documents: 'Documents',
-  Media: 'Media',
-};
-
-//// virtual local device root dir
-// export const DEVICE_ROOT_DIR = 'Device';
-//// virtual synced storage root dir
-// export const SYNCED_STORAGE_ROOT_DIR = 'Storage';
-
-export type EntityStatus =
-  | 'loaded'
-  | 'initializing'
-  | 'initError'
-  | 'initialized'
-  | 'destroying'
-  | 'starting'
-  | 'startError'
-  | 'running'
+export enum EntityStatuses {
+  loaded = 'loaded',
+  initializing = 'initializing',
+  initError = 'initError',
+  initialized = 'initialized',
+  destroying = 'destroying',
+  starting = 'starting',
+  startError = 'startError',
+  running = 'running',
   // fallen on error from running state
-  | 'fallen'
-  | 'stopping'
-  | 'stopError'
-  | 'stopped';
+  fallen = 'fallen',
+  stopping = 'stopping',
+  stopError = 'stopError',
+  stopped = 'stopped',
+}
 
-export const ENTITY_STATUS: Record<EntityStatus, EntityStatus> = {
-  loaded: 'loaded',
-  initializing: 'initializing',
-  initError: 'initError',
-  initialized: 'initialized',
-  destroying: 'destroying',
-  starting: 'starting',
-  startError: 'startError',
-  running: 'running',
-  fallen: 'fallen',
-  stopping: 'stopping',
-  stopError: 'stopError',
-  stopped: 'stopped',
-};
+// All the IO sets names
+export enum IoSetNames {
+  IoSetLocal = 'IoSetLocal',
+}
 
-export const IO_NAMES = {
-  LocalFilesIo: 'LocalFilesIo',
-  ArchiveIo: 'ArchiveIo',
-  HttpClientIo: 'HttpClientIo',
-  HttpServerIo: 'HttpServerIo',
-  MqttClientIo: 'MqttClientIo',
-  WsClientIo: 'WsClientIo',
-  WsServerIo: 'WsServerIo',
-};
+// All the IOs names
+export enum IoNames {
+  LocalFilesIo = 'LocalFilesIo',
+  ArchiveIo = 'ArchiveIo',
+  HttpClientIo = 'HttpClientIo',
+  HttpServerIo = 'HttpServerIo',
+  MqttClientIo = 'MqttClientIo',
+  WsClientIo = 'WsClientIo',
+  WsServerIo = 'WsServerIo',
+}
 
-export const DRIVER_NAMES = {
-  FilesDriver: 'FilesDriver',
-  ArchiveDriver: 'ArchiveDriver',
-  HttpClientDriver: 'HttpClientDriver',
-  HttpServerDriver: 'HttpServerDriver',
-  MqttClientDriver: 'MqttClientDriver',
-  WsClientDriver: 'WsClientDriver',
-  WsServerDriver: 'WsServerDriver',
-};
+// All the drivers names
+export enum DriverNames {
+  FilesDriver = 'FilesDriver',
+  ArchiveDriver = 'ArchiveDriver',
+  HttpClientDriver = 'HttpClientDriver',
+  HttpServerDriver = 'HttpServerDriver',
+  MqttClientDriver = 'MqttClientDriver',
+  WsClientDriver = 'WsClientDriver',
+  WsServerDriver = 'WsServerDriver',
+}
 
-// system services which have api
-export const SERVICE_NAMES = {
+// System services names
+export enum ServiceNames {
   // Network: 'Network',
   // // PublicApiService: 'PublicApiService',
   // Sessions: 'Sessions',
 };
 
-export const IO_SET_TYPES = {
-  IoSetLocal: 'IoSetLocal',
-};
 
-export const DRIVER_DESTROY_REASON = {
-  shutdown: 'shutdown',
-};
+export enum DriverDestroyReasons {
+  shutdown = 'shutdown',
+}
 
-export type DriverDestroyReason = keyof typeof DRIVER_DESTROY_REASON;
+export enum FileActions {
+  read = 'r',
+  write = 'w',
+}
 
-export const FILE_ACTION = {
-  read: 'r',
-  write: 'w',
-};
+//export const SERVER_STARTING_TIMEOUT_SEC = 60
 
-export type FileAction = keyof typeof FILE_ACTION;
+// TODO: review, move to network service
+// export enum NETWORK_CODES {
+//   success,
+//   badRequest,
+//   // error of remote method
+//   payloadHandlerError,
+//   // error while request or response process
+//   fatalError,
+//   noCategory,
+// }

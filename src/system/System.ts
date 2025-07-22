@@ -49,7 +49,7 @@ export class System {
   }
 
   constructor(
-    readonly ENV_MODE: EnvMode = ENV_MODES.production as EnvMode,
+    readonly ENV_MODE: ENV_MODES = ENV_MODES.production,
     private readonly ROOT_DIR: string,
     readonly EXT_DIRS?: string[],
     readonly JUST_INSTALLED: boolean = false
