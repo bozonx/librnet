@@ -65,6 +65,7 @@ export class System {
       await this.permissions.init();
       await this.io.initIos();
       await this.drivers.init();
+      this.events.emit(SystemEvents.driversInitialized);
 
       // TODO: вынести в установщик
       if (this.JUST_INSTALLED) {
@@ -72,6 +73,7 @@ export class System {
       }
 
       await this.service.init();
+      this.events.emit(SystemEvents.servicesInitialized);
       await this.app.init();
       // notify that system is inited
       this.events.emit(SystemEvents.systemInited);

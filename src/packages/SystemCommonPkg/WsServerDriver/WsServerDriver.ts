@@ -12,8 +12,9 @@ import type {
   WsServerProps,
 } from '../../../types/io/WsServerIoType.js';
 import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js';
-import type { System } from '@/system/System.js';
-import { DriverFactoryBase } from '@/system/base/DriverFactoryBase.js';
+import type { System } from '../../../system/System.js';
+import { DriverFactoryBase } from '../../../system/base/DriverFactoryBase.js';
+import { LOCAL_HOST } from '../../../types/constants.js';
 
 // TODO: можно ли установить cookie? стандартным способом?
 // TODO: а если сервер сам неожиданно отвалился?
@@ -135,13 +136,13 @@ export class WsServerDriver extends DriverFactoryBase<
     await super.validateInstanceProps(instanceProps);
 
     if (
-      instanceProps.host === 'localhost' ||
+      instanceProps.host === LOCAL_HOST ||
       instanceProps.host === '127.0.0.1'
     ) {
       const isPermitted = await this.system.permissions.checkPermissions(
         instanceProps.entityWhoAsk,
         this.name,
-        'localhost'
+        LOCAL_HOST
       );
 
       if (!isPermitted) {

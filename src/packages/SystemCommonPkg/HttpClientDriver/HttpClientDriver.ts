@@ -10,6 +10,8 @@ export interface HttpClientDriverProps {
   entityWhoAsk: string;
 }
 
+// TODO: rise system events httpClient
+
 export const WsClientDriverIndex: DriverIndex = (
   manifest: DriverManifest,
   system: System

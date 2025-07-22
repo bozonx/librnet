@@ -6,14 +6,18 @@ import {
 } from 'squidlet-lib';
 import type { DriverIndex, DriverManifest } from '../../../types/types.js';
 import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js';
-import { IO_NAMES, SystemEvents } from '../../../types/constants.js';
+import {
+  IO_NAMES,
+  LOCAL_HOST,
+  SystemEvents,
+} from '../../../types/constants.js';
 import { HttpServerEvent } from '../../../types/io/HttpServerIoType.js';
 import type {
   HttpServerIoFullType,
   HttpServerProps,
 } from '../../../types/io/HttpServerIoType.js';
-import type { System } from '@/system/System.js';
-import { DriverFactoryBase } from '@/system/base/DriverFactoryBase.js';
+import type { System } from '../../../system/System.js';
+import { DriverFactoryBase } from '../../../system/base/DriverFactoryBase.js';
 
 export interface HttpServerDriverProps extends HttpServerProps {
   entityWhoAsk: string;
@@ -135,13 +139,13 @@ export class HttpServerDriver extends DriverFactoryBase<
     await super.validateInstanceProps(instanceProps);
 
     if (
-      instanceProps.host === 'localhost' ||
+      instanceProps.host === LOCAL_HOST ||
       instanceProps.host === '127.0.0.1'
     ) {
       const isPermitted = await this.system.permissions.checkPermissions(
         instanceProps.entityWhoAsk,
         this.name,
-        'localhost'
+        LOCAL_HOST
       );
 
       if (!isPermitted) {

@@ -1,10 +1,5 @@
 export const DEFAULT_ENCODE = 'utf-8';
 export const EVENT_DELIMITER = '|';
-//export const VERSIONS_DIR_NAME = '.versions'
-// TODO: move this to system cfg
-export const WAIT_BEFORE_HALT_MS = 1000;
-export const ENTITY_INIT_TIMEOUT_SEC = 20;
-export const ENTITY_DESTROY_TIMEOUT_SEC = 20;
 export const CFG_FILE_EXT = 'json';
 export const LOG_FILE_EXT = 'log';
 export const LOCAL_HOST = 'localhost';
@@ -16,37 +11,31 @@ export const IS_TEXT_FILE_UTF8_SAMPLE_SIZE = 8192;
 export const DEFAULT_HTTP_LOCAL_PORT = 41808;
 // Secured port for external connections
 export const DEFAULT_WSS_EXTERNAL_PORT = 41809;
-//export const SERVER_STARTING_TIMEOUT_SEC = 60
 export const REQUEST_ID_LENGTH = 8;
 
+//export const SERVER_STARTING_TIMEOUT_SEC = 60
+
 export enum SystemEvents {
-  // driversInitialized,
-  // servicesInitialized,
-  // devicesInitialized,
-  // appInitialized,
-  // beforeDestroy,
-  logger,
-  systemInited,
-  systemStarted,
-  systemDestroying,
-  localFiles,
-  wsServer,
-  wsClient,
-  httpServer,
+  driversInitialized = 'driversInitialized',
+  servicesInitialized = 'servicesInitialized',
+  systemInited = 'systemInited',
+  systemStarted = 'systemStarted',
+  systemDestroying = 'systemDestroying',
+  logger = 'logger',
+  // any actions with local files
+  localFiles = 'localFiles',
+  // any actions with ws server
+  wsServer = 'wsServer',
+  // any actions with ws client
+  wsClient = 'wsClient',
+  // any actions with http server
+  httpServer = 'httpServer',
+  // any actions with http client
+  httpClient = 'httpClient',
   // when service or app status changed.
   //  ('app'|'service', entityName, EntityStatus, details?)
-  entityStatus,
+  entityStatus = 'entityStatus',
 }
-
-// TODO: review
-// export enum RootEvents {
-//   service,
-// }
-
-// TODO: review
-// export enum ServiceEvents {
-//   status,
-// }
 
 // TODO: review, move to network service
 export enum NETWORK_CODES {
