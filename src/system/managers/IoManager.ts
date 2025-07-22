@@ -2,11 +2,13 @@ import type {System} from '../System.js'
 import type { IoBase } from '../base/IoBase.js';
 import type { IoSetBase } from '../base/IoSetBase.js';
 import {
-  ENTITY_DESTROY_TIMEOUT_SEC,
-  ENTITY_INIT_TIMEOUT_SEC,
-  IO_NAMES,
+  EntityInitTimeoutSec,
+  EntityDestroyTimeoutSec,
+  IoNames,
 } from '../../types/constants.js';
 import { Promised } from 'squidlet-lib';
+
+// TODO: разве не нужно передавать в конструктор манифесты?
 
 
 export class IoManager {

@@ -146,6 +146,23 @@ export enum FileActions {
   write = 'w',
 }
 
+export enum EntityTypes {
+  app = 'app',
+  service = 'service',
+  driver = 'driver',
+  io = 'io',
+}
+
+export enum MountPointTypes {
+  // TODO: WTF?
+  root = 'root',
+  // path to external directory
+  external = 'external',
+  // path to archive
+  archive = 'archive',
+}
+
+
 //export const SERVER_STARTING_TIMEOUT_SEC = 60
 
 // TODO: review, move to network service
