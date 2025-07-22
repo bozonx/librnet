@@ -6,7 +6,6 @@ import type { AppContext } from '../system/context/AppContext.js';
 import type { System } from '../system/System.js';
 import type { DriverFactoryBase } from '../system/base/DriverFactoryBase.js';
 import type { DriverManifest } from './Manifests.js';
-import type { MountPointTypes } from './constants.js';
 
 export type IoIndex = (ioSet: IoSetBase, ctx: IoContext) => IoBase;
 export type DriverIndex = (
@@ -39,6 +38,88 @@ export interface MountPoint {
   dest: MountPointDefinition;
 }
 
+export enum EnvModes {
+  development = 'development',
+  production = 'production',
+  test = 'test',
+}
+
+export enum SystemEvents {
+  driversInitialized = 'driversInitialized',
+  servicesInitialized = 'servicesInitialized',
+  systemInited = 'systemInited',
+  systemStarted = 'systemStarted',
+  systemDestroying = 'systemDestroying',
+  logger = 'logger',
+  // any actions with local files
+  localFiles = 'localFiles',
+  // any actions with ws server
+  wsServer = 'wsServer',
+  // any actions with ws client
+  wsClient = 'wsClient',
+  // any actions with http server
+  httpServer = 'httpServer',
+  // any actions with http client
+  httpClient = 'httpClient',
+  // when service or app status changed.
+  //  ('app'|'service', entityName, EntityStatus, details?)
+  entityStatus = 'entityStatus',
+}
+
+export enum EntityTypes {
+  app = 'app',
+  service = 'service',
+  driver = 'driver',
+  io = 'io',
+}
+
+export enum EntityStatuses {
+  loaded = 'loaded',
+  initializing = 'initializing',
+  initError = 'initError',
+  initialized = 'initialized',
+  destroying = 'destroying',
+  starting = 'starting',
+  startError = 'startError',
+  running = 'running',
+  // fallen on error from running state
+  fallen = 'fallen',
+  stopping = 'stopping',
+  stopError = 'stopError',
+  stopped = 'stopped',
+}
+
+export enum DriverDestroyReasons {
+  shutdown = 'shutdown',
+}
+
+export enum FileActions {
+  read = 'r',
+  write = 'w',
+}
+
+export enum MountPointTypes {
+  // TODO: WTF?
+  root = 'root',
+  // path to external directory
+  external = 'external',
+  // path to archive
+  archive = 'archive',
+}
+
+
+//export const SERVER_STARTING_TIMEOUT_SEC = 60
+
+// TODO: review, move to network service
+// export enum NETWORK_CODES {
+//   success,
+//   badRequest,
+//   // error of remote method
+//   payloadHandlerError,
+//   // error while request or response process
+//   fatalError,
+//   noCategory,
+// }
 
 // export interface SubprogramError {
 //   code: number;
