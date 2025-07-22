@@ -86,7 +86,7 @@ export class IosManager {
   }
 
   // Register IoSet
-  useIoSet(ioSet: IoSetBase) {
+  use(ioSet: IoSetBase) {
     this.ioSets.push(ioSet);
 
     const ioNames = ioSet.getNames();

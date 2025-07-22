@@ -12,7 +12,20 @@ import { MountPointsManager } from './managers/MountPointsManager.js';
 import { RootDirDriverLogic } from './driversLogic/RootDirDriverLogic.js';
 import { SystemApiManager } from './managers/SystemApiManager.js';
 import { PortsManager } from './managers/PortsManager.js';
-import { EnvModes, SystemEvents, type SystemEnv } from '../types/types.js';
+import {
+  EntityTypes,
+  EnvModes,
+  SystemEvents,
+  type AppOnInit,
+  type DriverIndex,
+  type ServiceOnInit,
+  type SystemEnv,
+} from '../types/types.js';
+import {
+  type AppManifest,
+  type DriverManifest,
+  type ServiceManifest,
+} from '../types/Manifests.js';
 
 export class System {
   readonly events = new IndexedEventEmitter();
@@ -107,4 +120,27 @@ export class System {
       this.log.error(String(e));
     }
   }
+
+  /**
+   * Register a package in development mode
+   * @param manifest - manifest of the package
+   * @param index - index of the package
+   */
+  // use(
+  //   manifest: AppManifest | ServiceManifest | DriverManifest,
+  //   index: DriverIndex | ServiceOnInit | AppOnInit
+  // ) {
+  //   if (!this.isDevMode)
+  //     throw new Error(
+  //       `You try to register a package "${manifest.name}" not in development mode`
+  //     );
+
+  //   if (manifest.type === EntityTypes.app) {
+  //     this.apps.use(manifest, index);
+  //   } else if (manifest.type === EntityTypes.service) {
+  //     this.services.use(manifest, index);
+  //   } else if (manifest.type === EntityTypes.driver) {
+  //     this.drivers.use(manifest, index);
+  //   }
+  // }
 }

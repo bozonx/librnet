@@ -1,4 +1,4 @@
-import type { EntityTypes } from './constants.js';
+import { EntityTypes } from './types.js';
 
 // Manifest of a service or app
 export interface EntityManifest {

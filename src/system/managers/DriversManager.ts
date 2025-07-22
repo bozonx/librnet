@@ -55,7 +55,7 @@ export class DriversManager {
   }
 
   // Register Driver
-  useDriver(driverName: string, driverIndex: DriverIndex) {
+  use(driverName: string, driverIndex: DriverIndex) {
     const driver = driverIndex(driverName, this.system);
 
     // TODO: здесь нужно проерять requireIo. но нужно гарантировать

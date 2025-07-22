@@ -69,14 +69,14 @@ export async function startSystem(
 
   await beforeInit?.(system);
 
-  // init the system
-  await system.init();
-  // start services and apps
-  await system.start();
-
   // Enable graceful stop
   system.events.once(SystemEvents.systemStarted, () => {
     process.once('SIGINT', () => system.destroy());
     process.once('SIGTERM', () => system.destroy());
   });
+
+  // init the system
+  await system.init();
+  // start services and apps
+  await system.start();
 }
