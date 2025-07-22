@@ -1,4 +1,4 @@
-import type {System} from '../System.js'
+import type { System } from '../System.js';
 import type { IoBase } from '../base/IoBase.js';
 import type { IoSetBase } from '../base/IoSetBase.js';
 import {
@@ -10,8 +10,7 @@ import { Promised } from 'squidlet-lib';
 
 // TODO: разве не нужно передавать в конструктор манифесты?
 
-
-export class IoManager {
+export class IosManager {
   private readonly system: System;
   private readonly ioSets: IoSetBase[] = [];
   // object like {ioName: IoBase}

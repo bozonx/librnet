@@ -1,9 +1,9 @@
 import { IndexedEventEmitter, LogPublisher } from 'squidlet-lib';
-import { IoManager } from './managers/IoManager.js';
+import { IosManager } from './managers/IosManager.js';
 import { ServicesManager } from './managers/ServicesManager.js';
 import { ConfigsManager } from './managers/ConfigsManager.js';
 import { PermissionsManager } from './managers/PermissionsManager.js';
-import { PackageManager } from './managers/PackageManager.js';
+import { PackagesManager } from './managers/PackagesManager.js';
 import { DriversManager } from './managers/DriversManager.js';
 import { AppsManager } from './managers/AppsManager.js';
 import { EntitiesApiManager } from './managers/EntitiesApiManager.js';
@@ -26,16 +26,18 @@ export class System {
   // managers
   readonly mountPoints = new MountPointsManager(this, this.env.ROOT_DIR);
   readonly ports = new PortsManager(this);
-  readonly packageManager = new PackageManager(this);
+  readonly packagesManager = new PackagesManager(this);
+  readonly fileLogs = new FileLogsManager(this);
+  readonly systemApi = new SystemApiManager(this);
+  // TODO: зачем этот менеджер? если есть systemApi
+  readonly api = new EntitiesApiManager();
+
   readonly configs = new ConfigsManager(this);
   readonly permissions = new PermissionsManager(this);
-  readonly fileLogs = new FileLogsManager(this);
-  readonly io = new IoManager(this);
-  readonly api = new EntitiesApiManager();
-  readonly systemApi = new SystemApiManager(this);
+  readonly ios = new IosManager(this);
   readonly drivers = new DriversManager(this);
-  readonly service = new ServicesManager(this);
-  readonly app = new AppsManager(this);
+  readonly services = new ServicesManager(this);
+  readonly apps = new AppsManager(this);
 
   get isDevMode() {
     return this.env.ENV_MODE === EnvModes.development;
@@ -57,17 +59,22 @@ export class System {
 
   async init() {
     try {
-      await this.io.initIoSetsAndFilesIo();
-      // system configs for IO, drivers and services
+      // TODO: review this
+      await this.ios.initIoSetsAndFilesIo();
+
       await this.configs.init();
       await this.permissions.init();
-      await this.io.initIos();
+      // TODO: review this
+      await this.ios.initIos();
+
       await this.drivers.init();
       this.events.emit(SystemEvents.driversInitialized);
-      await this.service.init();
+
+      await this.services.init();
       this.events.emit(SystemEvents.servicesInitialized);
-      await this.app.init();
-      // notify that system is inited
+
+      await this.apps.init();
+
       this.events.emit(SystemEvents.systemInited);
     } catch (e) {
       this.log.error(String(e));
@@ -78,10 +85,10 @@ export class System {
     try {
       this.events.emit(SystemEvents.systemDestroying);
 
-      await this.app.destroy();
-      await this.service.destroy();
+      await this.apps.destroy();
+      await this.services.destroy();
       await this.drivers.destroy();
-      await this.io.destroy();
+      await this.ios.destroy();
 
       this.events.destroy();
     } catch (e) {
@@ -92,8 +99,8 @@ export class System {
   async start() {
     try {
       // start system's and user's services
-      await this.service.startAll();
-      await this.app.startAll();
+      await this.services.startAll();
+      await this.apps.startAll();
       // notify that system is started
       this.events.emit(SystemEvents.systemStarted);
     } catch (e) {

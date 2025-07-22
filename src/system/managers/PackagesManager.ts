@@ -12,7 +12,7 @@ import type { ArchiveDriver } from '@/packages/SystemCommonPkg/ArchiveDriver/Arc
 import yaml from 'yaml';
 import semver from 'semver';
 
-export class PackageManager {
+export class PackagesManager {
   constructor(private readonly system: System) {}
 
   /**
