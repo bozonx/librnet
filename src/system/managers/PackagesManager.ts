@@ -8,7 +8,7 @@ import {
   ROOT_DIRS,
   SYSTEM_ENTITY,
 } from '@/types/constants.js';
-import type { ArchiveDriver } from '@/packages/SystemCommonPkg/ArchiveDriver/ArchiveDriver.js';
+import type { ArchiveDriver } from '@/system/drivers/ArchiveDriver/ArchiveDriver.js';
 import yaml from 'yaml';
 import semver from 'semver';
 

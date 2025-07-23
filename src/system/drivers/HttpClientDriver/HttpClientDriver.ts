@@ -1,10 +1,10 @@
 import { IO_NAMES } from '../../../types/constants.js';
-import { DriverFactoryBase } from '../../../system/base/DriverFactoryBase.js';
-import { System } from '../../../system/System.js';
+import { DriverFactoryBase } from '../../base/DriverFactoryBase.js';
+import { System } from '../../System.js';
 import { parseUrl, type HttpRequest, type HttpResponse } from 'squidlet-lib';
 import type { HttpClientFullIoType } from '../../../types/io/HttpClientIoType.js';
 import type { DriverIndex, DriverManifest } from '../../../types/types.js';
-import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js';
+import DriverInstanceBase from '../../base/DriverInstanceBase.js';
 
 export interface HttpClientDriverProps {
   entityWhoAsk: string;

@@ -6,8 +6,11 @@ export enum RootDirs {
   mnt = 'mnt',
 }
 export enum LocalDataSubDirs {
-  // Installed files of IO, drivers, services and apps
-  programs = 'programs',
+  // System files
+  system = 'system',
+  // files of IO, drivers, services and apps
+  // installed via git or archive files
+  packages = 'packages',
   // Local data files of services and apps
   data = 'data',
   // Local databases of services and apps

@@ -1,7 +1,7 @@
 {
-  "name": "librnet",
-  "version": "0.0.1",
-  "description": "Personal and global network where all the files are own by user",
+  "name": "k-os",
+  "version": "0.0.2",
+  "description": "Personal decentralised OS based on overlay network.",
   "author": "Ivan Kozyrin <ipkozyrin@gmail.com>",
   "repository": "git@github.com:bozonx/librnet.git",
   "license": "MIT",
@@ -31,17 +31,15 @@
     "src": "./src"
   },
   "dependencies": {
-    "@types/semver": "^7.7.0",
     "semver": "^7.7.2",
     "squidlet-lib": "file:../squidlet-lib",
     "ws": "^8.18.2",
     "yaml": "^2.8.0"
   },
   "devDependencies": {
-    "@types/koa": "^2.15.0",
+    "@types/semver": "^7.7.0",
     "@types/node": "^22.15.29",
     "@types/ws": "^8.18.1",
-    "koa": "^3.0.0",
     "serve": "^14.2.4",
     "tsc": "^2.0.4",
     "typescript": "^5.8.3",
