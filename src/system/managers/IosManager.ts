@@ -1,3 +1,4 @@
+import { IndexedEvents } from 'squidlet-lib';
 import type { System } from '../System.js';
 import type { IoSetClientBase } from '../../ioSets/IoSetClientBase.js';
 import { allSettledWithTimeout } from '../helpers/helpers.js';
@@ -9,14 +10,11 @@ import {
 export function createIoProxy(ioName: string, ioSet: IoSetClientBase): any {
   // Создаем пустой объект для прокси
   const target: Record<string | symbol, any> = {};
+  const events = new IndexedEvents();
 
   // Навешиваем обработчик на ioSet.on при создании прокси
   const handlerIndex = ioSet.on((eventIoName: string, ...args: any[]) => {
-    // Обрабатываем события только для данного IO
-    if (eventIoName === ioName) {
-      // Здесь можно добавить логику обработки событий
-      // Пока оставляем пустым
-    }
+    if (eventIoName === ioName) events.emit(...args);
   });
 
   return new Proxy(target, {
@@ -25,44 +23,21 @@ export function createIoProxy(ioName: string, ioSet: IoSetClientBase): any {
 
       // Специальная обработка для методов on и off
       if (propName === 'on') {
-        return (...args: any[]) => {
-          // Заглушка для метода on
-          console.log(`IO "${ioName}": on method called with args:`, args);
-          // Возвращаем индекс обработчика (заглушка)
-          return 0;
+        return (cb: (...args: any[]) => void) => {
+          return events.addListener(cb);
         };
       }
 
       if (propName === 'off') {
         return (handlerIndex: number) => {
-          // Заглушка для метода off
-          console.log(
-            `IO "${ioName}": off method called with handlerIndex:`,
-            handlerIndex
-          );
+          events.removeListener(handlerIndex);
         };
       }
 
       // Для всех остальных методов перенаправляем в ioSet.callMethod
       return async (...args: any[]) => {
-        try {
-          return await ioSet.callMethod(ioName, propName, ...args);
-        } catch (error) {
-          console.error(
-            `Error calling method "${propName}" on IO "${ioName}":`,
-            error
-          );
-          throw error;
-        }
+        return ioSet.callMethod(ioName, propName, ...args);
       };
-    },
-
-    // Обработка установки свойств (если потребуется)
-    set: (target, prop, value) => {
-      const propName = String(prop);
-      console.log(`IO "${ioName}": Setting property "${propName}" to:`, value);
-      target[prop] = value;
-      return true;
     },
   });
 }
@@ -114,12 +89,12 @@ export class IosManager {
       GET_IO_NAMES_METHOD_NAME
     );
 
-    for (const name of ioNames) {
-      if (this.ios[name]) {
-        throw new Error(`The IO "${name}" has already registered`);
+    for (const ioName of ioNames) {
+      if (this.ios[ioName]) {
+        throw new Error(`The IO "${ioName}" has already registered`);
       }
 
-      this.ios[name] = createIoProxy(name, ioSet);
+      this.ios[ioName] = createIoProxy(ioName, ioSet);
     }
   }
 }
