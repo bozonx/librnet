@@ -7,9 +7,62 @@ import {
 } from '@/types/constants.js';
 
 export function createIoProxy(ioName: string, ioSet: IoSetClientBase): any {
-  return new Proxy(io, {
+  // Создаем пустой объект для прокси
+  const target: Record<string | symbol, any> = {};
+
+  // Навешиваем обработчик на ioSet.on при создании прокси
+  const handlerIndex = ioSet.on((eventIoName: string, ...args: any[]) => {
+    // Обрабатываем события только для данного IO
+    if (eventIoName === ioName) {
+      // Здесь можно добавить логику обработки событий
+      // Пока оставляем пустым
+    }
+  });
+
+  return new Proxy(target, {
     get: (target, prop) => {
-      return target[prop];
+      const propName = String(prop);
+
+      // Специальная обработка для методов on и off
+      if (propName === 'on') {
+        return (...args: any[]) => {
+          // Заглушка для метода on
+          console.log(`IO "${ioName}": on method called with args:`, args);
+          // Возвращаем индекс обработчика (заглушка)
+          return 0;
+        };
+      }
+
+      if (propName === 'off') {
+        return (handlerIndex: number) => {
+          // Заглушка для метода off
+          console.log(
+            `IO "${ioName}": off method called with handlerIndex:`,
+            handlerIndex
+          );
+        };
+      }
+
+      // Для всех остальных методов перенаправляем в ioSet.callMethod
+      return async (...args: any[]) => {
+        try {
+          return await ioSet.callMethod(ioName, propName, ...args);
+        } catch (error) {
+          console.error(
+            `Error calling method "${propName}" on IO "${ioName}":`,
+            error
+          );
+          throw error;
+        }
+      };
+    },
+
+    // Обработка установки свойств (если потребуется)
+    set: (target, prop, value) => {
+      const propName = String(prop);
+      console.log(`IO "${ioName}": Setting property "${propName}" to:`, value);
+      target[prop] = value;
+      return true;
     },
   });
 }

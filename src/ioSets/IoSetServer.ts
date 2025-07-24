@@ -16,7 +16,9 @@ export class IoSetServer {
 
   async init() {
     if (this.wasInited) {
-      throw new Error(`It isn't allowed to init IoSet more than once`);
+      throw new Error(
+        `IoSetServer: It isn't allowed to init IoSet more than once`
+      );
     }
 
     this.wasInited = true;
@@ -78,7 +80,7 @@ export class IoSetServer {
       }
 
       throw new Error(
-        `Can't find method "${methodName}" in "${IO_SET_SERVER_NAME}"`
+        `IoSetServer: Can't find method "${methodName}" in "${IO_SET_SERVER_NAME}"`
       );
     }
 
@@ -86,7 +88,11 @@ export class IoSetServer {
       throw new Error(`Can't find io instance "${ioName}"`);
     } else if (!(this.ios[ioName] as any)[methodName]) {
       throw new Error(
-        `Can't find method "${methodName}" in io instance "${ioName}"`
+        `IoSetServer: Can't find method "${methodName}" in io instance "${ioName}"`
+      );
+    } else if (methodName === 'init' || methodName === 'destroy') {
+      throw new Error(
+        `IoSetServer: Can't call method "${ioName}.${methodName}"`
       );
     }
 
