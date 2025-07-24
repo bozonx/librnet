@@ -19,7 +19,13 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "test", "_old/IoSetBase.ts", "_old/IoContext.ts"],
+  "include": [
+    "src/**/*",
+    "test",
+    "_old/IoSetBase.ts",
+    "_old/IoContext.ts",
+    "_old/IoSetLocal/index.ts"
+  ],
   "exclude": [
     "src/_not_used/starters/AndroidStarter",
     "src/_not_used/starters/DockerArmStarter",

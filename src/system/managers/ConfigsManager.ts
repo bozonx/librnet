@@ -17,7 +17,7 @@ const SYSTEM_MAIN_CFG_NAME = 'system.main';
 export class ConfigsManager {
   private _systemCfg!: SystemCfg;
 
-  get systemCfg() {
+  get systemCfg(): SystemCfg {
     return structuredClone(this._systemCfg);
   }
 

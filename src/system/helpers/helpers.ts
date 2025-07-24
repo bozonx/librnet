@@ -1,5 +1,10 @@
-import { clearRelPath, makeUniqId, trimCharStart } from 'squidlet-lib';
-import { pathJoin } from 'squidlet-lib';
+import {
+  clearRelPath,
+  makeUniqId,
+  trimCharStart,
+  pathJoin,
+  Promised,
+} from 'squidlet-lib';
 import type { MountPoint } from '../../types/types';
 import { REQUEST_ID_LENGTH } from '../../types/constants';
 
@@ -36,4 +41,25 @@ export function resolveRealPath(
 // TODO: do it. remove urls and relative paths
 export function clearAbsolutePath(pathTo: string): string {
   return trimCharStart(clearRelPath(pathTo), '/');
+}
+
+export async function allSettledWithTimeout(
+  promises: Promise<any>[],
+  timeout: number,
+  errorMessage: string
+): Promise<void> {
+  for (const item of promises) {
+    const promised = new Promised();
+
+    promises.push(promised.start(item, timeout));
+  }
+
+  const result = await Promise.allSettled(promises);
+  let errors = result
+    .filter((item) => item.status === 'rejected')
+    .map((item) => item.reason);
+
+  if (errors.length > 0) {
+    throw new Error(`${errorMessage}:\n${errors.join('\n')}`);
+  }
 }

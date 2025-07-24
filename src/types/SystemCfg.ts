@@ -1,17 +1,11 @@
-
-
 export interface SystemLocalCfg {
-  // defaultVersionsCount: number
-  // // like {fullRelPathToDir: 10}
-  // versionsCount: Record<string, number>
-  // rootDir: string;
-  export const WAIT_BEFORE_HALT_MS = 1000;
-export const ENTITY_INIT_TIMEOUT_SEC = 20;
-export const ENTITY_DESTROY_TIMEOUT_SEC = 20;
-// UI port for localhost
-export const DEFAULT_HTTP_LOCAL_PORT = 41808;
-// Secured port for external connections
-export const DEFAULT_WSS_EXTERNAL_PORT = 41809;
+  WAIT_BEFORE_HALT_MS: number;
+  ENTITY_INIT_TIMEOUT_SEC: number;
+  ENTITY_DESTROY_TIMEOUT_SEC: number;
+  // UI port for localhost
+  DEFAULT_HTTP_LOCAL_PORT: number;
+  // Secured port for external connections
+  DEFAULT_WSS_EXTERNAL_PORT: number;
 }
 
 export interface SystemSyncedCfg {
@@ -24,14 +18,13 @@ export interface SystemCfg {
 }
 
 export const systemLocalCfgDefaults: SystemLocalCfg = {
-  // // TODO: WTF?
-  // defaultVersionsCount: 5,
-  // // TODO: WTF?
-  // versionsCount: {},
-  // rootDir: '',
+  WAIT_BEFORE_HALT_MS: 1000,
+  ENTITY_INIT_TIMEOUT_SEC: 20,
+  ENTITY_DESTROY_TIMEOUT_SEC: 20,
+  DEFAULT_HTTP_LOCAL_PORT: 41808,
+  DEFAULT_WSS_EXTERNAL_PORT: 41809,
 };
 
 export const systemSyncedCfgDefaults: SystemSyncedCfg = {
-  //cfgSynced: {},
+  //
 };
-

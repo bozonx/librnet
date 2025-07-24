@@ -1,83 +1,50 @@
 import type { System } from '../System.js';
-import type { IoBase } from '../base/IoBase.js';
-import type { IoSetBase } from '../../../_old/IoSetBase.js';
+import type { IoSetClientBase } from '../../ioSets/IoSetClientBase.js';
+import { allSettledWithTimeout } from '../helpers/helpers.js';
 import {
-  EntityInitTimeoutSec,
-  EntityDestroyTimeoutSec,
-  IoNames,
-} from '../../types/constants.js';
-import { Promised } from 'squidlet-lib';
+  GET_IO_NAMES_METHOD_NAME,
+  IO_SET_SERVER_NAME,
+} from '@/types/constants.js';
 
-// TODO: разве не нужно передавать в конструктор манифесты?
+export function createIoProxy(ioName: string, ioSet: IoSetClientBase): IoProxy {
+  return new Proxy(io, {
+    get: (target, prop) => {
+      return target[prop];
+    },
+  });
+}
 
 export class IosManager {
-  private readonly system: System;
-  private readonly ioSets: IoSetBase[] = [];
-  // object like {ioName: IoBase}
-  private ios: Record<string, IoBase> = {};
+  private ioSets: IoSetClientBase[] = [];
+  // object like {ioName: IoProxy}
+  private ios: Record<string, IoProxy> = {};
 
-  constructor(system: System) {
-    this.system = system;
-  }
+  constructor(private readonly system: System) {}
 
-  async initIoSetsAndFilesIo() {
-    // TODO: use Promise.allSettled([
-    // TODO: add timeout for each item
-    // Init all the ioSets
-    for (const ioSet of Object.values(this.ioSets)) {
-      const promised = new Promised();
-
-      try {
-        await promised.start(ioSet.init(), ENTITY_INIT_TIMEOUT_SEC * 1000);
-      } catch (e) {
-        throw new Error(`Initialization of IoSet "${ioSet.type}" failed: ${e}`);
-      }
-    }
-
-    // TODO: WTF?
-    // init only FileIo
-    await this.initIo(IO_NAMES.LocalFilesIo);
-  }
-
-  /**
-   * It initializes all the IOs except FilesIo
-   */
-  async initIos() {
-    // TODO: use Promise.allSettled([
-    // TODO: add timeout for each item
-    for (const io of Object.values(this.ios)) {
-      if (io.name === IO_NAMES.LocalFilesIo) continue;
-
-      await this.initIo(io.name);
-    }
+  async init() {
+    await allSettledWithTimeout(
+      this.ioSets.map((ioSet) => ioSet.init()),
+      this.system.configs.systemCfg.local.ENTITY_INIT_TIMEOUT_SEC * 1000,
+      'Initialization of IoSets failed'
+    );
   }
 
   async destroy() {
-    // TODO: use Promise.allSettled([
-    // TODO: add timeout for each item
-    for (const ioName of Object.keys(this.ios)) {
-      await this.destroyIo(ioName);
-      delete this.ios[ioName];
-    }
+    await allSettledWithTimeout(
+      this.ioSets.map((ioSet) => ioSet.destroy()),
+      this.system.configs.systemCfg.local.ENTITY_DESTROY_TIMEOUT_SEC * 1000,
+      'Destroying of IoSets failed'
+    );
 
-    for (const index in this.ioSets) {
-      const ioSet = this.ioSets[index];
-      const promised = new Promised();
-
-      try {
-        await promised.start(
-          ioSet.destroy(),
-          ENTITY_DESTROY_TIMEOUT_SEC * 1000
-        );
-      } catch (e) {
-        throw new Error(`Destroying of "${ioSet.type}" failed: ${e}`);
-      }
-
-      delete this.ioSets[index];
-    }
+    this.ioSets = [];
+    this.ios = {};
   }
 
-  getIo<T extends IoBase>(ioName: string): T {
+  getIo<T>(ioName: string): T {
+    if (!this.ios[ioName]) {
+      throw new Error(`Can't find IO "${ioName}"`);
+    }
+
     return this.ios[ioName] as T;
   }
 
@@ -85,60 +52,21 @@ export class IosManager {
     return Object.keys(this.ios);
   }
 
-  // Register IoSet
-  use(ioSet: IoSetBase) {
-    if (!this.system.isDevMode)
-      throw new Error(
-        `You try to register an ioSet "${ioSet.type}" not in development mode`
-      );
-
+  // Register IoSet client
+  async useIoSet(ioSet: IoSetClientBase) {
     this.ioSets.push(ioSet);
 
-    const ioNames = ioSet.getNames();
+    const ioNames = await ioSet.callMethod<string[]>(
+      IO_SET_SERVER_NAME,
+      GET_IO_NAMES_METHOD_NAME
+    );
 
     for (const name of ioNames) {
       if (this.ios[name]) {
         throw new Error(`The IO "${name}" has already registered`);
       }
 
-      const io = ioSet.getIo(name);
-
-      this.ios[name] = io;
-    }
-  }
-
-  private async initIo(ioName: string) {
-    const io = this.ios[ioName];
-
-    if (!io) throw new Error(`Can't find IO "${ioName}"`);
-    if (!io.init) return;
-
-    const cfg = {
-      local: await this.system.configs.loadEntityConfig(ioName, false),
-      synced: await this.system.configs.loadEntityConfig(ioName, true),
-    };
-
-    const promised = new Promised();
-
-    try {
-      await promised.start(io.init(cfg), ENTITY_INIT_TIMEOUT_SEC * 1000);
-    } catch (e) {
-      throw new Error(`Initialization of "${ioName}" failed: ${e}`);
-    }
-  }
-
-  private async destroyIo(ioName: string) {
-    const io = this.ios[ioName];
-
-    if (!io) throw new Error(`Can't find IO "${ioName}"`);
-    if (!io.destroy) return;
-
-    const promised = new Promised();
-
-    try {
-      await promised.start(io.destroy(), ENTITY_DESTROY_TIMEOUT_SEC * 1000);
-    } catch (e) {
-      throw new Error(`Destroying of "${ioName}" failed: ${e}`);
+      this.ios[name] = createIoProxy(name, ioSet);
     }
   }
 }

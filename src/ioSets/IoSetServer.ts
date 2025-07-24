@@ -2,7 +2,10 @@ import type { IoBase } from '../system/base/IoBase.js';
 import type { IoManifest } from '../types/Manifests.js';
 import { IndexedEvents, type Logger } from 'squidlet-lib';
 import type { IoIndex } from '../types/types.js';
-import { IO_SET_SERVER_NAME } from '../types/constants.js';
+import {
+  GET_IO_NAMES_METHOD_NAME,
+  IO_SET_SERVER_NAME,
+} from '../types/constants.js';
 
 export class IoSetServer {
   private readonly ios: { [index: string]: IoBase } = {};
@@ -18,13 +21,26 @@ export class IoSetServer {
 
     this.wasInited = true;
 
+    // TODO: use Promise.allSettled([
     // TODO: init all the IOs
+    // for (const io of Object.values(this.ios)) {
+    //   if (io.name === IO_NAMES.LocalFilesIo) continue;
+
+    //   await this.initIo(io.name);
+    // }
   }
 
   async destroy() {
     // Ios were destroyed before in IoManager.
     // And now just remove them
+    // TODO: use Promise.allSettled([
+    // TODO: add timeout for each item
     for (let ioName of this.getNames()) delete this.ioCollection[ioName];
+    // for (const ioName of Object.keys(this.ios)) {
+    //   await this.destroyIo(ioName);
+    //   delete this.ios[ioName];
+    // }
+    this.events.destroy();
   }
 
   use(manifest: IoManifest, index: IoIndex) {
@@ -57,7 +73,7 @@ export class IoSetServer {
     ...args: any[]
   ): Promise<any> {
     if (ioName === IO_SET_SERVER_NAME) {
-      if (methodName === 'getIoNames') {
+      if (methodName === GET_IO_NAMES_METHOD_NAME) {
         return Promise.resolve(Object.keys(this.ios));
       }
 

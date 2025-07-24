@@ -13,3 +13,4 @@ export const DEFAULT_HTTP_LOCAL_PORT = 41808;
 // Secured port for external connections
 export const DEFAULT_WSS_EXTERNAL_PORT = 41809;
 export const IO_SET_SERVER_NAME = 'IoSetServer';
+export const GET_IO_NAMES_METHOD_NAME = 'getIoNames';
