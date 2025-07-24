@@ -1,7 +1,7 @@
 import type { IoBase } from '../system/base/IoBase.js';
 import type { ServiceContext } from '../system/context/ServiceContext.js';
 import type { IoContext } from '../ioSets/IoContext.js';
-import type { IoSetBase } from '../ioSets/IoSetBase.js';
+import type { IoSetBase } from '../../_old/IoSetBase.js';
 import type { AppContext } from '../system/context/AppContext.js';
 import type { System } from '../system/System.js';
 import type { DriverFactoryBase } from '../system/base/DriverFactoryBase.js';
