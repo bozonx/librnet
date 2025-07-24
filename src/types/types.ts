@@ -6,6 +6,7 @@ import type { AppContext } from '../system/context/AppContext.js';
 import type { System } from '../system/System.js';
 import type { DriverFactoryBase } from '../system/base/DriverFactoryBase.js';
 import type { DriverManifest } from './Manifests.js';
+import { LogLevels } from 'squidlet-lib';
 
 export type IoIndex = (ioSet: IoSetBase, ctx: IoContext) => IoBase;
 export type DriverIndex = (
@@ -43,6 +44,7 @@ export interface SystemEnv {
   FILES_UID: number;
   FILES_GID: number;
   ENV_MODE: EnvModes;
+  DEFAULT_LOG_LEVEL?: LogLevels;
 }
 
 export enum EnvModes {

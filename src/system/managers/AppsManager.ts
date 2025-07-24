@@ -10,6 +10,11 @@ export class AppsManager extends EntityManagerBase<AppContext> {
    * @param appOnInit - app on init function.
    */
   use(manifest: AppManifest, appOnInit: AppOnInit) {
+    if (!this.system.isDevMode)
+      throw new Error(
+        `You try to register an app "${manifest.name}" not in development mode`
+      );
+
     const context = new AppContext(this.system, manifest);
 
     this.useEntity(manifest, appOnInit, context);

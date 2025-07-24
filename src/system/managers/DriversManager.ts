@@ -1,7 +1,7 @@
 import type { System } from '../System.js';
-import type { DriverIndex } from '../../types/types.js';
-import { DRIVER_DESTROY_REASON } from '@/types/constants.js';
+import { DriverDestroyReasons, type DriverIndex } from '../../types/types.js';
 import type { DriverFactoryBase } from '../base/DriverFactoryBase.js';
+import type { DriverManifest } from '../../types/Manifests.js';
 
 export class DriversManager {
   private readonly system: System;
@@ -42,7 +42,7 @@ export class DriversManager {
       this.system.log.debug(
         `DriversManager: destroying driver "${driverName}"`
       );
-      await driver.destroy(DRIVER_DESTROY_REASON.shutdown);
+      await driver.destroy(DriverDestroyReasons.shutdown);
     }
   }
 
@@ -55,14 +55,19 @@ export class DriversManager {
   }
 
   // Register Driver
-  use(driverName: string, driverIndex: DriverIndex) {
-    const driver = driverIndex(driverName, this.system);
+  use(manifest: DriverManifest, driverIndex: DriverIndex) {
+    if (!this.system.isDevMode)
+      throw new Error(
+        `You try to register a driver "${manifest.name}" not in development mode`
+      );
+
+    const driver = driverIndex(manifest, this.system);
 
     // TODO: здесь нужно проерять requireIo. но нужно гарантировать
     //    что все IO уже добавлены
 
-    if (this.drivers[driverName]) {
-      throw new Error(`The same driver "${driverName} is already in use"`);
+    if (this.drivers[manifest.name]) {
+      throw new Error(`The same driver "${manifest.name}" is already in use"`);
     }
 
     this.drivers[driver.name] = driver;

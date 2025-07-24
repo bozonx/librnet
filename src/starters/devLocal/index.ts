@@ -1,5 +1,5 @@
 import { EnvModes } from '../../types/types.js';
-import { startSystem } from './startSystem';
+import { startSystem } from './startSystemDev.js';
 
 const ROOT_DIR = process.env.ROOT_DIR as string;
 const FILES_UID = process.env.FILES_UID as unknown as number;

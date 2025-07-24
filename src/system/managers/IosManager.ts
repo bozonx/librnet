@@ -87,6 +87,11 @@ export class IosManager {
 
   // Register IoSet
   use(ioSet: IoSetBase) {
+    if (!this.system.isDevMode)
+      throw new Error(
+        `You try to register an ioSet "${ioSet.type}" not in development mode`
+      );
+
     this.ioSets.push(ioSet);
 
     const ioNames = ioSet.getNames();

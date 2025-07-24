@@ -3,7 +3,7 @@
  * It has to be run from starter
  */
 
-export { startSystem } from './starters/devLocal/startSystem.js';
+export { startSystem } from './starters/devLocal/startSystemDev.js';
 export { System } from './system/System.js';
 export * from './types/constants.js';
 export * from './types/types.js';
