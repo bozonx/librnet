@@ -8,7 +8,7 @@ import type { DriverFactoryBase } from '../system/base/DriverFactoryBase.js';
 import type { DriverManifest } from './Manifests.js';
 import { LogLevels } from 'squidlet-lib';
 
-export type IoIndex = (ioSet: IoSetBase, ctx: IoContext) => IoBase;
+export type IoIndex = (ctx: IoContext) => IoBase;
 export type DriverIndex = (
   manifest: DriverManifest,
   system: System

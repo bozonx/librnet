@@ -1,6 +1,6 @@
 import type { IoBase } from '../system/base/IoBase.js';
 import type { IoManifest } from '../types/Manifests.js';
-import { IndexedEvents, type Logger } from 'squidlet-lib';
+import { ConsoleLogger, IndexedEvents, type Logger } from 'squidlet-lib';
 import type { IoIndex } from '../types/types.js';
 import {
   GET_IO_NAMES_METHOD_NAME,
@@ -10,9 +10,17 @@ import {
 export class IoSetServer {
   private readonly ios: { [index: string]: IoBase } = {};
   private wasInited: boolean = false;
-  private readonly events = new IndexedEvents();
+  private readonly logger: Logger;
 
-  constructor(private readonly logger?: Logger) {}
+  // private readonly events = new IndexedEvents();
+
+  constructor(readonly send: (msg: string) => void, logger?: Logger) {
+    if (logger) {
+      this.logger = logger;
+    } else {
+      this.logger = new ConsoleLogger();
+    }
+  }
 
   async init() {
     if (this.wasInited) {
@@ -45,35 +53,7 @@ export class IoSetServer {
     this.events.destroy();
   }
 
-  use(manifest: IoManifest, index: IoIndex) {
-    // TODO: use default console logger
-    const ctx = { log: this.logger };
-    this.ios[manifest.name] = io;
-
-    this.pkgCtx.log.info(`${this.type}: registering IO "${ioName}"`);
-
-    if (this.ioCollection[ioName]) {
-      throw new Error(`The same IO "${ioName}" is already in use`);
-    }
-    // only register it not init (it will be inited in IoManager)
-    this.ioCollection[ioName] = io;
-  }
-
-  // TODO: add requestId
-
-  on(cb: (ioName: string, ...args: any[]) => void): number {
-    return this.events.addListener(cb);
-  }
-
-  off(handlerIndex: number) {
-    this.events.removeListener(handlerIndex);
-  }
-
-  callMethod(
-    ioName: string | typeof IO_SET_SERVER_NAME,
-    methodName: string,
-    ...args: any[]
-  ): Promise<any> {
+  incomeMessage(msg: string) {
     if (ioName === IO_SET_SERVER_NAME) {
       if (methodName === GET_IO_NAMES_METHOD_NAME) {
         return Promise.resolve(Object.keys(this.ios));
@@ -98,4 +78,27 @@ export class IoSetServer {
 
     return (this.ios[ioName] as any)[methodName](...args);
   }
+
+  use(manifest: IoManifest, index: IoIndex) {
+    if (this.ios[manifest.name]) {
+      throw new Error(
+        `IoSetServer: The same IO "${manifest.name}" is already in use`
+      );
+    }
+
+    this.logger.info(`IoSetServer: registering IO "${manifest.name}"`);
+
+    const ctx = { log: this.logger };
+    const io = index(ctx);
+
+    this.ios[manifest.name] = io;
+  }
+
+  // on(cb: (ioName: string, ...args: any[]) => void): number {
+  //   return this.events.addListener(cb);
+  // }
+
+  // off(handlerIndex: number) {
+  //   this.events.removeListener(handlerIndex);
+  // }
 }

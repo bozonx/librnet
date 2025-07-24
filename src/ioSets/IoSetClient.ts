@@ -13,7 +13,7 @@ export class IoSetClient {
    * @param send - The function to send a message to the server
    */
   constructor(
-    readonly send: (msg: string) => Promise<void>,
+    readonly send: (msg: string) => void,
     readonly requestTimeoutSec: number = 60
   ) {}
 
@@ -71,7 +71,7 @@ export class IoSetClient {
       }
     });
 
-    await this.send(JSON.stringify([requestId, ioName, methodName, ...args]));
+    this.send(JSON.stringify([requestId, ioName, methodName, ...args]));
     return await promised;
   }
 }
