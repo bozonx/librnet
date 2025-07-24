@@ -14,8 +14,8 @@ import type {
 import type { WsCloseStatus } from '../../types/io/WsClientIoType.js';
 import { ServerIoBase } from '../../system/base/ServerIoBase.js';
 import type { IoIndex } from '../../types/types.js';
-import type { IoContext } from '../../system/context/IoContext.js';
-import type { IoSetBase } from '@/system/base/IoSetBase.js';
+import type { IoContext } from '../../ioSets/IoContext.js';
+import type { IoSetBase } from '@/ioSets/IoSetBase.js';
 import { makeRequestObject } from './HttpServerIo.js';
 
 // TODO: нужно делать пинг на соединение и удалять если нет ответа

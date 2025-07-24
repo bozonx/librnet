@@ -13,7 +13,7 @@ import {
   type ServiceOnInit,
   type AppOnInit,
 } from '../../types/types.js';
-import { type IoSetBase } from '../../system/base/IoSetBase.js';
+import { type IoSetBase } from '../../ioSets/IoSetBase.js';
 import { type AppManifest } from '../../types/Manifests.js';
 import { type ServiceManifest } from '../../types/Manifests.js';
 import { type DriverManifest } from '../../types/Manifests.js';

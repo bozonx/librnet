@@ -3,7 +3,7 @@ import type { ExecException } from 'node:child_process';
 import type SysHaltIoType from '../../types/io/SysHaltIoType.js';
 import { WAIT_BEFORE_HALT_MS } from '../../../types/constants.js';
 import type { IoIndex } from '../../../types/types.js';
-import type { IoContext } from '../../../system/context/IoContext.js';
+import type { IoContext } from '../../../ioSets/IoContext.js';
 import { IoBase } from '../../../system/base/IoBase.js';
 
 export const SysHaltIoIndex: IoIndex = (ctx: IoContext) => {

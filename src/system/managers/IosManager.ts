@@ -1,6 +1,6 @@
 import type { System } from '../System.js';
 import type { IoBase } from '../base/IoBase.js';
-import type { IoSetBase } from '../base/IoSetBase.js';
+import type { IoSetBase } from '../../ioSets/IoSetBase.js';
 import {
   EntityInitTimeoutSec,
   EntityDestroyTimeoutSec,

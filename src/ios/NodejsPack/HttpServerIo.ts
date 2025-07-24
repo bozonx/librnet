@@ -8,8 +8,8 @@ import type {
 } from '../../types/io/HttpServerIoType.js';
 import { ServerIoBase } from '../../system/base/ServerIoBase.js';
 import type { IoIndex } from '../../types/types.js';
-import type { IoContext } from '../../system/context/IoContext.js';
-import type { IoSetBase } from '@/system/base/IoSetBase.js';
+import type { IoContext } from '../../ioSets/IoContext.js';
+import type { IoSetBase } from '@/ioSets/IoSetBase.js';
 import { DEFAULT_ENCODE } from '@/types/constants.js';
 
 type ServerItem = [

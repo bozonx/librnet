@@ -1,7 +1,7 @@
-import type { IoBase } from './IoBase.js';
+import type { IoBase } from '../system/base/IoBase.js';
 import type { PackageContext } from '../context/PackageContext.js';
-import type { IoIndex, IoSetEnv } from '../../types/types.js';
-import { IoContext } from '../context/IoContext.js';
+import type { IoIndex, IoSetEnv } from '../types/types.js';
+import { IoContext } from './IoContext.js';
 
 export abstract class IoSetBase {
   abstract readonly type: string;

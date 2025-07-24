@@ -1,5 +1,5 @@
-import type { IoContext } from '../context/IoContext.js';
-import type { IoSetBase } from './IoSetBase.js';
+import type { IoContext } from '../../ioSets/IoContext.js';
+import type { IoSetBase } from '../../ioSets/IoSetBase.js';
 
 export abstract class IoBase {
   // put name of the IO here it it not the same as class name
