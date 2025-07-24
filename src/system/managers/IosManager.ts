@@ -1,13 +1,13 @@
 import { IndexedEvents } from 'squidlet-lib';
 import type { System } from '../System.js';
-import type { IoSetClientBase } from '../../ioSets/IoSetClientBase.js';
+import type { IoSetClient } from '../../ioSets/IoSetClient.js';
 import { allSettledWithTimeout } from '../helpers/helpers.js';
 import {
   GET_IO_NAMES_METHOD_NAME,
   IO_SET_SERVER_NAME,
 } from '@/types/constants.js';
 
-export function createIoProxy(ioName: string, ioSet: IoSetClientBase): any {
+export function createIoProxy(ioName: string, ioSet: IoSetClient): any {
   // Создаем пустой объект для прокси
   const target: Record<string | symbol, any> = {};
   const events = new IndexedEvents();
@@ -43,19 +43,19 @@ export function createIoProxy(ioName: string, ioSet: IoSetClientBase): any {
 }
 
 export class IosManager {
-  private ioSets: IoSetClientBase[] = [];
+  private ioSets: IoSetClient[] = [];
   // object like {ioName: IoProxy}
   private ios: Record<string, any> = {};
 
   constructor(private readonly system: System) {}
 
-  async init() {
-    await allSettledWithTimeout(
-      this.ioSets.map((ioSet) => ioSet.init()),
-      this.system.configs.systemCfg.local.ENTITY_INIT_TIMEOUT_SEC * 1000,
-      'Initialization of IoSets failed'
-    );
-  }
+  // async init() {
+  //   await allSettledWithTimeout(
+  //     this.ioSets.map((ioSet) => ioSet.init()),
+  //     this.system.configs.systemCfg.local.ENTITY_INIT_TIMEOUT_SEC * 1000,
+  //     'Initialization of IoSets failed'
+  //   );
+  // }
 
   async destroy() {
     await allSettledWithTimeout(
@@ -81,7 +81,7 @@ export class IosManager {
   }
 
   // Register IoSet client
-  async useIoSet(ioSet: IoSetClientBase) {
+  async useIoSet(ioSet: IoSetClient) {
     this.ioSets.push(ioSet);
 
     const ioNames = await ioSet.callMethod<string[]>(
