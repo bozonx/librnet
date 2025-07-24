@@ -13,7 +13,7 @@ import type {
 } from '../../types/io/FilesIoType.js';
 import { IoBase } from '../../system/base/IoBase.js';
 import type { BinTypes, BinTypesNames, IoIndex } from '../../types/types.js';
-import type { IoContext } from '../../ioSets/IoContext.js';
+import type { IoContext } from '../../../_old/IoContext.js';
 import {
   DEFAULT_ENCODE,
   IO_NAMES,

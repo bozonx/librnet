@@ -5,7 +5,7 @@ import {WsCloseStatus, WsClientEvent} from '../../types/io/WsClientIoType.js'
 import type {WsClientIoType, WebSocketClientProps} from '../../types/io/WsClientIoType.js'
 import { IoBase } from '../../system/base/IoBase.js';
 import type { IoIndex } from '../../types/types.js';
-import type { IoContext } from '../../ioSets/IoContext.js';
+import type { IoContext } from '../../../_old/IoContext.js';
 import type { IoSetBase } from '@/ioSets/IoSetBase.js';
 import { makeWsResponseObject } from './WsServerIo.js';
 

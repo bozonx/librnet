@@ -9,7 +9,7 @@ import type {
   SysPermanentInfo,
 } from '../../types/SysInfo.js';
 import type { IoIndex } from '../../../types/types.js';
-import type { IoContext } from '../../../ioSets/IoContext.js';
+import type { IoContext } from '../../../../_old/IoContext.js';
 import { IoBase } from '../../../system/base/IoBase.js';
 
 export const SysInfoIoIndex: IoIndex = (ctx: IoContext) => {

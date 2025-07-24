@@ -1,11 +1,13 @@
 import type { IoBase } from '../system/base/IoBase.js';
 import type { IoManifest } from '../types/Manifests.js';
-import type { Logger } from 'squidlet-lib';
+import { IndexedEvents, type Logger } from 'squidlet-lib';
 import type { IoIndex } from '../types/types.js';
+import { IO_SET_SERVER_NAME } from '../types/constants.js';
 
 export class IoSetServer {
   private readonly ios: { [index: string]: IoBase } = {};
   private wasInited: boolean = false;
+  private readonly events = new IndexedEvents();
 
   constructor(private readonly logger?: Logger) {}
 
@@ -39,22 +41,39 @@ export class IoSetServer {
     this.ioCollection[ioName] = io;
   }
 
-  /**
-   * It returns the instance of IO which was created on initialization
-   * @param ioName
-   */
-  getIo<T extends IoBase>(ioName: string): T {
-    if (!this.ioCollection[ioName]) {
-      throw new Error(`Can't find io instance "${ioName}"`);
-    }
+  // TODO: add requestId
 
-    return this.ioCollection[ioName] as T;
+  on(cb: (ioName: string, ...args: any[]) => void): number {
+    return this.events.addListener(cb);
   }
 
-  /**
-   * Get all the names of platforms items
-   */
-  getNames(): string[] {
-    return Object.keys(this.ioCollection);
+  off(handlerIndex: number) {
+    this.events.removeListener(handlerIndex);
+  }
+
+  callMethod(
+    ioName: string | typeof IO_SET_SERVER_NAME,
+    methodName: string,
+    ...args: any[]
+  ): Promise<any> {
+    if (ioName === IO_SET_SERVER_NAME) {
+      if (methodName === 'getIoNames') {
+        return Promise.resolve(Object.keys(this.ios));
+      }
+
+      throw new Error(
+        `Can't find method "${methodName}" in "${IO_SET_SERVER_NAME}"`
+      );
+    }
+
+    if (!this.ios[ioName]) {
+      throw new Error(`Can't find io instance "${ioName}"`);
+    } else if (!(this.ios[ioName] as any)[methodName]) {
+      throw new Error(
+        `Can't find method "${methodName}" in io instance "${ioName}"`
+      );
+    }
+
+    return (this.ios[ioName] as any)[methodName](...args);
   }
 }

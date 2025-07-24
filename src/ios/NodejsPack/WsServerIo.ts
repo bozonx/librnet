@@ -14,7 +14,7 @@ import type {
 import type { WsCloseStatus } from '../../types/io/WsClientIoType.js';
 import { ServerIoBase } from '../../system/base/ServerIoBase.js';
 import type { IoIndex } from '../../types/types.js';
-import type { IoContext } from '../../ioSets/IoContext.js';
+import type { IoContext } from '../../../_old/IoContext.js';
 import type { IoSetBase } from '@/ioSets/IoSetBase.js';
 import { makeRequestObject } from './HttpServerIo.js';
 

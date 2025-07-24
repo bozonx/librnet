@@ -8,7 +8,7 @@ import type {
 } from '../../types/io/HttpServerIoType.js';
 import { ServerIoBase } from '../../system/base/ServerIoBase.js';
 import type { IoIndex } from '../../types/types.js';
-import type { IoContext } from '../../ioSets/IoContext.js';
+import type { IoContext } from '../../../_old/IoContext.js';
 import type { IoSetBase } from '@/ioSets/IoSetBase.js';
 import { DEFAULT_ENCODE } from '@/types/constants.js';
 
