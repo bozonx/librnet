@@ -36,7 +36,7 @@ export class IoSetClient {
         throw new Error(`Request ${requestId} not found`);
       }
 
-      this.requests.get(requestId)?.(ioName, methodName, result);
+      this.requests.get(requestId)!(ioName, methodName, result);
       this.requests.delete(requestId);
     } else {
       // just event from server
