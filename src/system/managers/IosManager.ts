@@ -6,7 +6,7 @@ import {
   IO_SET_SERVER_NAME,
 } from '@/types/constants.js';
 
-export function createIoProxy(ioName: string, ioSet: IoSetClientBase): IoProxy {
+export function createIoProxy(ioName: string, ioSet: IoSetClientBase): any {
   return new Proxy(io, {
     get: (target, prop) => {
       return target[prop];
@@ -17,7 +17,7 @@ export function createIoProxy(ioName: string, ioSet: IoSetClientBase): IoProxy {
 export class IosManager {
   private ioSets: IoSetClientBase[] = [];
   // object like {ioName: IoProxy}
-  private ios: Record<string, IoProxy> = {};
+  private ios: Record<string, any> = {};
 
   constructor(private readonly system: System) {}
 
