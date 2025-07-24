@@ -13,10 +13,10 @@ import {
   type ServiceOnInit,
   type AppOnInit,
 } from '../../types/types.js';
-import { type IoSetBase } from '../../../_old/IoSetBase.js';
 import { type AppManifest } from '../../types/Manifests.js';
 import { type ServiceManifest } from '../../types/Manifests.js';
 import { type DriverManifest } from '../../types/Manifests.js';
+import { IoSetServer } from '@/ioSets/IoSetServer.js';
 
 // const EXT_DIRS = process.env.EXT_DIRS as unknown as string[];
 // const JUST_INSTALLED =
@@ -28,7 +28,7 @@ import { type DriverManifest } from '../../types/Manifests.js';
 
 export async function startSystemDev(
   env: Partial<SystemEnv>,
-  ioSets: IoSetBase[],
+  ioSets: IoSetServer[],
   packages: [
     AppManifest | ServiceManifest | DriverManifest,
     DriverIndex | ServiceOnInit | AppOnInit

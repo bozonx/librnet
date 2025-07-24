@@ -5,15 +5,15 @@ import {
   GET_IO_NAMES_METHOD_NAME,
   IO_SET_SERVER_NAME,
 } from '../types/constants.js';
-import { allSettledWithTimeout } from '@/system/helpers/helpers.js';
+import { allSettledWithTimeout } from '../system/helpers/helpers.js';
 
 export class IoSetServer {
   private readonly ios: { [index: string]: IoBase } = {};
   private wasInited: boolean = false;
   private readonly logger: Logger;
+  private send: (msg: string) => void = () => {};
 
   constructor(
-    readonly send: (msg: string) => void,
     readonly entityInitTimeoutSec: number,
     readonly entityDestroyTimeoutSec: number,
     logger?: Logger
@@ -25,7 +25,7 @@ export class IoSetServer {
     }
   }
 
-  async init() {
+  async init(send: (msg: string) => void) {
     if (this.wasInited) {
       throw new Error(
         `IoSetServer: It isn't allowed to init IoSet more than once`
@@ -33,6 +33,8 @@ export class IoSetServer {
     }
 
     this.wasInited = true;
+
+    this.send = send;
 
     await allSettledWithTimeout(
       Object.values(this.ios)
