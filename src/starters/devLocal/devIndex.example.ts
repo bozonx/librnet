@@ -8,14 +8,19 @@ import { HttpClientIoIndex } from '../../ios/NodejsPack/HttpClientIo.js';
 import { HttpServerIoIndex } from '../../ios/NodejsPack/HttpServerIo.js';
 import { WsClientIoIndex } from '../../ios/NodejsPack/WsClientIo.js';
 import { WsServerIoIndex } from '../../ios/NodejsPack/WsServerIo.js';
+import { IoSetClient } from '@/ioSets/IoSetClient';
 
 (async () => {
   const logger = new ConsoleLogger(LogLevels.debug);
   const localIoSetServer = new IoSetServer(
-    // TODO: get values
+    (msg: string) => localIoSetClient.incomeMessage(msg),
     20,
     20,
     logger
+  );
+  const localIoSetClient = new IoSetClient(
+    (msg: string) => localIoSetServer.incomeMessage(msg),
+    20
   );
 
   localIoSetServer.use(IoNames.LocalFilesIo, FilesIoIndex);
@@ -24,16 +29,14 @@ import { WsServerIoIndex } from '../../ios/NodejsPack/WsServerIo.js';
   localIoSetServer.use(IoNames.WsClientIo, WsClientIoIndex);
   localIoSetServer.use(IoNames.WsServerIo, WsServerIoIndex);
 
+  await localIoSetServer.init();
   await startSystemDev(
     {
       ROOT_DIR: process.env.ROOT_DIR as string,
       ENV_MODE: EnvModes.development,
       DEFAULT_LOG_LEVEL: LogLevels.debug,
-      //   ENV_MODE: EnvModes.development,
-      //   FILES_UID: 100,
-      //   FILES_GID: 100,
     },
-    [localIoSetServer],
+    [localIoSetClient],
     [
       // TODO: add packages
     ],

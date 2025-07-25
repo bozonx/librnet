@@ -16,19 +16,13 @@ import {
 import { type AppManifest } from '../../types/Manifests.js';
 import { type ServiceManifest } from '../../types/Manifests.js';
 import { type DriverManifest } from '../../types/Manifests.js';
-import { IoSetServer } from '@/ioSets/IoSetServer.js';
-
-// const EXT_DIRS = process.env.EXT_DIRS as unknown as string[];
-// const JUST_INSTALLED =
-//   typeof process.env.JUST_INSTALLED === 'string'
-//     ? process.env.JUST_INSTALLED === 'true'
-//     : false;
+import type { IoSetClient } from '@/ioSets/IoSetClient.js';
 
 // TODO: make dirs
 
 export async function startSystemDev(
   env: Partial<SystemEnv>,
-  ioSets: IoSetServer[],
+  ioSets: IoSetClient[],
   packages: [
     AppManifest | ServiceManifest | DriverManifest,
     DriverIndex | ServiceOnInit | AppOnInit
@@ -39,8 +33,9 @@ export async function startSystemDev(
   const resolvedLogger =
     consoleLogger || new ConsoleLogger(env.DEFAULT_LOG_LEVEL || LogLevels.info);
   const system = new System({
-    FILES_UID: 100,
-    FILES_GID: 100,
+    // TODO: лучше считать текущего юзера и группу
+    FILES_UID: 1000,
+    FILES_GID: 1000,
     ENV_MODE: EnvModes.development,
     ...omitUndefined(env),
   } as SystemEnv);
@@ -53,7 +48,7 @@ export async function startSystemDev(
   );
 
   for (const ioSet of ioSets) {
-    system.ios.use(ioSet);
+    system.ios.useIoSet(ioSet);
   }
 
   for (const [manifest, packageIndex] of packages) {

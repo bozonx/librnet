@@ -11,11 +11,11 @@ export class IoSetServer {
   private readonly ios: { [index: string]: IoBase } = {};
   private wasInited: boolean = false;
   private readonly logger: Logger;
-  private send: (msg: string) => void = () => {};
 
   constructor(
-    readonly entityInitTimeoutSec: number,
-    readonly entityDestroyTimeoutSec: number,
+    readonly send: (msg: string) => void,
+    readonly entityInitTimeoutSec: number = 60,
+    readonly entityDestroyTimeoutSec: number = 60,
     logger?: Logger
   ) {
     if (logger) {
@@ -25,7 +25,7 @@ export class IoSetServer {
     }
   }
 
-  async init(send: (msg: string) => void) {
+  async init() {
     if (this.wasInited) {
       throw new Error(
         `IoSetServer: It isn't allowed to init IoSet more than once`
@@ -33,8 +33,6 @@ export class IoSetServer {
     }
 
     this.wasInited = true;
-
-    this.send = send;
 
     await allSettledWithTimeout(
       Object.values(this.ios)
