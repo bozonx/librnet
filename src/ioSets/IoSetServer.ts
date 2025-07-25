@@ -68,49 +68,56 @@ export class IoSetServer {
     this.ios[ioName] = io;
   }
 
-  incomeMessage(msg: string) {
-    const [requestId, ioName, methodName, ...args] = JSON.parse(msg);
+  async incomeMessage(msg: string) {
+    try {
+      const [requestId, ioName, methodName, ...args] = JSON.parse(msg);
 
-    if (!requestId) {
-      return this.logger.error(
-        `IoSetServer: Invalid message, it doesn't have requestId: ${msg}`
-      );
-    }
-
-    if (ioName === IO_SET_SERVER_NAME) {
-      if (methodName === GET_IO_NAMES_METHOD_NAME) {
-        return this.sendResponse(requestId, null, Object.keys(this.ios));
+      if (!requestId) {
+        return this.logger.error(
+          `IoSetServer: Invalid message, it doesn't have requestId: ${msg}`
+        );
       }
 
-      return this.sendResponse(
-        requestId,
-        `Can't find method "${methodName}" in "${IO_SET_SERVER_NAME}"`
-      );
-    }
+      if (ioName === IO_SET_SERVER_NAME) {
+        if (methodName === GET_IO_NAMES_METHOD_NAME) {
+          return this.sendResponse(requestId, null, Object.keys(this.ios));
+        }
 
-    if (!this.ios[ioName]) {
-      return this.sendResponse(requestId, `Can't find io instance "${ioName}"`);
-    } else if (!(this.ios[ioName] as any)[methodName]) {
-      return this.sendResponse(
-        requestId,
-        `Can't find method "${methodName}" in io instance "${ioName}"`
-      );
-    } else if (methodName === 'init' || methodName === 'destroy') {
-      return this.sendResponse(
-        requestId,
-        `Not allowed to call method "${ioName}.${methodName}"`
-      );
-    }
+        return this.sendResponse(
+          requestId,
+          `Can't find method "${methodName}" in "${IO_SET_SERVER_NAME}"`
+        );
+      }
 
-    let result: any;
+      if (!this.ios[ioName]) {
+        return this.sendResponse(
+          requestId,
+          `Can't find io instance "${ioName}"`
+        );
+      } else if (!(this.ios[ioName] as any)[methodName]) {
+        return this.sendResponse(
+          requestId,
+          `Can't find method "${methodName}" in io instance "${ioName}"`
+        );
+      } else if (methodName === 'init' || methodName === 'destroy') {
+        return this.sendResponse(
+          requestId,
+          `Not allowed to call method "${ioName}.${methodName}"`
+        );
+      }
 
-    try {
-      result = (this.ios[ioName] as any)[methodName](...args);
+      let result: any;
+
+      try {
+        result = await (this.ios[ioName] as any)[methodName](...args);
+      } catch (error) {
+        return this.sendResponse(requestId, String(error));
+      }
+
+      this.sendResponse(requestId, null, result);
     } catch (error) {
-      return this.sendResponse(requestId, String(error));
+      this.logger.error(`IoSetServer: Error of incomeMessage ${msg}: ${error}`);
     }
-
-    this.sendResponse(requestId, null, result);
   }
 
   private sendResponse(requestId: number, error: string | null, result?: any) {
