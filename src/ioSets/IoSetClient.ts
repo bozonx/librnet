@@ -4,10 +4,7 @@ import { REQUEST_ID_LENGTH } from '../types/constants.js';
 export class IoSetClient {
   readonly events = new IndexedEvents();
   // current requests
-  readonly requests = new Map<
-    string,
-    (ioName: string, methodName: string, result: any) => void
-  >();
+  readonly requests = new Map<string, (error: string, result: any) => void>();
 
   /**
    * @param send - The function to send a message to the server
@@ -26,21 +23,21 @@ export class IoSetClient {
    * @param msg - The message to handle
    */
   incomeMessage(msg: string) {
-    const [requestId, ioName, ...args] = JSON.parse(msg);
+    const [requestId, ...p] = JSON.parse(msg);
 
     if (requestId) {
       // it is response by request
-      const [methodName, result] = args;
+      const [error, result] = p;
 
       if (!this.requests.has(requestId)) {
         throw new Error(`Request ${requestId} not found`);
       }
-
-      this.requests.get(requestId)!(ioName, methodName, result);
+      // call callback of request
+      this.requests.get(requestId)!(error, result);
       this.requests.delete(requestId);
     } else {
-      // just event from server
-      this.events.emit(ioName, ...args);
+      // just event from server like: ioName, eventName, ...args
+      this.events.emit(...p);
     }
   }
 
@@ -64,14 +61,18 @@ export class IoSetClient {
       this.requests.delete(requestId);
     }, this.requestTimeoutSec * 1000);
 
-    this.requests.set(requestId, (incomeIoName, incomeMethodName, result) => {
-      if (incomeIoName === ioName && incomeMethodName === methodName) {
+    this.requests.set(requestId, (error, result) => {
+      if (error) {
+        promised.reject(new Error(error));
+      } else {
         promised.resolve(result);
-        clearTimeout(timeout);
       }
+
+      clearTimeout(timeout);
     });
 
     this.send(JSON.stringify([requestId, ioName, methodName, ...args]));
+
     return await promised;
   }
 }

@@ -7,6 +7,8 @@ import {
 } from '../types/constants.js';
 import { allSettledWithTimeout } from '../system/helpers/helpers.js';
 
+// TODO: обычное сообщение должно быть с requestId = null
+
 export class IoSetServer {
   private readonly ios: { [index: string]: IoBase } = {};
   private wasInited: boolean = false;
@@ -77,6 +79,7 @@ export class IoSetServer {
 
     if (ioName === IO_SET_SERVER_NAME) {
       if (methodName === GET_IO_NAMES_METHOD_NAME) {
+        // TODO: handle error
         return this.send(
           JSON.stringify([requestId, ioName, methodName, Object.keys(this.ios)])
         );
@@ -112,6 +115,7 @@ export class IoSetServer {
       );
     }
 
+    // TODO: handle error
     this.send(JSON.stringify([requestId, ioName, methodName, result]));
   }
 }
