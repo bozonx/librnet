@@ -47,7 +47,7 @@ export async function startSystemDev(
   );
 
   for (const ioSet of ioSets) {
-    system.ios.useIoSet(ioSet);
+    await system.ios.useIoSet(ioSet);
   }
 
   for (const [manifest, packageIndex] of packages) {

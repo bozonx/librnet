@@ -45,17 +45,9 @@ export function createIoProxy(ioName: string, ioSet: IoSetClient): any {
 export class IosManager {
   private ioSets: IoSetClient[] = [];
   // object like {ioName: IoProxy}
-  private ios: Record<string, any> = {};
+  private readonly ios: Map<string, any> = new Map();
 
   constructor(private readonly system: System) {}
-
-  // async init() {
-  //   await allSettledWithTimeout(
-  //     this.ioSets.map((ioSet) => ioSet.init()),
-  //     this.system.configs.systemCfg.local.ENTITY_INIT_TIMEOUT_SEC * 1000,
-  //     'Initialization of IoSets failed'
-  //   );
-  // }
 
   async destroy() {
     await allSettledWithTimeout(
@@ -65,19 +57,19 @@ export class IosManager {
     );
 
     this.ioSets = [];
-    this.ios = {};
+    this.ios.clear();
   }
 
   getIo<T>(ioName: string): T {
-    if (!this.ios[ioName]) {
+    if (!this.ios.get(ioName)) {
       throw new Error(`Can't find IO "${ioName}"`);
     }
 
-    return this.ios[ioName] as T;
+    return this.ios.get(ioName) as T;
   }
 
   getNames(): string[] {
-    return Object.keys(this.ios);
+    return Array.from(this.ios.keys());
   }
 
   // Register IoSet client
@@ -90,11 +82,11 @@ export class IosManager {
     );
 
     for (const ioName of ioNames) {
-      if (this.ios[ioName]) {
+      if (this.ios.get(ioName)) {
         throw new Error(`The IO "${ioName}" has already registered`);
       }
 
-      this.ios[ioName] = createIoProxy(ioName, ioSet);
+      this.ios.set(ioName, createIoProxy(ioName, ioSet));
     }
   }
 }
