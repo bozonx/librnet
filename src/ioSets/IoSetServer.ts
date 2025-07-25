@@ -7,8 +7,6 @@ import {
 } from '../types/constants.js';
 import { allSettledWithTimeout } from '../system/helpers/helpers.js';
 
-// TODO: обычное сообщение должно быть с requestId = null
-
 export class IoSetServer {
   private readonly ios: { [index: string]: IoBase } = {};
   private wasInited: boolean = false;
@@ -35,6 +33,14 @@ export class IoSetServer {
     }
 
     this.wasInited = true;
+
+    for (const [ioName, io] of Object.entries(this.ios)) {
+      if (io.on) {
+        const handlerIndex = await io.on((...args) => {
+          this.sendEvent(ioName, ...args);
+        });
+      }
+    }
 
     await allSettledWithTimeout(
       Object.values(this.ios)
@@ -127,13 +133,30 @@ export class IoSetServer {
       );
       res?.catch((error) => {
         this.logger.error(
-          `IoSetServer: Error of response ${requestId}: ${error}`
+          `IoSetServer: Error of response ${requestId} ${JSON.stringify(
+            result
+          )}: ${error}`
         );
       });
     } catch (error) {
       this.logger.error(
-        `IoSetServer: Error of response ${requestId}: ${error}`
+        `IoSetServer: Error of response ${requestId} ${JSON.stringify(
+          result
+        )}: ${error}`
       );
+    }
+  }
+
+  private sendEvent(...args: any[]) {
+    const msg = JSON.stringify([null, ...args]);
+    try {
+      const res: Promise<void> | void = this.send(msg);
+
+      res?.catch((error) => {
+        this.logger.error(`IoSetServer: Error of event ${msg}: ${error}`);
+      });
+    } catch (error) {
+      this.logger.error(`IoSetServer: Error of event ${msg}: ${error}`);
     }
   }
 }

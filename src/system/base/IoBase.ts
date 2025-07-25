@@ -1,3 +1,5 @@
+import type { IoContext } from '../../types/types.js';
+
 export abstract class IoBase {
   // put name of the IO here it it not the same as class name
   // abstract readonly name: string;
@@ -9,6 +11,9 @@ export abstract class IoBase {
 
   init?(): Promise<void>;
   destroy?(): Promise<void>;
+
+  on?(cb: (...args: any[]) => void): Promise<number>;
+  off?(handlerIndex: number): Promise<void>;
 
   // /**
   //  * Setup props before init.
