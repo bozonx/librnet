@@ -5,12 +5,7 @@ import {
   type SystemSyncedCfg,
   type SystemCfg,
 } from '../../types/SystemCfg.js';
-import {
-  CFG_FILE_EXT,
-  LOCAL_DATA_SUB_DIRS,
-  ROOT_DIRS,
-  SYNCED_DATA_SUB_DIRS,
-} from '../../types/constants.js';
+import { CFG_FILE_EXT } from '../../types/constants.js';
 
 const SYSTEM_MAIN_CFG_NAME = 'system.main';
 

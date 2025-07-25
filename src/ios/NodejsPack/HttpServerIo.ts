@@ -79,7 +79,8 @@ export class HttpServerIo
     (requestId: number, response: HttpResponse) => void
   >();
 
-  init = async (cfg?: HttpServerIoConfig) => {
+  init = async () => {
+    // TODO: remove this
     this.cfg = {
       ...HTTP_SERVER_IO_CONFIG_DEFAULTS,
       ...cfg,

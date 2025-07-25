@@ -1,6 +1,6 @@
 import type { IoBase } from '../system/base/IoBase.js';
 import { ConsoleLogger, LogLevels, type Logger } from 'squidlet-lib';
-import type { IoIndex } from '../types/types.js';
+import type { IoContext, IoIndex } from '../types/types.js';
 import {
   GET_IO_NAMES_METHOD_NAME,
   IO_SET_SERVER_NAME,
@@ -15,7 +15,7 @@ export class IoSetServer {
   private readonly logger: Logger;
 
   constructor(
-    readonly send: (msg: string) => void,
+    readonly send: (msg: string) => Promise<void> | void,
     readonly entityInitTimeoutSec: number = 60,
     readonly entityDestroyTimeoutSec: number = 60,
     logger?: Logger
@@ -62,7 +62,7 @@ export class IoSetServer {
 
     this.logger.info(`IoSetServer: registering IO "${ioName}"`);
 
-    const ctx = { log: this.logger };
+    const ctx: IoContext = { log: this.logger };
     const io = index(ctx);
 
     this.ios[ioName] = io;
@@ -79,28 +79,26 @@ export class IoSetServer {
 
     if (ioName === IO_SET_SERVER_NAME) {
       if (methodName === GET_IO_NAMES_METHOD_NAME) {
-        // TODO: handle error
-        return this.send(
-          JSON.stringify([requestId, ioName, methodName, Object.keys(this.ios)])
-        );
+        return this.sendResponse(requestId, null, Object.keys(this.ios));
       }
 
-      return this.logger.error(
-        `IoSetServer: Can't find method "${methodName}" in "${IO_SET_SERVER_NAME}"`
+      return this.sendResponse(
+        requestId,
+        `Can't find method "${methodName}" in "${IO_SET_SERVER_NAME}"`
       );
     }
 
     if (!this.ios[ioName]) {
-      return this.logger.error(
-        `IoSetServer: Can't find io instance "${ioName}"`
-      );
+      return this.sendResponse(requestId, `Can't find io instance "${ioName}"`);
     } else if (!(this.ios[ioName] as any)[methodName]) {
-      return this.logger.error(
-        `IoSetServer: Can't find method "${methodName}" in io instance "${ioName}"`
+      return this.sendResponse(
+        requestId,
+        `Can't find method "${methodName}" in io instance "${ioName}"`
       );
     } else if (methodName === 'init' || methodName === 'destroy') {
-      return this.logger.error(
-        `IoSetServer: Can't call method "${ioName}.${methodName}"`
+      return this.sendResponse(
+        requestId,
+        `Not allowed to call method "${ioName}.${methodName}"`
       );
     }
 
@@ -109,13 +107,26 @@ export class IoSetServer {
     try {
       result = (this.ios[ioName] as any)[methodName](...args);
     } catch (error) {
-      // TODO: нужно возвращать ошибку в клиент
-      return this.logger.error(
-        `IoSetServer: Error in method "${ioName}.${methodName}": ${error}`
-      );
+      return this.sendResponse(requestId, String(error));
     }
 
-    // TODO: handle error
-    this.send(JSON.stringify([requestId, ioName, methodName, result]));
+    this.sendResponse(requestId, null, result);
+  }
+
+  private sendResponse(requestId: number, error: string | null, result?: any) {
+    try {
+      const res: Promise<void> | void = this.send(
+        JSON.stringify([requestId, error, result])
+      );
+      res?.catch((error) => {
+        this.logger.error(
+          `IoSetServer: Error of response ${requestId}: ${error}`
+        );
+      });
+    } catch (error) {
+      this.logger.error(
+        `IoSetServer: Error of response ${requestId}: ${error}`
+      );
+    }
   }
 }

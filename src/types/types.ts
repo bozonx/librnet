@@ -4,7 +4,11 @@ import type { AppContext } from '../system/context/AppContext.js';
 import type { System } from '../system/System.js';
 import type { DriverFactoryBase } from '../system/base/DriverFactoryBase.js';
 import type { DriverManifest } from './Manifests.js';
-import { LogLevels } from 'squidlet-lib';
+import type { Logger, LogLevels } from 'squidlet-lib';
+
+export interface IoContext {
+  log: Logger;
+}
 
 export type IoIndex = (ctx: IoContext) => IoBase;
 export type DriverIndex = (
