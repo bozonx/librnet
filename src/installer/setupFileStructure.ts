@@ -36,35 +36,39 @@ export async function setupFileStructure(system: System) {
   }
 
   // Make default system config files
-  try {
+  const systemLocalCfgPath = pathJoin(
+    RootDirs.local,
+    LocalDataSubDirs.configs,
+    'system.' + CFG_FILE_EXT
+  );
+  if (!(await system.localFiles.exists(systemLocalCfgPath))) {
     await system.localFiles.writeFile(
-      pathJoin(
-        RootDirs.local,
-        LocalDataSubDirs.configs,
-        'system.' + CFG_FILE_EXT
-      ),
+      systemLocalCfgPath,
       JSON.stringify(systemLocalCfgDefaults, null, 2)
     );
-  } catch (e) {
-    // ignore
   }
 
-  try {
+  const systemSyncedCfgPath = pathJoin(
+    RootDirs.synced,
+    SyncedDataSubDirs.configs,
+    'system.' + CFG_FILE_EXT
+  );
+  if (!(await system.localFiles.exists(systemSyncedCfgPath))) {
     await system.localFiles.writeFile(
-      pathJoin(
-        RootDirs.synced,
-        SyncedDataSubDirs.configs,
-        'system.' + CFG_FILE_EXT
-      ),
+      systemSyncedCfgPath,
       JSON.stringify(systemSyncedCfgDefaults, null, 2)
     );
-  } catch (e) {
-    // ignore
   }
 
-  try {
+  // system/package.json
+  const systemPackageJsonPath = pathJoin(
+    RootDirs.local,
+    LocalDataSubDirs.system,
+    'package.json'
+  );
+  if (!(await system.localFiles.exists(systemPackageJsonPath))) {
     await system.localFiles.writeFile(
-      pathJoin(RootDirs.local, LocalDataSubDirs.system, 'package.json'),
+      systemPackageJsonPath,
       JSON.stringify(
         {
           name: 'system',
@@ -72,25 +76,29 @@ export async function setupFileStructure(system: System) {
           description: 'System',
           main: 'index.js',
           scripts: {},
+          dependencies: {
+            '@squidlet/lib': 'latest',
+          },
         },
         null,
         2
       )
     );
-  } catch (e) {
-    // ignore
   }
 
-  try {
+  // system/index.js
+  const systemIndexJsPath = pathJoin(
+    RootDirs.local,
+    LocalDataSubDirs.system,
+    'index.js'
+  );
+
+  if (!(await system.localFiles.exists(systemIndexJsPath))) {
     await system.localFiles.writeFile(
       pathJoin(RootDirs.local, LocalDataSubDirs.system, 'index.js'),
-      `import { System } from '@/system/System.js';
+      `import { StartProduction } from 'k-os';
 
-const system = new System();
-
-system.start();`
+StartProduction();`
     );
-  } catch (e) {
-    // ignore
   }
 }

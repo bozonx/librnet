@@ -1,4 +1,4 @@
-import type { BinTypes, BinTypesNames } from '../types';
+import type { BinTypes } from '../types';
 
 export interface StatsSimplified {
   // in bytes
@@ -93,7 +93,7 @@ export interface FilesIoType {
    * @param returnType - Default is Uint8Array
    * @returns
    */
-  readBinFile(pathTo: string, returnType?: BinTypesNames): Promise<BinTypes>;
+  readBinFile(pathTo: string, returnType?: BinTypes): Promise<BinTypes>;
 
   /**
    * Check if file is a valid UTF-8 text file
@@ -144,6 +144,13 @@ export interface FilesIoType {
    * @returns
    */
   stat(pathTo: string): Promise<StatsSimplified | undefined>;
+
+  /**
+   * Check if file or directory exists
+   * @param pathTo
+   * @returns true if file or directory exists, false otherwise
+   */
+  exists(pathTo: string): Promise<boolean>;
 
   /**
    * Copy specified files. Use full path

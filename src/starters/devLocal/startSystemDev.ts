@@ -17,8 +17,7 @@ import { type AppManifest } from '../../types/Manifests.js';
 import { type ServiceManifest } from '../../types/Manifests.js';
 import { type DriverManifest } from '../../types/Manifests.js';
 import type { IoSetClient } from '@/ioSets/IoSetClient.js';
-
-// TODO: make dirs
+import { setupFileStructure } from '@/installer/setupFileStructure.js';
 
 export async function startSystemDev(
   env: Partial<SystemEnv>,
@@ -56,6 +55,8 @@ export async function startSystemDev(
   }
 
   await beforeInit?.(system);
+
+  await setupFileStructure(system);
 
   // Enable graceful stop
   system.events.once(SystemEvents.systemStarted, () => {

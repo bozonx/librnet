@@ -91,6 +91,20 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     return result;
   }
 
+  async exists(pathTo: string): Promise<boolean> {
+    // TODO:  разве это не stat?
+    const result = await this.filesIo.exists(this.preparePath(pathTo));
+
+    this.riseEvent({
+      path: pathTo,
+      action: FILE_ACTION.read,
+      method: 'exists',
+      timestamp: Date.now(),
+    });
+
+    return result;
+  }
+
   async readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]> {
     const result = await this.filesIo.readdir(
       this.preparePath(pathTo),
