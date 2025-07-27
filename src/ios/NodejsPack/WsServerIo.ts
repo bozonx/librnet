@@ -13,9 +13,7 @@ import type {
 } from '../../types/io/WsServerIoType.js';
 import type { WsCloseStatus } from '../../types/io/WsClientIoType.js';
 import { ServerIoBase } from '../../system/base/ServerIoBase.js';
-import type { IoIndex } from '../../types/types.js';
-import type { IoContext } from '../../../_old/IoContext.js';
-import type { IoSetBase } from '@/ioSets/IoSetBase.js';
+import type { IoIndex, IoContext } from '../../types/types.js';
 import { makeRequestObject } from './HttpServerIo.js';
 
 // TODO: нужно делать пинг на соединение и удалять если нет ответа
@@ -36,8 +34,8 @@ enum ITEM_POSITION {
   listeningState,
 }
 
-export const WsServerIoIndex: IoIndex = (ioSet: IoSetBase, ctx: IoContext) => {
-  return new WsServerIo(ioSet, ctx);
+export const WsServerIoIndex: IoIndex = (ctx: IoContext) => {
+  return new WsServerIo(ctx);
 };
 
 export function makeWsResponseObject(res: IncomingMessage): HttpResponse {
@@ -52,8 +50,6 @@ export class WsServerIo
   extends ServerIoBase<ServerItem, WsServerProps>
   implements WsServerIoType
 {
-  name = 'WsServerIo';
-
   async isServerListening(serverId: string): Promise<boolean> {
     const serverItem = this.servers[serverId];
 

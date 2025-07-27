@@ -7,10 +7,8 @@ import type {
   HttpServerProps,
 } from '../../types/io/HttpServerIoType.js';
 import { ServerIoBase } from '../../system/base/ServerIoBase.js';
-import type { IoIndex } from '../../types/types.js';
-import type { IoContext } from '../../../_old/IoContext.js';
-import type { IoSetBase } from '@/ioSets/IoSetBase.js';
-import { DEFAULT_ENCODE } from '@/types/constants.js';
+import type { IoIndex, IoContext } from '../../types/types.js';
+import { DEFAULT_ENCODE } from '../../types/constants.js';
 
 type ServerItem = [
   // Http server instance
@@ -28,15 +26,12 @@ export interface HttpServerIoConfig {
   requestTimeoutSec: number;
 }
 // TODO: это можно передавать в параметрах а не в конфиге
-const HTTP_SERVER_IO_CONFIG_DEFAULTS = {
-  requestTimeoutSec: 60,
-};
+// const HTTP_SERVER_IO_CONFIG_DEFAULTS = {
+//   requestTimeoutSec: 60,
+// };
 
-export const HttpServerIoIndex: IoIndex = (
-  ioSet: IoSetBase,
-  ctx: IoContext
-) => {
-  return new HttpServerIo(ioSet, ctx);
+export const HttpServerIoIndex: IoIndex = (ctx: IoContext) => {
+  return new HttpServerIo(ctx);
 };
 
 export function makeRequestObject(req: IncomingMessage): HttpRequest {
@@ -72,20 +67,9 @@ export class HttpServerIo
   extends ServerIoBase<ServerItem, HttpServerProps>
   implements HttpServerIoType
 {
-  name = 'HttpServerIo';
-
-  private cfg: HttpServerIoConfig = HTTP_SERVER_IO_CONFIG_DEFAULTS;
   private responseEvent = new IndexedEvents<
     (requestId: number, response: HttpResponse) => void
   >();
-
-  init = async () => {
-    // TODO: remove this
-    this.cfg = {
-      ...HTTP_SERVER_IO_CONFIG_DEFAULTS,
-      ...cfg,
-    };
-  };
 
   async isServerListening(serverId: string): Promise<boolean> {
     const serverItem = this.servers[serverId];

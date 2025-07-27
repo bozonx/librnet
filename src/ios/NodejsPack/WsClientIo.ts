@@ -4,13 +4,11 @@ import {callPromised, convertBufferToUint8Array, IndexedEvents, omitObj} from 's
 import {WsCloseStatus, WsClientEvent} from '../../types/io/WsClientIoType.js'
 import type {WsClientIoType, WebSocketClientProps} from '../../types/io/WsClientIoType.js'
 import { IoBase } from '../../system/base/IoBase.js';
-import type { IoIndex } from '../../types/types.js';
-import type { IoContext } from '../../../_old/IoContext.js';
-import type { IoSetBase } from '@/ioSets/IoSetBase.js';
+import type { IoIndex, IoContext } from '../../types/types.js';
 import { makeWsResponseObject } from './WsServerIo.js';
 
-export const WsClientIoIndex: IoIndex = (ioSet: IoSetBase, ctx: IoContext) => {
-  return new WsClientIo(ioSet, ctx);
+export const WsClientIoIndex: IoIndex = (ctx: IoContext) => {
+  return new WsClientIo(ctx);
 };
 
 type ConnectionItem = [WebSocket, WebSocketClientProps];
@@ -23,8 +21,6 @@ enum CONNECTION_POSITION {
 // TODO: может сделать базовый класс для подобных клиентов
 
 export class WsClientIo extends IoBase implements WsClientIoType {
-  name = 'WsClientIo';
-
   private readonly events = new IndexedEvents();
   private readonly connections: ConnectionItem[] = [];
 

@@ -1,20 +1,13 @@
 import type { HttpClientIoType } from '../../types/io/HttpClientIoType.js';
 import type { HttpRequest, HttpResponse } from 'squidlet-lib';
 import { IoBase } from '../../system/base/IoBase.js';
-import type { IoIndex } from '../../types/types.js';
-import type { IoContext } from '../../../_old/IoContext.js';
-import type { IoSetBase } from '@/ioSets/IoSetBase.js';
+import type { IoIndex, IoContext } from '../../types/types.js';
 
-export const HttpClientIoIndex: IoIndex = (
-  ioSet: IoSetBase,
-  ctx: IoContext
-) => {
-  return new HttpClientIo(ioSet, ctx);
+export const HttpClientIoIndex: IoIndex = (ctx: IoContext) => {
+  return new HttpClientIo(ctx);
 };
 
 export class HttpClientIo extends IoBase implements HttpClientIoType {
-  name = 'HttpClientIo';
-
   async request(request: HttpRequest): Promise<HttpResponse> {
     const res = await fetch(request.url, {
       method: request.method,

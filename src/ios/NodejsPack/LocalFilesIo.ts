@@ -12,22 +12,17 @@ import type {
   WriteFileOptions,
 } from '../../types/io/FilesIoType.js';
 import { IoBase } from '../../system/base/IoBase.js';
-import type { BinTypes, BinTypesNames, IoIndex } from '../../types/types.js';
-import type { IoContext } from '../../../_old/IoContext.js';
+import type { BinTypes, IoIndex, IoContext } from '../../types/types.js';
 import {
   DEFAULT_ENCODE,
-  IO_NAMES,
   IS_TEXT_FILE_UTF8_SAMPLE_SIZE,
 } from '../../types/constants.js';
-import type { IoSetBase } from '@/ioSets/IoSetBase.js';
 
-export const FilesIoIndex: IoIndex = (ioSet: IoSetBase, ctx: IoContext) => {
-  return new LocalFilesIo(ioSet, ctx);
+export const FilesIoIndex: IoIndex = (ctx: IoContext) => {
+  return new LocalFilesIo(ctx);
 };
 
 export class LocalFilesIo extends IoBase implements FilesIoType {
-  readonly name = IO_NAMES.LocalFilesIo;
-
   async readTextFile(
     pathTo: string,
     options?: ReadTextFileOptions
