@@ -43,7 +43,7 @@ export function createIoProxy(ioName: string, ioSet: IoSetClient): any {
 }
 
 export class IosManager {
-  private readonly ioSets: IoSetClient[] = [];
+  private readonly ioSets: Set<IoSetClient> = new Set();
   // object like {ioName: IoProxy}
   private readonly ios: Map<string, any> = new Map();
 
@@ -51,13 +51,13 @@ export class IosManager {
 
   async destroy() {
     await allSettledWithTimeout(
-      this.ioSets.map(async (ioSet, index) => {
+      [...this.ioSets].map(async (ioSet, index) => {
         this.system.log.debug(
-          `IosManager: destroying ioSet (${index + 1}/${this.ioSets.length})`
+          `IosManager: destroying ioSet (${index + 1}/${this.ioSets.size})`
         );
         await ioSet.destroy();
 
-        this.ioSets.splice(index, 1);
+        this.ioSets.delete(ioSet);
       }),
       this.system.configs.systemCfg.local.ENTITY_DESTROY_TIMEOUT_SEC * 1000,
       'Destroying of IoSets failed'
@@ -80,7 +80,7 @@ export class IosManager {
 
   // Register IoSet client
   async useIoSet(ioSet: IoSetClient) {
-    this.ioSets.push(ioSet);
+    this.ioSets.add(ioSet);
 
     const ioNames = await ioSet.callMethod<string[]>(
       IO_SET_SERVER_NAME,
