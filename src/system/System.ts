@@ -72,13 +72,8 @@ export class System {
 
   async init() {
     try {
-      // TODO: review this
-      await this.ios.initIoSetsAndFilesIo();
-
       await this.configs.init();
       await this.permissions.init();
-      // TODO: review this
-      await this.ios.initIos();
 
       await this.drivers.init();
       this.events.emit(SystemEvents.driversInitialized);
