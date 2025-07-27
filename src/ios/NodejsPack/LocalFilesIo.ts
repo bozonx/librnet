@@ -23,6 +23,8 @@ export const FilesIoIndex: IoIndex = (ctx: IoContext) => {
 };
 
 export class LocalFilesIo extends IoBase implements FilesIoType {
+  ////// READING //////
+
   async readTextFile(
     pathTo: string,
     options?: ReadTextFileOptions
@@ -34,7 +36,7 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
 
   async readBinFile(
     pathTo: string,
-    returnType: BinTypesNames = 'Uint8Array'
+    returnType: BinTypes = 'Uint8Array'
   ): Promise<BinTypes> {
     const buffer: Buffer = await fs.readFile(pathTo);
 
@@ -64,6 +66,55 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
       default:
         throw new Error(`Unknown return type: ${returnType}`);
     }
+  }
+
+  async stat(pathTo: string): Promise<StatsSimplified | undefined> {
+    let stat: Stats;
+
+    try {
+      stat = await fs.stat(pathTo);
+    } catch (e) {
+      return undefined;
+    }
+
+    return {
+      size: stat.size,
+      dir: stat.isDirectory(),
+      symbolicLink: stat.isSymbolicLink(),
+      mtime: stat.mtime.getTime(),
+      atime: stat.atime.getTime(),
+      ctime: stat.ctime.getTime(),
+      birthtime: stat.birthtime.getTime(),
+      mode: stat.mode,
+      uid: stat.uid,
+      gid: stat.gid,
+      dev: stat.dev,
+      ino: stat.ino,
+      nlink: stat.nlink,
+      rdev: stat.rdev,
+      blksize: stat.blksize,
+      blocks: stat.blocks,
+    };
+  }
+
+  async exists(pathTo: string): Promise<boolean> {
+    try {
+      await fs.access(pathTo);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]> {
+    return fs.readdir(pathTo, {
+      ...options,
+      encoding: options?.encoding || DEFAULT_ENCODE,
+    });
+  }
+
+  readlink(pathTo: string): Promise<string> {
+    return fs.readlink(pathTo);
   }
 
   async isTextFileUtf8(pathTo: string): Promise<boolean> {
@@ -98,6 +149,12 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
       return false;
     }
   }
+
+  async realpath(pathTo: string): Promise<string> {
+    return fs.realpath(pathTo);
+  }
+
+  ////// WRITING //////
 
   async appendFile(
     pathTo: string,
@@ -160,35 +217,6 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     );
   }
 
-  async stat(pathTo: string): Promise<StatsSimplified | undefined> {
-    let stat: Stats;
-
-    try {
-      stat = await fs.stat(pathTo);
-    } catch (e) {
-      return undefined;
-    }
-
-    return {
-      size: stat.size,
-      dir: stat.isDirectory(),
-      symbolicLink: stat.isSymbolicLink(),
-      mtime: stat.mtime.getTime(),
-      atime: stat.atime.getTime(),
-      ctime: stat.ctime.getTime(),
-      birthtime: stat.birthtime.getTime(),
-      mode: stat.mode,
-      uid: stat.uid,
-      gid: stat.gid,
-      dev: stat.dev,
-      ino: stat.ino,
-      nlink: stat.nlink,
-      rdev: stat.rdev,
-      blksize: stat.blksize,
-      blocks: stat.blocks,
-    };
-  }
-
   async cp(files: [string, string][], options?: CopyOptions): Promise<void> {
     return Promise.allSettled(
       files.map((item) => fs.cp(item[0], item[1], options))
@@ -229,25 +257,10 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     });
   }
 
-  readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]> {
-    return fs.readdir(pathTo, {
-      ...options,
-      encoding: options?.encoding || DEFAULT_ENCODE,
-    });
-  }
-
   async mkdir(pathTo: string, options?: MkdirOptions): Promise<void> {
     await fs.mkdir(pathTo, options);
 
     return this.chown(pathTo);
-  }
-
-  readlink(pathTo: string): Promise<string> {
-    return fs.readlink(pathTo);
-  }
-
-  async realpath(pathTo: string): Promise<string> {
-    return fs.realpath(pathTo);
   }
 
   async symlink(target: string, pathTo: string): Promise<void> {

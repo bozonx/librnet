@@ -92,7 +92,6 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   }
 
   async exists(pathTo: string): Promise<boolean> {
-    // TODO:  разве это не stat?
     const result = await this.filesIo.exists(this.preparePath(pathTo));
 
     this.riseEvent({
@@ -134,6 +133,20 @@ export abstract class FilesDriverLogic implements FilesDriverType {
       method: 'readlink',
       timestamp: Date.now(),
       // TODO: известно ли сколько байт считывается?
+    });
+
+    return result;
+  }
+
+  async isTextFileUtf8(pathTo: string): Promise<boolean> {
+    const result = await this.filesIo.isTextFileUtf8(this.preparePath(pathTo));
+
+    this.riseEvent({
+      path: pathTo,
+      action: FILE_ACTION.read,
+      method: 'isTextFileUtf8',
+      timestamp: Date.now(),
+      size: IS_TEXT_FILE_UTF8_SAMPLE_SIZE,
     });
 
     return result;
@@ -186,32 +199,8 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     return result;
   }
 
-  async isExists(pathToFileOrDir: string): Promise<boolean> {
-    const result = !!(await this.stat(this.preparePath(pathToFileOrDir)));
-
-    this.riseEvent({
-      path: pathToFileOrDir,
-      action: FILE_ACTION.read,
-      method: 'isExists',
-      timestamp: Date.now(),
-      // do not calculate size
-    });
-
-    return result;
-  }
-
-  async isTextFileUtf8(pathTo: string): Promise<boolean> {
-    const result = await this.filesIo.isTextFileUtf8(this.preparePath(pathTo));
-
-    this.riseEvent({
-      path: pathTo,
-      action: FILE_ACTION.read,
-      method: 'isTextFileUtf8',
-      timestamp: Date.now(),
-      size: IS_TEXT_FILE_UTF8_SAMPLE_SIZE,
-    });
-
-    return result;
+  async realpath(pathTo: string): Promise<string> {
+    const result = await this.filesIo.realpath(this.preparePath(pathTo));
   }
 
   ///////// WRITE METHODS

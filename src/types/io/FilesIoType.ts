@@ -79,6 +79,8 @@ export interface MkdirOptions {
  * But actually it joins these paths with workDir and result will be like /workdir/envSet/...
  */
 export interface FilesIoType {
+  ////// READING //////
+
   /**
    * Read text file and return it as string
    * @param pathTo
@@ -96,11 +98,53 @@ export interface FilesIoType {
   readBinFile(pathTo: string, returnType?: BinTypes): Promise<BinTypes>;
 
   /**
+   * Get file or directory stats.
+   * If file or directory doesn't exist, it will return undefined.
+   * @param pathTo
+   * @returns
+   */
+  stat(pathTo: string): Promise<StatsSimplified | undefined>;
+
+  /**
+   * Check if file or directory exists
+   * @param pathTo
+   * @returns true if file or directory exists, false otherwise
+   */
+  exists(pathTo: string): Promise<boolean>;
+
+  /**
+   * Read directory
+   * @param pathTo
+   * @param options - Default encoding is UTF-8
+   * @returns
+   */
+  readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]>;
+
+  /**
+   * You should pass only symlink. Resolve it by using stat().
+   * It returns an absolute path to target file.
+   * Encoding is UTF-8
+   * @param pathTo
+   * @returns path to target file which is set in symlink (can be relative)
+   */
+  readlink(pathTo: string): Promise<string>;
+
+  /**
    * Check if file is a valid UTF-8 text file
    * @param pathTo - path to file to check
    * @returns true if file is valid UTF-8 text, false otherwise
    */
   isTextFileUtf8(pathTo: string): Promise<boolean>;
+
+  /**
+   * Resolve path to real path through symlinks
+   * Encoding is UTF-8
+   * @param pathTo
+   * @returns absolute path to deeply linked target file
+   */
+  realpath(pathTo: string): Promise<string>;
+
+  ////// WRITING //////
 
   /**
    * Append data to file even if it doesn't exist
@@ -138,21 +182,6 @@ export interface FilesIoType {
   rm(paths: string[], options?: RmOptions): Promise<void>;
 
   /**
-   * Get file or directory stats.
-   * If file or directory doesn't exist, it will return undefined.
-   * @param pathTo
-   * @returns
-   */
-  stat(pathTo: string): Promise<StatsSimplified | undefined>;
-
-  /**
-   * Check if file or directory exists
-   * @param pathTo
-   * @returns true if file or directory exists, false otherwise
-   */
-  exists(pathTo: string): Promise<boolean>;
-
-  /**
    * Copy specified files. Use full path
    * files is ["~/1/old.txt", "~/2/new.txt"][]
    * If has errors it will wait for all the files to be copied
@@ -176,14 +205,6 @@ export interface FilesIoType {
   rename(files: [string, string][]): Promise<void>;
 
   /**
-   * Read directory
-   * @param pathTo
-   * @param options - Default encoding is UTF-8
-   * @returns
-   */
-  readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]>;
-
-  /**
    * Create directory
    * If recursive is true, it will create parent directories recursively
    *   and if destination directory already exists, it will NOT throw an error
@@ -193,23 +214,6 @@ export interface FilesIoType {
    * @returns
    */
   mkdir(pathTo: string, options?: MkdirOptions): Promise<void>;
-
-  /**
-   * You should pass only symlink. Resolve it by using stat().
-   * It returns an absolute path to target file.
-   * Encoding is UTF-8
-   * @param pathTo
-   * @returns path to target file which is set in symlink (can be relative)
-   */
-  readlink(pathTo: string): Promise<string>;
-
-  /**
-   * Resolve path to real path through symlinks
-   * Encoding is UTF-8
-   * @param pathTo
-   * @returns absolute path to deeply linked target file
-   */
-  realpath(pathTo: string): Promise<string>;
 
   /**
    * Create symlink.
