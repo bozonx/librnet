@@ -61,12 +61,11 @@ export class DriversManager {
 
   // Register Driver
   use(manifest: DriverManifest, driverIndex: DriverIndex) {
-    if (!this.system.isDevMode)
-      throw new Error(
-        `You try to register a driver "${manifest.name}" not in development mode`
-      );
-
     const driver = driverIndex(manifest, this.system);
+
+    if (this.drivers[manifest.name]) {
+      throw new Error(`The same driver "${manifest.name}" is already in use"`);
+    }
 
     const foundRequiredIoNames: string[] = this.system.ios
       .getNames()
@@ -74,18 +73,13 @@ export class DriversManager {
     // skip driver if it doesn't meet his dependencies
     if (foundRequiredIoNames.length !== driver.requireIo.length)
       throw new Error(
-        `Driver "${driverName}" doesn't meet his IO dependencies. His required IOs: "${driver.requireIo.join(
+        `Driver "${
+          manifest.name
+        }" doesn't meet his IO dependencies. His required IOs: "${driver.requireIo.join(
           ', '
         )}", but all available IOs: "${this.system.ios.getNames().join(', ')}"`
       );
 
-    // TODO: здесь нужно проерять requireIo. но нужно гарантировать
-    //    что все IO уже добавлены
-
-    if (this.drivers[manifest.name]) {
-      throw new Error(`The same driver "${manifest.name}" is already in use"`);
-    }
-
-    this.drivers[driver.name] = driver;
+    this.drivers[driver.name] = [driver, manifest];
   }
 }

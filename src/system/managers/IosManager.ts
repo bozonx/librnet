@@ -51,18 +51,18 @@ export class IosManager {
 
   async destroy() {
     await allSettledWithTimeout(
-      [...this.ioSets].map(async (ioSet, index) => {
+      [...this.ioSets].map((ioSet, index) => {
         this.system.log.debug(
           `IosManager: destroying ioSet (${index + 1}/${this.ioSets.size})`
         );
-        await ioSet.destroy();
 
-        this.ioSets.delete(ioSet);
+        return ioSet.destroy();
       }),
       this.system.configs.systemCfg.local.ENTITY_DESTROY_TIMEOUT_SEC * 1000,
       'Destroying of IoSets failed'
     );
 
+    this.ioSets.clear();
     this.ios.clear();
   }
 
