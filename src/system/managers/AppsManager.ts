@@ -1,6 +1,6 @@
-import type { AppManifest, AppOnInit } from '../../types/types.js';
-import { AppContext } from '../context/AppContext.js';
-import { EntityManagerBase } from '../base/EntityManagerBase.js';
+import type { AppManifest, AppOnInit } from '@/types/types.js';
+import { AppContext } from '@/system/context/AppContext.js';
+import { EntityManagerBase } from '@/system/base/EntityManagerBase.js';
 
 export class AppsManager extends EntityManagerBase<AppContext> {
   readonly type = 'app' as const;

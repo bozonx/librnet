@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { MountPointsManager } from '../src/system/managers/MountPointsManager';
-import type { MountPoint } from '../src/types/types';
-import { MountPointTypes } from '../src/types/types';
-import type { System } from '../src/system/System';
+import { MountPointsManager } from '@/system/managers/MountPointsManager';
+import type { MountPoint } from '@/types/types';
+import { MountPointTypes } from '@/types/types';
+import type { System } from '@/system/System';
 
 // Мок для System
 const mockSystem = {

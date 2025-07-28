@@ -14,6 +14,11 @@ export default {
     '<rootDir>/src/_not_used/',
   ],
 
+  // Настройки для алиасов модулей
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+
   // Настройки для TypeScript
   transform: {
     '^.+\\.tsx?$': [
