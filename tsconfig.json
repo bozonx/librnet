@@ -19,7 +19,7 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "test"],
+  "include": ["src/**/*"],
   "exclude": [
     "src/_not_used",
     "distr",

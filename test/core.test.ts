@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { MountPointsManager } from '../src/system/managers/MountPointsManager';
 import type { MountPoint } from '../src/types/types';
+import { MountPointTypes } from '../src/types/types';
 import type { System } from '../src/system/System';
 
 // Мок для System
@@ -21,13 +22,13 @@ describe('MountPointsManager', () => {
   describe('circular mount points detection', () => {
     it('should allow valid mount points', async () => {
       const point1: MountPoint = {
-        src: { type: 'root', path: '/src1' },
-        dest: { type: 'external', path: '/dest1' },
+        src: { type: MountPointTypes.root, path: '/src1' },
+        dest: { type: MountPointTypes.external, path: '/dest1' },
       };
 
       const point2: MountPoint = {
-        src: { type: 'root', path: '/src2' },
-        dest: { type: 'external', path: '/dest2' },
+        src: { type: MountPointTypes.root, path: '/src2' },
+        dest: { type: MountPointTypes.external, path: '/dest2' },
       };
 
       // Эти точки не должны создавать цикл
@@ -37,13 +38,13 @@ describe('MountPointsManager', () => {
 
     it('should detect direct circular mount points', async () => {
       const point1: MountPoint = {
-        src: { type: 'root', path: '/src1' },
-        dest: { type: 'external', path: '/dest1' },
+        src: { type: MountPointTypes.root, path: '/src1' },
+        dest: { type: MountPointTypes.external, path: '/dest1' },
       };
 
       const point2: MountPoint = {
-        src: { type: 'external', path: '/dest1' },
-        dest: { type: 'root', path: '/src1' },
+        src: { type: MountPointTypes.external, path: '/dest1' },
+        dest: { type: MountPointTypes.root, path: '/src1' },
       };
 
       // Регистрируем первую точку
@@ -57,18 +58,18 @@ describe('MountPointsManager', () => {
 
     it('should detect indirect circular mount points', async () => {
       const point1: MountPoint = {
-        src: { type: 'root', path: '/src1' },
-        dest: { type: 'external', path: '/dest1' },
+        src: { type: MountPointTypes.root, path: '/src1' },
+        dest: { type: MountPointTypes.external, path: '/dest1' },
       };
 
       const point2: MountPoint = {
-        src: { type: 'external', path: '/dest1' },
-        dest: { type: 'external', path: '/dest2' },
+        src: { type: MountPointTypes.external, path: '/dest1' },
+        dest: { type: MountPointTypes.external, path: '/dest2' },
       };
 
       const point3: MountPoint = {
-        src: { type: 'external', path: '/dest2' },
-        dest: { type: 'root', path: '/src1' },
+        src: { type: MountPointTypes.external, path: '/dest2' },
+        dest: { type: MountPointTypes.root, path: '/src1' },
       };
 
       // Регистрируем первые две точки
@@ -83,23 +84,23 @@ describe('MountPointsManager', () => {
 
     it('should detect complex circular mount points', async () => {
       const point1: MountPoint = {
-        src: { type: 'root', path: '/src1' },
-        dest: { type: 'external', path: '/dest1' },
+        src: { type: MountPointTypes.root, path: '/src1' },
+        dest: { type: MountPointTypes.external, path: '/dest1' },
       };
 
       const point2: MountPoint = {
-        src: { type: 'external', path: '/dest1' },
-        dest: { type: 'external', path: '/dest2' },
+        src: { type: MountPointTypes.external, path: '/dest1' },
+        dest: { type: MountPointTypes.external, path: '/dest2' },
       };
 
       const point3: MountPoint = {
-        src: { type: 'external', path: '/dest2' },
-        dest: { type: 'external', path: '/dest3' },
+        src: { type: MountPointTypes.external, path: '/dest2' },
+        dest: { type: MountPointTypes.external, path: '/dest3' },
       };
 
       const point4: MountPoint = {
-        src: { type: 'external', path: '/dest3' },
-        dest: { type: 'root', path: '/src1' },
+        src: { type: MountPointTypes.external, path: '/dest3' },
+        dest: { type: MountPointTypes.root, path: '/src1' },
       };
 
       // Регистрируем первые три точки
@@ -115,13 +116,13 @@ describe('MountPointsManager', () => {
 
     it('should allow non-circular mount points with same destinations', async () => {
       const point1: MountPoint = {
-        src: { type: 'root', path: '/src1' },
-        dest: { type: 'external', path: '/dest1' },
+        src: { type: MountPointTypes.root, path: '/src1' },
+        dest: { type: MountPointTypes.external, path: '/dest1' },
       };
 
       const point2: MountPoint = {
-        src: { type: 'root', path: '/src2' },
-        dest: { type: 'external', path: '/dest1' },
+        src: { type: MountPointTypes.root, path: '/src2' },
+        dest: { type: MountPointTypes.external, path: '/dest1' },
       };
 
       // Эти точки не создают цикл, хотя у них одинаковая destination
@@ -131,8 +132,8 @@ describe('MountPointsManager', () => {
 
     it('should prevent root to root mount points', async () => {
       const point: MountPoint = {
-        src: { type: 'root', path: '/src1' },
-        dest: { type: 'root', path: '/dest1' },
+        src: { type: MountPointTypes.root, path: '/src1' },
+        dest: { type: MountPointTypes.root, path: '/dest1' },
       };
 
       await expect(manager.registerMountPoint(point)).rejects.toThrow(
@@ -142,8 +143,8 @@ describe('MountPointsManager', () => {
 
     it('should prevent duplicate mount points', async () => {
       const point: MountPoint = {
-        src: { type: 'root', path: '/src1' },
-        dest: { type: 'external', path: '/dest1' },
+        src: { type: MountPointTypes.root, path: '/src1' },
+        dest: { type: MountPointTypes.external, path: '/dest1' },
       };
 
       await manager.registerMountPoint(point);
@@ -157,12 +158,12 @@ describe('MountPointsManager', () => {
       // Создаем менеджер с уже существующими циклическими точками
       const circularMountPoints: MountPoint[] = [
         {
-          src: { type: 'root', path: '/src1' },
-          dest: { type: 'external', path: '/dest1' },
+          src: { type: MountPointTypes.root, path: '/src1' },
+          dest: { type: MountPointTypes.external, path: '/dest1' },
         },
         {
-          src: { type: 'external', path: '/dest1' },
-          dest: { type: 'root', path: '/src1' },
+          src: { type: MountPointTypes.external, path: '/dest1' },
+          dest: { type: MountPointTypes.root, path: '/src1' },
         },
       ];
 
@@ -190,12 +191,12 @@ describe('MountPointsManager', () => {
       // Создаем менеджер с валидными точками
       const validMountPoints: MountPoint[] = [
         {
-          src: { type: 'root', path: '/src1' },
-          dest: { type: 'external', path: '/dest1' },
+          src: { type: MountPointTypes.root, path: '/src1' },
+          dest: { type: MountPointTypes.external, path: '/dest1' },
         },
         {
-          src: { type: 'root', path: '/src2' },
-          dest: { type: 'external', path: '/dest2' },
+          src: { type: MountPointTypes.root, path: '/src2' },
+          dest: { type: MountPointTypes.external, path: '/dest2' },
         },
       ];
 

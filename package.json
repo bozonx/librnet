@@ -24,7 +24,10 @@
   "scripts": {
     "dev": "ROOT_DIR=./_testData tsx ./src/starters/devLocal/devIndex.example.ts",
     "build": "tsc",
-    "test": "vitest --config vitest.config.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:verbose": "jest --verbose",
     "dev:compositor": "serve ./src/compositor"
   },
   "directories": {
@@ -37,12 +40,14 @@
     "yaml": "^2.8.0"
   },
   "devDependencies": {
-    "@types/semver": "^7.7.0",
+    "@types/jest": "^29.5.12",
     "@types/node": "^22.15.29",
+    "@types/semver": "^7.7.0",
     "@types/ws": "^8.18.1",
+    "jest": "^30.0.5",
     "serve": "^14.2.4",
+    "ts-jest": "^29.1.2",
     "tsc": "^2.0.4",
-    "typescript": "^5.8.3",
-    "vitest": "^3.1.4"
+    "typescript": "^5.8.3"
   }
 }
