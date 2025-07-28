@@ -6,24 +6,24 @@
 jest.setTimeout(10000);
 
 // Глобальные моки для Node.js модулей
-jest.mock('fs', () => ({
-  ...jest.requireActual('fs'),
-  promises: {
-    ...jest.requireActual('fs').promises,
-    readFile: jest.fn(),
-    writeFile: jest.fn(),
-    mkdir: jest.fn(),
-    access: jest.fn(),
-  },
-}));
+// jest.mock('fs', () => ({
+//   ...jest.requireActual('fs'),
+//   promises: {
+//     ...jest.requireActual('fs').promises,
+//     readFile: jest.fn(),
+//     writeFile: jest.fn(),
+//     mkdir: jest.fn(),
+//     access: jest.fn(),
+//   },
+// }));
 
-jest.mock('path', () => ({
-  ...jest.requireActual('path'),
-  resolve: jest.fn(),
-  join: jest.fn(),
-  dirname: jest.fn(),
-  basename: jest.fn(),
-}));
+// jest.mock('path', () => ({
+//   ...jest.requireActual('path'),
+//   resolve: jest.fn(),
+//   join: jest.fn(),
+//   dirname: jest.fn(),
+//   basename: jest.fn(),
+// }));
 
 // Очистка после каждого теста
 afterEach(() => {
