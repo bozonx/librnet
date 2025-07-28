@@ -9,7 +9,8 @@
   "type": "module",
   "types": "src/index.ts",
   "engines": {
-    "node": ">=18.14.0"
+    "node": ">=24.0.0",
+    "pnpm": ">=9.15.0"
   },
   "exports": {
     ".": "./src/index.ts",
