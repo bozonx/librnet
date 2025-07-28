@@ -35,16 +35,26 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
 
   async readTextFile(
     pathTo: string,
-    options?: ReadTextFileOptions
+    options: ReadTextFileOptions = { pos: 0 }
   ): Promise<string> {
-    return fs.readFile(pathTo, {
-      encoding: options?.encoding || DEFAULT_ENCODE,
-    });
+    if (options.size) {
+      return fs.open(pathTo, 'r').then((fileHandle) => {
+        return fileHandle
+          .read(options.size, options.pos)
+          .then((data) => data.toString());
+      });
+    }
+
+    return fs
+      .readFile(pathTo, {
+        encoding: options?.encoding || DEFAULT_ENCODE,
+      })
+      .then((data) => data.toString());
   }
 
   async readBinFile(
     pathTo: string,
-    options: ReadBinFileOptions = { returnType: 'Uint8Array' }
+    options: ReadBinFileOptions = { returnType: 'Uint8Array', pos: 0 }
   ): Promise<BinTypes> {
     const buffer: Buffer = await fs.readFile(pathTo);
 
