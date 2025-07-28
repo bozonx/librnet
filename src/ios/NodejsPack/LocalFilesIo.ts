@@ -37,27 +37,90 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     pathTo: string,
     options: ReadTextFileOptions = { pos: 0 }
   ): Promise<string> {
-    if (options.size) {
-      return fs.open(pathTo, 'r').then((fileHandle) => {
-        return fileHandle
-          .read(options.size, options.pos)
-          .then((data) => data.toString());
-      });
+    // Если указан размер или позиция, читаем часть файла
+    if (options.size !== undefined || options.pos !== undefined) {
+      const fileHandle = await fs.open(pathTo, 'r');
+      try {
+        // Получаем размер файла для определения сколько читать
+        const stats = await fileHandle.stat();
+        const pos = options.pos || 0;
+        const size =
+          options.size !== undefined ? options.size : stats.size - pos;
+
+        // Проверяем, что позиция не выходит за пределы файла
+        if (pos >= stats.size) {
+          return '';
+        }
+
+        // Ограничиваем размер чтения размером файла
+        const readSize = Math.min(size, stats.size - pos);
+
+        if (readSize <= 0) {
+          return '';
+        }
+
+        const buffer = Buffer.alloc(readSize);
+        const result = await fileHandle.read(buffer, 0, readSize, pos);
+
+        // Возвращаем только прочитанные байты с указанной кодировкой
+        return buffer.toString(
+          options?.encoding || DEFAULT_ENCODE,
+          0,
+          result.bytesRead
+        );
+      } finally {
+        await fileHandle.close();
+      }
     }
 
-    return fs
-      .readFile(pathTo, {
-        encoding: options?.encoding || DEFAULT_ENCODE,
-      })
-      .then((data) => data.toString());
+    // Если размер и позиция не указаны, читаем весь файл
+    return fs.readFile(pathTo, {
+      encoding: options?.encoding || DEFAULT_ENCODE,
+    });
   }
 
   async readBinFile(
     pathTo: string,
     options: ReadBinFileOptions = { returnType: 'Uint8Array', pos: 0 }
   ): Promise<BinTypes> {
-    const buffer: Buffer = await fs.readFile(pathTo);
+    let buffer: Buffer;
 
+    // Если указан размер или позиция, читаем часть файла
+    if (options.size !== undefined || options.pos !== undefined) {
+      const fileHandle = await fs.open(pathTo, 'r');
+      try {
+        // Получаем размер файла для определения сколько читать
+        const stats = await fileHandle.stat();
+        const pos = options.pos || 0;
+        const size =
+          options.size !== undefined ? options.size : stats.size - pos;
+
+        // Проверяем, что позиция не выходит за пределы файла
+        if (pos >= stats.size) {
+          buffer = Buffer.alloc(0);
+        } else {
+          // Ограничиваем размер чтения размером файла
+          const readSize = Math.min(size, stats.size - pos);
+
+          if (readSize <= 0) {
+            buffer = Buffer.alloc(0);
+          } else {
+            buffer = Buffer.alloc(readSize);
+            const result = await fileHandle.read(buffer, 0, readSize, pos);
+
+            // Создаем новый буфер только с прочитанными байтами
+            buffer = buffer.subarray(0, result.bytesRead);
+          }
+        }
+      } finally {
+        await fileHandle.close();
+      }
+    } else {
+      // Если размер и позиция не указаны, читаем весь файл
+      buffer = await fs.readFile(pathTo);
+    }
+
+    // Преобразуем в указанный тип
     switch (options.returnType) {
       case 'Int8Array':
         return new Int8Array(buffer);
@@ -82,7 +145,7 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
       case 'BigUint64Array':
         return new BigUint64Array(buffer);
       default:
-        throw new Error(`Unknown return type: ${returnType}`);
+        throw new Error(`Unknown return type: ${options.returnType}`);
     }
   }
 
