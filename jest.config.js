@@ -31,7 +31,7 @@ export default {
   },
 
   // Настройки покрытия кода
-  collectCoverage: true,
+  collectCoverage: false,
   collectCoverageFrom: [
     'src/**/*.ts',
     'test/**/*.ts',

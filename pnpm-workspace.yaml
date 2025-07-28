@@ -1,2 +1,5 @@
 ignoredBuiltDependencies:
   - unrs-resolver
+
+overrides:
+  squidlet-lib: link:../../../../home/ivan/.local/share/pnpm/global/5/node_modules/squidlet-lib

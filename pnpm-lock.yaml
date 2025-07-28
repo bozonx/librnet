@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  squidlet-lib: link:../../../../home/ivan/.local/share/pnpm/global/5/node_modules/squidlet-lib
+
 importers:
 
   .:
@@ -12,8 +15,8 @@ importers:
         specifier: ^7.7.2
         version: 7.7.2
       squidlet-lib:
-        specifier: file:../squidlet-lib
-        version: file:../squidlet-lib
+        specifier: link:../../../../home/ivan/.local/share/pnpm/global/5/node_modules/squidlet-lib
+        version: link:../../../../home/ivan/.local/share/pnpm/global/5/node_modules/squidlet-lib
       ws:
         specifier: ^8.18.2
         version: 8.18.3
@@ -1425,9 +1428,6 @@ packages:
 
   sprintf-js@1.0.3:
     resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
-
-  squidlet-lib@file:../squidlet-lib:
-    resolution: {directory: ../squidlet-lib, type: directory}
 
   stack-utils@2.0.6:
     resolution: {integrity: sha512-XlkWvfIm6RmsWtNJx+uqtKLS8eqFbxUg0ZzLXqY0caEy9l7hruX8IpiDnjsLavoBgqCCR71TqWO8MaXYheJ3RQ==}
@@ -3276,8 +3276,6 @@ snapshots:
   source-map@0.6.1: {}
 
   sprintf-js@1.0.3: {}
-
-  squidlet-lib@file:../squidlet-lib: {}
 
   stack-utils@2.0.6:
     dependencies:

@@ -3,7 +3,10 @@
   "compilerOptions": {
     "rootDir": ".",
     "types": ["jest", "node"],
-    "verbatimModuleSyntax": false
+    "verbatimModuleSyntax": false,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*", "test/**/*"],
   "exclude": [
