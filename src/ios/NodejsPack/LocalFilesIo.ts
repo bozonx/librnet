@@ -324,6 +324,7 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     await this.changeOwner(pathTo, options?.uid, options?.gid);
   }
 
+  // TODO: test
   async link(
     target: string,
     pathTo: string,
