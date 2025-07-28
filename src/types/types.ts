@@ -31,6 +31,19 @@ export type BinTypes =
   | BigInt64Array
   | BigUint64Array;
 
+export type BinTypesNames =
+  | 'Int8Array'
+  | 'Uint8Array'
+  | 'Uint8ClampedArray'
+  | 'Int16Array'
+  | 'Uint16Array'
+  | 'Int32Array'
+  | 'Uint32Array'
+  | 'Float32Array'
+  | 'Float64Array'
+  | 'BigInt64Array'
+  | 'BigUint64Array';
+
 export interface MountPointDefinition {
   type: MountPointTypes;
   path: string;

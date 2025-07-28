@@ -1,4 +1,4 @@
-import type { BinTypes } from '../types';
+import type { BinTypes, BinTypesNames } from '../types';
 
 export interface StatsSimplified {
   // in bytes
@@ -43,6 +43,10 @@ export interface CopyOptions {
   recursive?: boolean;
   // when force is false, and the destination exists, throw an error. Default: false.
   errorOnExist?: boolean;
+  // Set User ID to the destination file or directory
+  uid?: number;
+  // Set Group ID to the destination file or directory
+  gid?: number;
 }
 
 export interface RmOptions {
@@ -55,11 +59,28 @@ export interface RmOptions {
 export interface ReadTextFileOptions {
   // if not set then it will be UTF-8
   encoding?: BufferEncoding;
+  // Position to start reading from
+  pos?: number;
+  // Number of bytes to read
+  size?: number;
+}
+
+export interface ReadBinFileOptions {
+  // if not set then it will be Uint8Array
+  returnType?: BinTypesNames;
+  // Position to start reading from
+  pos?: number;
+  // Number of bytes to read
+  size?: number;
 }
 
 export interface WriteFileOptions {
   // if not set then it will be UTF-8
   encoding?: BufferEncoding;
+  // Set User ID to the created file
+  uid?: number;
+  // Set Group ID to the created file
+  gid?: number;
 }
 
 export interface ReaddirOptions {
@@ -72,6 +93,34 @@ export interface ReaddirOptions {
 export interface MkdirOptions {
   // If true, creates parent directories recursively. Default: false.
   recursive?: boolean;
+  // Set User ID to the created directory
+  uid?: number;
+  // Set Group ID to the created directory
+  gid?: number;
+}
+
+export interface GlobOptions {
+  // The current working directory of the process
+  // You have to pass it if you use relative paths
+  cwd?: string;
+  // Patterns to exclude. Default: [].
+  exclude?: string[];
+  // If true, the result will contain file info objects. Default: false.
+  withFileTypes?: boolean;
+}
+
+export enum AccessMode {
+  F_OK = 0, // check if file exists
+  R_OK = 4, // check if file exists and is readable
+  W_OK = 2, // check if file exists and is writable
+  X_OK = 1, // check if file exists and is executable
+}
+
+export interface UtimesOptions {
+  // If true, the access time will be set to the target of the symlink.
+  // If false, the access time will be set to the symlink itself.
+  // Default: true.
+  followSymlinks?: boolean;
 }
 
 /**
@@ -79,6 +128,8 @@ export interface MkdirOptions {
  * But actually it joins these paths with workDir and result will be like /workdir/envSet/...
  */
 export interface FilesIoType {
+  // TODO: add access
+
   ////// READING //////
 
   /**
@@ -92,10 +143,10 @@ export interface FilesIoType {
   /**
    * Read binary file and return it as specified type
    * @param pathTo
-   * @param returnType - Default is Uint8Array
+   * @param options - Default returnType is Uint8Array
    * @returns
    */
-  readBinFile(pathTo: string, returnType?: BinTypes): Promise<BinTypes>;
+  readBinFile(pathTo: string, options?: ReadBinFileOptions): Promise<BinTypes>;
 
   /**
    * Get file or directory stats.
@@ -144,6 +195,22 @@ export interface FilesIoType {
    */
   realpath(pathTo: string): Promise<string>;
 
+  /**
+   * Get all files by pattern
+   * @param pattern
+   * @param options
+   * @returns
+   */
+  glob(pattern: string | string[], options?: GlobOptions): Promise<string[]>;
+
+  /**
+   * Check if file or directory exists and has access to it
+   * @param pathTo
+   * @param mode - default is AccessMode.F_OK
+   * @returns
+   */
+  access(pathTo: string, mode?: AccessMode): Promise<boolean>;
+
   ////// WRITING //////
 
   /**
@@ -151,6 +218,8 @@ export interface FilesIoType {
    * @param pathTo
    * @param data
    * @param options - If data is string then default encoding is UTF-8
+   * @param options.uid - Set User ID to the created file (not appended)
+   * @param options.gid - Set Group ID to the created file (not appended)
    * @returns
    */
   appendFile(
@@ -223,4 +292,43 @@ export interface FilesIoType {
    * @returns
    */
   symlink(target: string, pathTo: string): Promise<void>;
+
+  /**
+   * Set access and modification times of a file
+   * @param pathTo
+   * @param atime
+   * @param mtime
+   * @returns
+   */
+  utimes(
+    pathTo: string,
+    atime: number | string,
+    mtime: number | string,
+    options?: UtimesOptions
+  ): Promise<void>;
+
+  /**
+   * Truncate file to specified length
+   * @param pathTo
+   * @param len default is 0
+   * @returns
+   */
+  truncate(pathTo: string, len: number): Promise<void>;
+
+  /**
+   * Change file or directory owner
+   * @param pathTo
+   * @param uid
+   * @param gid
+   * @returns
+   */
+  chown(pathTo: string, uid: number, gid: number): Promise<void>;
+
+  /**
+   * Change file or directory permissions
+   * @param pathTo
+   * @param mode
+   * @returns
+   */
+  chmod(pathTo: string, mode: number): Promise<void>;
 }

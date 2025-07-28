@@ -1,18 +1,26 @@
-import fs from 'node:fs/promises';
+import fs, { constants } from 'node:fs/promises';
 import { open } from 'node:fs/promises';
-import type { Stats } from 'node:fs';
-import type { FilesIoType } from '../../types/io/FilesIoType.js';
+import type { GlobOptions, Stats } from 'node:fs';
+import { pathIsAbsolute } from 'squidlet-lib';
+import { AccessMode, type FilesIoType } from '../../types/io/FilesIoType.js';
 import type {
   CopyOptions,
   MkdirOptions,
+  ReadBinFileOptions,
   ReaddirOptions,
   ReadTextFileOptions,
   RmOptions,
   StatsSimplified,
+  UtimesOptions,
   WriteFileOptions,
 } from '../../types/io/FilesIoType.js';
 import { IoBase } from '../../system/base/IoBase.js';
-import type { BinTypes, IoIndex, IoContext } from '../../types/types.js';
+import type {
+  BinTypes,
+  IoIndex,
+  IoContext,
+  BinTypesNames,
+} from '../../types/types.js';
 import {
   DEFAULT_ENCODE,
   IS_TEXT_FILE_UTF8_SAMPLE_SIZE,
@@ -36,11 +44,11 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
 
   async readBinFile(
     pathTo: string,
-    returnType: BinTypes = 'Uint8Array'
+    options: ReadBinFileOptions = { returnType: 'Uint8Array' }
   ): Promise<BinTypes> {
     const buffer: Buffer = await fs.readFile(pathTo);
 
-    switch (returnType) {
+    switch (options.returnType) {
       case 'Int8Array':
         return new Int8Array(buffer);
       case 'Uint8Array':
@@ -97,6 +105,7 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     };
   }
 
+  // TODO: test
   async exists(pathTo: string): Promise<boolean> {
     try {
       await fs.access(pathTo);
@@ -154,6 +163,39 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     return fs.realpath(pathTo);
   }
 
+  // TODO: test
+  async glob(
+    pattern: string | string[],
+    options: GlobOptions = {}
+  ): Promise<string[]> {
+    const patterns = Array.isArray(pattern) ? pattern : [pattern];
+
+    if (!patterns.every(pathIsAbsolute) && !options?.cwd) {
+      throw new Error('If you use relative path, you have to pass cwd');
+    }
+
+    const result: string[] = [];
+
+    for await (const item of fs.glob(pattern, options)) {
+      result.push(item.toString());
+    }
+
+    return result;
+  }
+
+  // TODO: test
+  async access(
+    pathTo: string,
+    mode: AccessMode = AccessMode.F_OK
+  ): Promise<boolean> {
+    try {
+      await fs.access(pathTo, mode);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   ////// WRITING //////
 
   async appendFile(
@@ -164,7 +206,7 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     let wasExist = true;
 
     try {
-      await fs.lstat(pathTo);
+      await fs.access(pathTo);
     } catch (e) {
       wasExist = false;
     }
@@ -178,7 +220,7 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
       await fs.appendFile(pathTo, data, options);
     }
 
-    if (!wasExist) await this.chown(pathTo);
+    if (!wasExist) await this.changeOwner(pathTo, options?.uid, options?.gid);
   }
 
   async writeFile(
@@ -194,7 +236,7 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
       await fs.writeFile(pathTo, data, options);
     }
 
-    await this.chown(pathTo);
+    await this.changeOwner(pathTo, options?.uid, options?.gid);
   }
 
   async rm(paths: string[], options?: RmOptions): Promise<void> {
@@ -205,6 +247,8 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
             (result): result is PromiseRejectedResult =>
               result.status === 'rejected'
           )
+
+          // TODO: откуда берется path?
           .map((result) => ({
             path: result.reason.path || 'unknown',
             error: result.reason.message || 'Unknown error',
@@ -218,7 +262,7 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
   }
 
   async cp(files: [string, string][], options?: CopyOptions): Promise<void> {
-    return Promise.allSettled(
+    await Promise.allSettled(
       files.map((item) => fs.cp(item[0], item[1], options))
     ).then((results) => {
       const errors = results
@@ -226,6 +270,7 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
           (result): result is PromiseRejectedResult =>
             result.status === 'rejected'
         )
+        // TODO: откуда берется path?
         .map((result) => ({
           path: result.reason.path || 'unknown',
           error: result.reason.message || 'Unknown error',
@@ -235,6 +280,14 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
         throw errors;
       }
     });
+
+    if (options?.uid || options?.gid) {
+      await Promise.allSettled(
+        files.map((item) =>
+          this.changeOwner(item[1], options?.uid, options?.gid)
+        )
+      );
+    }
   }
 
   async rename(files: [string, string][]): Promise<void> {
@@ -246,6 +299,7 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
           (result): result is PromiseRejectedResult =>
             result.status === 'rejected'
         )
+        // TODO: откуда берется path?
         .map((result) => ({
           path: result.reason.path || 'unknown',
           error: result.reason.message || 'Unknown error',
@@ -259,34 +313,54 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
 
   async mkdir(pathTo: string, options?: MkdirOptions): Promise<void> {
     await fs.mkdir(pathTo, options);
-
-    return this.chown(pathTo);
+    await this.changeOwner(pathTo, options?.uid, options?.gid);
   }
 
   async symlink(target: string, pathTo: string): Promise<void> {
+    // TODO: add uid and gid
     await fs.symlink(target, pathTo);
-    await this.chown(pathTo);
+    await this.changeOwner(pathTo);
   }
 
-  private async chown(pathTo: string) {
-    if (!this.ioSet.env.FILES_UID && !this.ioSet.env.FILES_GID) {
+  // TODO: test
+  async utimes(
+    pathTo: string,
+    atime: number | string,
+    mtime: number | string,
+    options: UtimesOptions = { followSymlinks: true }
+  ): Promise<void> {
+    if (options.followSymlinks) {
+      await fs.utimes(pathTo, atime, mtime);
+    } else {
+      await fs.lutimes(pathTo, atime, mtime);
+    }
+  }
+
+  // TODO: test
+  async truncate(pathTo: string, len: number = 0): Promise<void> {
+    await fs.truncate(pathTo, len);
+  }
+
+  // TODO: test
+  async chown(pathTo: string, uid: number, gid: number): Promise<void> {
+    await fs.chown(pathTo, uid, gid);
+  }
+
+  // TODO: test
+  async chmod(pathTo: string, mode: number): Promise<void> {
+    await fs.chmod(pathTo, mode);
+  }
+
+  private async changeOwner(pathTo: string, uid?: number, gid?: number) {
+    if (!uid && !gid) {
       // if noting to change - just return
       return;
-    } else if (this.ioSet.env.FILES_UID && this.ioSet.env.FILES_GID) {
+    } else if (uid && gid) {
       // uid and gid are specified - set both
-      return await fs.chown(
-        pathTo,
-        this.ioSet.env.FILES_UID,
-        this.ioSet.env.FILES_GID
-      );
+      return await fs.chown(pathTo, uid, gid);
     }
     // else load stats to resolve lack of params
     const stat: Stats = await fs.stat(pathTo);
-
-    await fs.chown(
-      pathTo,
-      this.ioSet.env.FILES_UID || stat.uid,
-      this.ioSet.env.FILES_GID || stat.gid
-    );
+    await fs.chown(pathTo, uid || stat.uid, gid || stat.gid);
   }
 }
