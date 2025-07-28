@@ -123,6 +123,17 @@ export interface UtimesOptions {
   followSymlinks?: boolean;
 }
 
+export interface LinkOptions {
+  // If true, the link will be a symlink.
+  // If false, the link will be a hard link.
+  // Default: true.
+  symlink?: boolean;
+  // Set User ID to the created link
+  uid?: number;
+  // Set Group ID to the created link
+  gid?: number;
+}
+
 /**
  * FilesIo works with absolute paths like /envSet/..., /varData/... and /tmp/...
  * But actually it joins these paths with workDir and result will be like /workdir/envSet/...
@@ -285,13 +296,13 @@ export interface FilesIoType {
   mkdir(pathTo: string, options?: MkdirOptions): Promise<void>;
 
   /**
-   * Create symlink.
+   * Create a link.
    * On windows type file or dir are automatically detected
    * @param target - target path (source file)
-   * @param pathTo - path to place symlink
+   * @param pathTo - path to place link
    * @returns
    */
-  symlink(target: string, pathTo: string): Promise<void>;
+  link(target: string, pathTo: string, options?: LinkOptions): Promise<void>;
 
   /**
    * Set access and modification times of a file

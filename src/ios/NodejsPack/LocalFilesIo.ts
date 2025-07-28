@@ -1,4 +1,4 @@
-import fs, { constants } from 'node:fs/promises';
+import fs from 'node:fs/promises';
 import { open } from 'node:fs/promises';
 import type { GlobOptions, Stats } from 'node:fs';
 import { pathIsAbsolute } from 'squidlet-lib';
@@ -6,6 +6,7 @@ import { AccessMode, type FilesIoType } from '../../types/io/FilesIoType.js';
 import type {
   CopyOptions,
   MkdirOptions,
+  LinkOptions,
   ReadBinFileOptions,
   ReaddirOptions,
   ReadTextFileOptions,
@@ -37,88 +38,22 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     pathTo: string,
     options: ReadTextFileOptions = { pos: 0 }
   ): Promise<string> {
-    // Если указан размер или позиция, читаем часть файла
-    if (options.size !== undefined || options.pos !== undefined) {
-      const fileHandle = await fs.open(pathTo, 'r');
-      try {
-        // Получаем размер файла для определения сколько читать
-        const stats = await fileHandle.stat();
-        const pos = options.pos || 0;
-        const size =
-          options.size !== undefined ? options.size : stats.size - pos;
-
-        // Проверяем, что позиция не выходит за пределы файла
-        if (pos >= stats.size) {
-          return '';
-        }
-
-        // Ограничиваем размер чтения размером файла
-        const readSize = Math.min(size, stats.size - pos);
-
-        if (readSize <= 0) {
-          return '';
-        }
-
-        const buffer = Buffer.alloc(readSize);
-        const result = await fileHandle.read(buffer, 0, readSize, pos);
-
-        // Возвращаем только прочитанные байты с указанной кодировкой
-        return buffer.toString(
-          options?.encoding || DEFAULT_ENCODE,
-          0,
-          result.bytesRead
-        );
-      } finally {
-        await fileHandle.close();
-      }
+    if (!options.size) {
+      return fs.readFile(pathTo, {
+        encoding: options?.encoding || DEFAULT_ENCODE,
+      });
     }
 
-    // Если размер и позиция не указаны, читаем весь файл
-    return fs.readFile(pathTo, {
-      encoding: options?.encoding || DEFAULT_ENCODE,
-    });
+    const buffer = await this.readFileBuffer(pathTo, options);
+
+    return buffer.toString(options?.encoding || DEFAULT_ENCODE);
   }
 
   async readBinFile(
     pathTo: string,
     options: ReadBinFileOptions = { returnType: 'Uint8Array', pos: 0 }
   ): Promise<BinTypes> {
-    let buffer: Buffer;
-
-    // Если указан размер или позиция, читаем часть файла
-    if (options.size !== undefined || options.pos !== undefined) {
-      const fileHandle = await fs.open(pathTo, 'r');
-      try {
-        // Получаем размер файла для определения сколько читать
-        const stats = await fileHandle.stat();
-        const pos = options.pos || 0;
-        const size =
-          options.size !== undefined ? options.size : stats.size - pos;
-
-        // Проверяем, что позиция не выходит за пределы файла
-        if (pos >= stats.size) {
-          buffer = Buffer.alloc(0);
-        } else {
-          // Ограничиваем размер чтения размером файла
-          const readSize = Math.min(size, stats.size - pos);
-
-          if (readSize <= 0) {
-            buffer = Buffer.alloc(0);
-          } else {
-            buffer = Buffer.alloc(readSize);
-            const result = await fileHandle.read(buffer, 0, readSize, pos);
-
-            // Создаем новый буфер только с прочитанными байтами
-            buffer = buffer.subarray(0, result.bytesRead);
-          }
-        }
-      } finally {
-        await fileHandle.close();
-      }
-    } else {
-      // Если размер и позиция не указаны, читаем весь файл
-      buffer = await fs.readFile(pathTo);
-    }
+    const buffer = await this.readFileBuffer(pathTo, options);
 
     // Преобразуем в указанный тип
     switch (options.returnType) {
@@ -389,10 +324,18 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     await this.changeOwner(pathTo, options?.uid, options?.gid);
   }
 
-  async symlink(target: string, pathTo: string): Promise<void> {
-    // TODO: add uid and gid
-    await fs.symlink(target, pathTo);
-    await this.changeOwner(pathTo);
+  async link(
+    target: string,
+    pathTo: string,
+    options: LinkOptions = { symlink: true }
+  ): Promise<void> {
+    if (options.symlink) {
+      await fs.symlink(target, pathTo);
+    } else {
+      await fs.link(target, pathTo);
+    }
+
+    await this.changeOwner(pathTo, options?.uid, options?.gid);
   }
 
   // TODO: test
@@ -435,5 +378,50 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     // else load stats to resolve lack of params
     const stat: Stats = await fs.stat(pathTo);
     await fs.chown(pathTo, uid || stat.uid, gid || stat.gid);
+  }
+
+  /**
+   * Приватный метод для чтения файла в буфер с поддержкой позиции и размера
+   * @param pathTo - путь к файлу
+   * @param options - опции чтения (pos, size)
+   * @returns Promise<Buffer> - прочитанный буфер
+   */
+  private async readFileBuffer(
+    pathTo: string,
+    options: { pos?: number; size?: number }
+  ): Promise<Buffer> {
+    // Если размер и позиция не указаны, читаем весь файл
+    if (options.size === undefined && options.pos === undefined) {
+      return fs.readFile(pathTo);
+    }
+
+    // Читаем часть файла с позиции
+    const fileHandle = await fs.open(pathTo, 'r');
+    try {
+      // Получаем размер файла для определения сколько читать
+      const stats = await fileHandle.stat();
+      const pos = options.pos || 0;
+      const size = options.size !== undefined ? options.size : stats.size - pos;
+
+      // Проверяем, что позиция не выходит за пределы файла
+      if (pos >= stats.size) {
+        return Buffer.alloc(0);
+      }
+
+      // Ограничиваем размер чтения размером файла
+      const readSize = Math.min(size, stats.size - pos);
+
+      if (readSize <= 0) {
+        return Buffer.alloc(0);
+      }
+
+      const buffer = Buffer.alloc(readSize);
+      const result = await fileHandle.read(buffer, 0, readSize, pos);
+
+      // Возвращаем только прочитанные байты
+      return buffer.subarray(0, result.bytesRead);
+    } finally {
+      await fileHandle.close();
+    }
   }
 }
