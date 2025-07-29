@@ -39,9 +39,9 @@ export class System {
   readonly localFiles = new RootDirDriverLogic(this, this.env.ROOT_DIR)
   // managers
   readonly mountPoints = new MountPointsManager(this, this.env.ROOT_DIR)
+  readonly fileLogs = new FileLogsManager(this)
   readonly ports = new PortsManager(this)
   readonly packagesManager = new PackagesManager(this)
-  readonly fileLogs = new FileLogsManager(this)
   readonly systemApi = new SystemApiManager(this)
   // TODO: зачем этот менеджер? если есть systemApi
   readonly api = new EntitiesApiManager()

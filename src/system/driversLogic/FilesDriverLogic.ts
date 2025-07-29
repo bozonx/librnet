@@ -23,7 +23,7 @@ import type {
 import type { IoBase } from '../base/IoBase.js'
 
 /**
- * Logic of the files driver which
+ * Logic of the files driver which:
  *
  * - Adds more methods
  * - ️️‼️❓resolves glob patterns
@@ -115,9 +115,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
       method: 'readdir',
       timestamp: Date.now(),
       size: result.reduce((acc, item) => acc + item.length, 0),
-      details: {
-        recursive: options?.recursive ?? false,
-      },
+      details: { recursive: options?.recursive ?? false },
     })
 
     return result
@@ -270,10 +268,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
         action: FILE_ACTION.write,
         method: 'cp',
         timestamp: Date.now(),
-        details: {
-          src,
-          recursive: options?.recursive ?? false,
-        },
+        details: { src, recursive: options?.recursive ?? false },
         // TODO: calculate size
       })
     }
@@ -293,9 +288,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
         action: FILE_ACTION.write,
         method: 'rename',
         timestamp: Date.now(),
-        details: {
-          src,
-        },
+        details: { src },
         // TODO: нужно определить находятся ли файлы на разных дисках
         // и если да, то нужно считать размер файлов
         // TODO: Делает 2 операциияя - считываение и запись
@@ -311,9 +304,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
       action: FILE_ACTION.write,
       method: 'mkdir',
       timestamp: Date.now(),
-      details: {
-        recursive: options?.recursive ?? false,
-      },
+      details: { recursive: options?.recursive ?? false },
       // TODO: известно ли сколько байт занимает операция?
     })
   }
@@ -347,10 +338,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
         el,
         pathJoin(this.preparePath(destDir), pathBasename(el)),
       ]),
-      {
-        recursive: true,
-        force,
-      }
+      { recursive: true, force }
     )
 
     for (const [src, dest] of srcPaths.map((el) => [
@@ -364,9 +352,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
         action: FILE_ACTION.write,
         method: 'copyToDest',
         timestamp: Date.now(),
-        details: {
-          src,
-        },
+        details: { src },
         // TODO: считать размер файлов
       })
     }
@@ -396,9 +382,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
         action: FILE_ACTION.write,
         method: 'moveToDest',
         timestamp: Date.now(),
-        details: {
-          src,
-        },
+        details: { src },
         // TODO: нужно определить находятся ли файлы на разных дисках
         // и если да, то нужно считать размер файлов
       })
@@ -416,9 +400,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
       action: FILE_ACTION.write,
       method: 'renameFile',
       timestamp: Date.now(),
-      details: {
-        oldPath: file,
-      },
+      details: { oldPath: file },
       // do not calculate size because it is very difficult to do
     })
   }

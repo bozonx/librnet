@@ -1,6 +1,7 @@
-import { IO_NAMES, SystemEvents } from '../../types/constants.js'
+import { IoNames } from '../../types/EntitiesNames.js'
+import type { FilesEventData } from '../../types/EventsData.js'
 import type { FilesIoType } from '../../types/io/FilesIoType.js'
-import type { FilesEventData } from '../../types/types.js'
+import { SystemEvents } from '../../types/types.js'
 import { System } from '../System.js'
 import type { IoBase } from '../base/IoBase.js'
 import { resolveRealPath } from '../helpers/helpers.js'
@@ -12,7 +13,7 @@ export class RootDirDriverLogic extends FilesDriverLogic {
     protected readonly rootDir: string
   ) {
     super(
-      system.io.getIo<FilesIoType & IoBase>(IO_NAMES.LocalFilesIo),
+      system.ios.getIo<FilesIoType & IoBase>(IoNames.LocalFilesIo),
       (data: FilesEventData) => {
         this.system.events.emit(SystemEvents.localFiles, data)
       }
