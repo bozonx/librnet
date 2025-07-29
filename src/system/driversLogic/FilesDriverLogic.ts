@@ -2,7 +2,10 @@ import { pathBasename, pathDirname, pathJoin } from 'squidlet-lib'
 
 import type { FilesEventData } from '@/types/EventsData.js'
 import type { FilesDriverType } from '@/types/FilesDriverType.js'
-import { IS_TEXT_FILE_UTF8_SAMPLE_SIZE } from '@/types/constants.js'
+import {
+  DEFAULT_ENCODE,
+  IS_TEXT_FILE_UTF8_SAMPLE_SIZE,
+} from '@/types/constants.js'
 import type {
   AccessMode,
   CopyOptions,
@@ -46,7 +49,11 @@ export abstract class FilesDriverLogic implements FilesDriverType {
       options
     )
 
-    this.riseReadEvent(pathTo, 'readTextFile', result.length)
+    this.riseReadEvent(
+      pathTo,
+      'readTextFile',
+      Buffer.byteLength(result, DEFAULT_ENCODE)
+    )
 
     return result
   }
@@ -190,13 +197,12 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   ) {
     await this.filesIo.appendFile(this.preparePath(pathTo), data, options)
 
-    this.riseWriteEvent(
-      pathTo,
-      'appendFile',
-      typeof data === 'string'
-        ? Buffer.byteLength(data, 'utf8')
-        : data.byteLength
-    )
+    const size =
+      (typeof data === 'string'
+        ? Buffer.byteLength(data, DEFAULT_ENCODE)
+        : data.byteLength) + Buffer.byteLength(pathTo, DEFAULT_ENCODE)
+
+    this.riseWriteEvent(pathTo, 'appendFile', size)
   }
 
   async writeFile(
@@ -206,13 +212,12 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   ) {
     await this.filesIo.writeFile(this.preparePath(pathTo), data, options)
 
-    this.riseWriteEvent(
-      pathTo,
-      'writeFile',
-      typeof data === 'string'
-        ? Buffer.byteLength(data, 'utf8')
-        : data.byteLength
-    )
+    const size =
+      (typeof data === 'string'
+        ? Buffer.byteLength(data, DEFAULT_ENCODE)
+        : data.byteLength) + Buffer.byteLength(pathTo, DEFAULT_ENCODE)
+
+    this.riseWriteEvent(pathTo, 'writeFile', size)
   }
 
   async rm(paths: string[], options?: RmOptions) {
@@ -222,13 +227,16 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     )
 
     for (const path of paths) {
+      const size = Buffer.byteLength(path, DEFAULT_ENCODE)
       // Do not calculate size because it is very difficult to do
       // it depends on the file system, OS journaling and cache
-      this.riseWriteEvent(path, 'rm')
+      this.riseWriteEvent(path, 'rm', size)
     }
   }
 
   async cp(files: [string, string][], options?: CopyOptions): Promise<void> {
+    // TODO: resove glob patterns
+
     await this.filesIo.cp(
       files.map(([src, dest]) => [
         this.preparePath(src),
@@ -238,15 +246,24 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     )
 
     for (const [src, dest] of files) {
-      // TODO: Делает 2 операциияя - считываение и запись
-      this.riseEvent({
-        path: dest,
-        action: FileActions.write,
-        method: 'cp',
-        timestamp: Date.now(),
-        details: { src, recursive: options?.recursive ?? false },
-        // TODO: calculate size
-      })
+      const stats = await this.filesIo.stat(this.preparePath(src))
+
+      if (stats?.dir) {
+        continue
+      }
+
+      const details = {
+        ...options,
+        recursive: options?.recursive ?? false,
+        src,
+        dest,
+      }
+
+      this.riseReadEvent(src, 'cp', stats?.size ?? 0, details)
+
+      const size = (stats?.size ?? 0) + Buffer.byteLength(dest, DEFAULT_ENCODE)
+
+      this.riseWriteEvent(dest, 'cp', size, details)
     }
   }
 
@@ -269,8 +286,10 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   async mkdir(pathTo: string, options?: MkdirOptions) {
     await this.filesIo.mkdir(this.preparePath(pathTo), options)
 
-    // TODO: известно ли сколько байт занимает операция?
-    this.riseWriteEvent(pathTo, 'mkdir', undefined, {
+    const size = Buffer.byteLength(pathTo, DEFAULT_ENCODE)
+
+    // do not add size of metadata because it is very difficult to do
+    this.riseWriteEvent(pathTo, 'mkdir', size, {
       recursive: options?.recursive ?? false,
     })
   }
@@ -281,8 +300,43 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
     await this.filesIo.link(preparedTarget, preparedPathTo)
 
-    // TODO: известно ли сколько байт занимает операция?
-    this.riseWriteEvent(pathTo, 'symlink')
+    // do not add size of metadata because it is very difficult to do
+    const size =
+      Buffer.byteLength(target, DEFAULT_ENCODE) +
+      Buffer.byteLength(pathTo, DEFAULT_ENCODE)
+
+    this.riseWriteEvent(pathTo, 'symlink', size, { target })
+  }
+
+  async utimes(
+    pathTo: string,
+    atime: number | string,
+    mtime: number | string
+  ): Promise<void> {
+    await this.filesIo.utimes(this.preparePath(pathTo), atime, mtime)
+
+    const size = Buffer.byteLength(
+      JSON.stringify({ atime, mtime }),
+      DEFAULT_ENCODE
+    )
+
+    this.riseWriteEvent(pathTo, 'utimes', size, { atime, mtime })
+  }
+
+  async truncate(pathTo: string, len: number = 0): Promise<void> {
+    await this.filesIo.truncate(this.preparePath(pathTo), len)
+    this.riseWriteEvent(pathTo, 'truncate', len, { len })
+  }
+
+  async chown(pathTo: string, uid: number, gid: number): Promise<void> {
+    await this.filesIo.chown(this.preparePath(pathTo), uid, gid)
+    this.riseWriteEvent(pathTo, 'chown', undefined, { uid, gid })
+  }
+
+  // TODO: сделать более читабельный mode
+  async chmod(pathTo: string, mode: number): Promise<void> {
+    await this.filesIo.chmod(this.preparePath(pathTo), mode)
+    this.riseWriteEvent(pathTo, 'chmod', undefined, { mode })
   }
 
   ////////// ADDITIONAL
