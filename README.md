@@ -15,6 +15,11 @@ Personal decentralised OS based on overlay network.
 - **`prettier-plugin-packagejson`** - Форматирование package.json файлов
 - **`prettier-plugin-sort-json`** - Сортировка ключей в JSON файлах
 
+#### Конфигурация
+
+- **Файл конфигурации**: `.prettierrc.yml` (YAML формат для лучшей совместимости с Cursor AI)
+- **Плагины**: Указываются явно в командах для гарантированной работы
+
 #### Настройка сортировки импортов
 
 Импорты автоматически сортируются в следующем порядке:
@@ -27,14 +32,12 @@ Personal decentralised OS based on overlay network.
 #### Форматирование JSDoc
 
 JSDoc комментарии автоматически форматируются:
-
 - Добавляются пустые строки между описанием и тегами
 - Правильное выравнивание параметров и возвращаемых значений
 
 #### Форматирование JSON
 
 JSON файлы автоматически сортируются:
-
 - Ключи сортируются в алфавитном порядке
 - `package.json` получает логическую структуру полей
 
@@ -48,6 +51,14 @@ pnpm format
 pnpm format:check
 ```
 
+#### Автоматическое форматирование в Cursor AI
+
+Для включения автоматического форматирования при сохранении в Cursor AI:
+
+1. Убедитесь, что файл `.prettierrc.yml` находится в корне проекта
+2. В настройках Cursor AI включите "Format on Save"
+3. Если автоматическое форматирование не работает, используйте команду `pnpm format`
+
 #### Пример сортировки импортов
 
 ```typescript
@@ -57,8 +68,8 @@ import { WebSocket } from 'ws'
 
 // Локальные импорты (относительные пути и алиасы)
 import { System } from '../system/System.js'
-import { startSystemDev } from './startSystemDev'
 import { IoSetClient } from '@/ioSets/IoSetClient'
+import { startSystemDev } from './startSystemDev'
 ```
 
 #### Пример форматирования JSDoc
