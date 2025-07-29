@@ -1,4 +1,4 @@
-import type { System } from '../System.js'
+import type { System } from '@/system/System.js'
 import type { SystemCfg } from '@/types/SystemCfg.js'
 import type { MountPoint } from '@/types/types.js'
 

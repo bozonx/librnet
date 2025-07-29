@@ -1,28 +1,28 @@
 import { deserializeJson, getDeepMethod, serializeJson } from 'squidlet-lib'
 
-import { requestError } from '../../../helpers/helpers.js'
-import type { RequestError } from '../../../helpers/helpers.js'
-import { ServiceBase } from '../../../system/base/ServiceBase.js'
-import type { ServiceProps } from '../../../types/ServiceProps.js'
+import type {
+  WsServerDriver,
+  WsServerInstance,
+} from '@/drivers/WsServerDriver/WsServerDriver.js'
+import type {
+  RequestMessage,
+  ResponseMessage,
+} from '@/services/NetworkSubSystem/Message.js'
+import { ServiceBase } from '@/system/base/ServiceBase.js'
+import type { ServiceContext } from '@/system/context/ServiceContext.js'
+import { requestError } from '@/system/helpers/helpers.js'
+import type { RequestError } from '@/system/helpers/helpers.js'
+import type { ServiceProps } from '@/types/ServiceProps.js'
 import {
   DEFAULT_UI_WS_PORT,
   DRIVER_NAMES,
   LOCAL_HOST,
-} from '../../../types/constants.js'
+} from '@/types/constants.js'
 import type {
   WsServerConnectionParams,
   WsServerProps,
-} from '../../../types/io/WsServerIoType.js'
-import type { ServiceIndex, SubprogramError } from '../../../types/types.js'
-import type { ServiceContext } from '../../context/ServiceContext.js'
-import type {
-  RequestMessage,
-  ResponseMessage,
-} from '../NetworkSubSystem/Message.js'
-import type {
-  WsServerDriver,
-  WsServerInstance,
-} from '../WsServerDriver/WsServerDriver.js'
+} from '@/types/io/WsServerIoType.js'
+import type { ServiceIndex, SubprogramError } from '@/types/types.js'
 
 export interface UiApiRequestData {
   // api method to call can be with "." separator
@@ -67,10 +67,7 @@ export class UiWsApiService extends ServiceBase {
 
     this.wsServer = await this.ctx.drivers
       .getDriver<WsServerDriver>(DRIVER_NAMES.WsServerDriver)
-      .subDriver({
-        host: this.cfg.host,
-        port: this.cfg.port,
-      } as WsServerProps)
+      .subDriver({ host: this.cfg.host, port: this.cfg.port } as WsServerProps)
 
     this.wsServer.onConnection(this.handleConnection)
     this.wsServer.onMessage(this.handleMessage)

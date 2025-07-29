@@ -1,6 +1,6 @@
 import type { LogLevel } from 'squidlet-lib'
 
-import type { System } from '../System.js'
+import type { System } from '@/system/System.js'
 import type { EntityManifest } from '@/types/types.js'
 
 export class EntityLogFile {

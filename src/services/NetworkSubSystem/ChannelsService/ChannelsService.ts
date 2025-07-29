@@ -1,10 +1,10 @@
-import { ServiceBase } from '../../base/ServiceBase.js'
-import type { ServiceContext } from '../../system/context/ServiceContext.js'
-import type { ServiceProps } from '../../types/ServiceProps.js'
-import type { ServiceIndex, SubprogramError } from '../../types/types.js'
 import type { ChannelInstanceType, ChannelType } from './ChannelType.js'
 import { WsClientChannel } from './WsClientChannel.js'
 import { WsServerChannel } from './WsServerChannel.js'
+import { ServiceBase } from '@/system/base/ServiceBase.js'
+import type { ServiceContext } from '@/system/context/ServiceContext.js'
+import type { ServiceProps } from '@/types/ServiceProps.js'
+import type { ServiceIndex, SubprogramError } from '@/types/types.js'
 
 export const ChannelServiceIndex: ServiceIndex = (
   ctx: ServiceContext
@@ -29,9 +29,7 @@ export const CHANNELS_WRAPPERS = {
   WsServerChannel: typeof WsServerChannel.constructor,
 }
 
-export const DEFAULT_CHANNELS_SERVICE_CFG = {
-  connections: [],
-}
+export const DEFAULT_CHANNELS_SERVICE_CFG = { connections: [] }
 
 export class ChannelsService extends ServiceBase {
   private connections: Record<string, ChannelType> = {}
@@ -45,9 +43,7 @@ export class ChannelsService extends ServiceBase {
   }
 
   getApi(): ChannelServiceApi {
-    return {
-      registerChannel: this.registerChannel.bind(this),
-    }
+    return { registerChannel: this.registerChannel.bind(this) }
   }
 
   async init(

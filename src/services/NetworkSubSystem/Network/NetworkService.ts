@@ -1,19 +1,19 @@
 import { IndexedEvents, makeUniqId } from 'squidlet-lib'
 
-import { ServiceBase } from '../../base/ServiceBase.js'
-import type { ServiceContext } from '../../system/context/ServiceContext.js'
+import { Connections } from './Connections.js'
+import type { ConnectionsIncomeMsgHandler } from './Connections.js'
+import { ServiceBase } from '@/system/base/ServiceBase.js'
+import type { ServiceContext } from '@/system/context/ServiceContext.js'
 import type {
   NetworkIncomeRequest,
   NetworkIncomeResponse,
   NetworkResponseStatus,
   NetworkSendRequest,
   NetworkSendResponse,
-} from '../../types/Network.js'
-import type { ServiceProps } from '../../types/ServiceProps.js'
-import { NETWORK_CODES, REQUEST_ID_LENGTH } from '../../types/constants.js'
-import type { ServiceIndex, SubprogramError } from '../../types/types.js'
-import { Connections } from './Connections.js'
-import type { ConnectionsIncomeMsgHandler } from './Connections.js'
+} from '@/types/Network.js'
+import type { ServiceProps } from '@/types/ServiceProps.js'
+import { NETWORK_CODES, REQUEST_ID_LENGTH } from '@/types/constants.js'
+import type { ServiceIndex, SubprogramError } from '@/types/types.js'
 
 export interface NetworkServiceApi {
   sendRequest<T = any>(
@@ -103,10 +103,7 @@ export class NetworkService extends ServiceBase {
 
     // TODO: validate message - only supported types
 
-    await this.connections.send({
-      ...request,
-      requestId,
-    })
+    await this.connections.send({ ...request, requestId })
 
     return new Promise((resolve, reject) => {
       // TODO: timeout of waiting
@@ -138,10 +135,7 @@ export class NetworkService extends ServiceBase {
     // TODO: отправить в connections
     // TODO: ожидать с таймаутом response
 
-    return {
-      code: response.code,
-      error: response.error,
-    }
+    return { code: response.code, error: response.error }
   }
 
   /**

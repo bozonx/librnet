@@ -1,6 +1,6 @@
 import { IndexedEvents, Promised, makeUniqId } from 'squidlet-lib'
 
-import { REQUEST_ID_LENGTH } from '../types/constants.js'
+import { REQUEST_ID_LENGTH } from '@/types/constants.js'
 
 export class IoSetClient {
   readonly events = new IndexedEvents()

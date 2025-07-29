@@ -34,10 +34,7 @@ export class EntitiesApiManager {
   }
 
   registerAppApi(appName: string, apiSet: ApiSet) {
-    this.appApiSet[appName] = {
-      ...this.appApiSet[appName],
-      ...apiSet,
-    }
+    this.appApiSet[appName] = { ...this.appApiSet[appName], ...apiSet }
   }
 
   registerServiceApi(serviceName: string, apiSet: ApiSet) {

@@ -1,19 +1,19 @@
 import { IndexedEventEmitter, pathJoin } from 'squidlet-lib'
 import type { Logger } from 'squidlet-lib'
 
+import type { System } from '@/system/System'
+import type DriverInstanceBase from '@/system/base/DriverInstanceBase.js'
+import { DirTrapLogic } from '@/system/driversLogic/DirTrapLogic.js'
+import { EntityConfig } from '@/system/driversLogic/EntityConfig.js'
+import { EntityLogFile } from '@/system/driversLogic/EntityLogFile.js'
+import { permissionWrapper } from '@/system/helpers/permissionWrapper.js'
 import {
   type EntityStatus,
   LOCAL_DATA_SUB_DIRS,
   ROOT_DIRS,
   SYNCED_DATA_SUB_DIRS,
   SYSTEM_API_SERVICE_NAME,
-} from '../../types/constants.js'
-import type { System } from '../System'
-import type DriverInstanceBase from '../base/DriverInstanceBase.js'
-import { DirTrapLogic } from '../driversLogic/DirTrapLogic.js'
-import { EntityConfig } from '../driversLogic/EntityConfig.js'
-import { EntityLogFile } from '../driversLogic/EntityLogFile.js'
-import { permissionWrapper } from '../helpers/permissionWrapper.js'
+} from '@/types/constants.js'
 import type { EntityManifest, EntityType } from '@/types/types.js'
 
 export abstract class EntityBaseContext {

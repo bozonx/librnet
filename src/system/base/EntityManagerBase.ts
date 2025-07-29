@@ -1,9 +1,9 @@
 import { arraysDifference } from 'squidlet-lib'
 
-import type { EntityStatus } from '../../types/constants.js'
-import type { EntityManifest, EntityType } from '../../types/types.js'
-import type { System } from '../System'
-import type { EntityBaseContext } from '../context/EntityBaseContext.js'
+import type { System } from '@/system/System'
+import type { EntityBaseContext } from '@/system/context/EntityBaseContext.js'
+import type { EntityStatus } from '@/types/constants.js'
+import type { EntityManifest, EntityType } from '@/types/types.js'
 
 // TODO: use status fallen
 

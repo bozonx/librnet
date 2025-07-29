@@ -1,5 +1,5 @@
-import type { WebSocketClientProps } from '../../types/io/WsClientIoType.js'
 import type { ChannelInstanceType, ChannelType } from './ChannelType.js'
+import type { WebSocketClientProps } from '@/types/io/WsClientIoType.js'
 
 export class WsClientChannel implements ChannelType {
   private props: WebSocketClientProps

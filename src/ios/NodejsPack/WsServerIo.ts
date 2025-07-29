@@ -7,15 +7,15 @@ import {
 } from 'squidlet-lib'
 import WebSocket, { WebSocketServer } from 'ws'
 
-import { ServerIoBase } from '../../system/base/ServerIoBase.js'
-import type { WsCloseStatus } from '../../types/io/WsClientIoType.js'
-import { WsServerEvent } from '../../types/io/WsServerIoType.js'
+import { makeRequestObject } from './HttpServerIo.js'
+import { ServerIoBase } from '@/system/base/ServerIoBase.js'
+import type { WsCloseStatus } from '@/types/io/WsClientIoType.js'
+import { WsServerEvent } from '@/types/io/WsServerIoType.js'
 import type {
   WsServerIoType,
   WsServerProps,
-} from '../../types/io/WsServerIoType.js'
-import type { IoContext, IoIndex } from '../../types/types.js'
-import { makeRequestObject } from './HttpServerIo.js'
+} from '@/types/io/WsServerIoType.js'
+import type { IoContext, IoIndex } from '@/types/types.js'
 
 // TODO: нужно делать пинг на соединение и удалять если нет ответа
 
@@ -113,10 +113,7 @@ export class WsServerIo
 
   protected startServer(serverId: string, props: WsServerProps): ServerItem {
     // server will automatically started
-    const server = new WebSocketServer({
-      ...props,
-      autoPong: true,
-    })
+    const server = new WebSocketServer({ ...props, autoPong: true })
 
     server.on('error', (err) =>
       this.events.emit(WsServerEvent.serverError, serverId, String(err))

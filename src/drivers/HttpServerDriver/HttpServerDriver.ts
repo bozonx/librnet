@@ -5,16 +5,16 @@ import {
   Promised,
 } from 'squidlet-lib'
 
-import { IO_NAMES, LOCAL_HOST, SystemEvents } from '../../../types/constants.js'
-import { HttpServerEvent } from '../../../types/io/HttpServerIoType.js'
+import type { System } from '@/system/System.js'
+import { DriverFactoryBase } from '@/system/base/DriverFactoryBase.js'
+import DriverInstanceBase from '@/system/base/DriverInstanceBase.js'
+import { IO_NAMES, LOCAL_HOST, SystemEvents } from '@/types/constants.js'
+import { HttpServerEvent } from '@/types/io/HttpServerIoType.js'
 import type {
   HttpServerIoFullType,
   HttpServerProps,
-} from '../../../types/io/HttpServerIoType.js'
-import type { DriverIndex, DriverManifest } from '../../../types/types.js'
-import type { System } from '../../System.js'
-import { DriverFactoryBase } from '../../base/DriverFactoryBase.js'
-import DriverInstanceBase from '../../base/DriverInstanceBase.js'
+} from '@/types/io/HttpServerIoType.js'
+import type { DriverIndex, DriverManifest } from '@/types/types.js'
 
 export interface HttpServerDriverProps extends HttpServerProps {
   entityWhoAsk: string
@@ -118,10 +118,7 @@ export class HttpServerDriver extends DriverFactoryBase<
 
     await startedPromised
 
-    return {
-      ...instanceProps,
-      serverId,
-    }
+    return { ...instanceProps, serverId }
   }
 
   protected async destroyCb(instanceId: number): Promise<void> {

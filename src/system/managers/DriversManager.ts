@@ -1,8 +1,8 @@
-import type { DriverManifest } from '../../types/Manifests.js'
-import { DriverDestroyReasons, type DriverIndex } from '../../types/types.js'
-import type { System } from '../System.js'
-import type { DriverFactoryBase } from '../base/DriverFactoryBase.js'
-import { allSettledWithTimeout } from '../helpers/helpers.js'
+import type { System } from '@/system/System.js'
+import type { DriverFactoryBase } from '@/system/base/DriverFactoryBase.js'
+import { allSettledWithTimeout } from '@/system/helpers/helpers.js'
+import type { DriverManifest } from '@/types/Manifests.js'
+import { DriverDestroyReasons, type DriverIndex } from '@/types/types.js'
 
 export class DriversManager {
   private readonly system: System

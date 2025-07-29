@@ -8,18 +8,10 @@
     compositorApiUrl: '/api/v1/compositor',
     appUiUrl: '/ui',
     tiles: {
-      top: {
-        height: 48,
-      },
-      bottom: {
-        height: 48,
-      },
-      left: {
-        width: 150,
-      },
-      right: {
-        width: 150,
-      },
+      top: { height: 48 },
+      bottom: { height: 48 },
+      left: { width: 150 },
+      right: { width: 150 },
     },
   }
 

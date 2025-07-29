@@ -38,9 +38,7 @@ function useUiApi(app: TestAppBackend) {
     testApi(arg1: string, arg2: number) {
       console.log(arg1, arg2)
 
-      return {
-        result: 'Hello, world!',
-      }
+      return { result: 'Hello, world!' }
     },
   }
 }

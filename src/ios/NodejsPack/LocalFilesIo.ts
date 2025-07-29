@@ -3,12 +3,12 @@ import fs from 'node:fs/promises'
 import { open } from 'node:fs/promises'
 import { pathIsAbsolute } from 'squidlet-lib'
 
-import { IoBase } from '../../system/base/IoBase.js'
+import { IoBase } from '@/system/base/IoBase.js'
 import {
   DEFAULT_ENCODE,
   IS_TEXT_FILE_UTF8_SAMPLE_SIZE,
-} from '../../types/constants.js'
-import { AccessMode, type FilesIoType } from '../../types/io/FilesIoType.js'
+} from '@/types/constants.js'
+import { AccessMode, type FilesIoType } from '@/types/io/FilesIoType.js'
 import type {
   CopyOptions,
   LinkOptions,
@@ -20,13 +20,13 @@ import type {
   StatsSimplified,
   UtimesOptions,
   WriteFileOptions,
-} from '../../types/io/FilesIoType.js'
+} from '@/types/io/FilesIoType.js'
 import type {
   BinTypes,
   BinTypesNames,
   IoContext,
   IoIndex,
-} from '../../types/types.js'
+} from '@/types/types.js'
 
 export const FilesIoIndex: IoIndex = (ctx: IoContext) => {
   return new LocalFilesIo(ctx)

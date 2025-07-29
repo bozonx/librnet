@@ -1,17 +1,13 @@
 import { mergeDeepObjects, pathJoin } from 'squidlet-lib'
 
-import {
-  LocalDataSubDirs,
-  RootDirs,
-  SyncedDataSubDirs,
-} from '../../types/Dirs.js'
+import type { System } from '@/system/System.js'
+import { LocalDataSubDirs, RootDirs, SyncedDataSubDirs } from '@/types/Dirs.js'
 import {
   type SystemCfg,
   type SystemLocalCfg,
   type SystemSyncedCfg,
-} from '../../types/SystemCfg.js'
-import { CFG_FILE_EXT } from '../../types/constants.js'
-import type { System } from '../System.js'
+} from '@/types/SystemCfg.js'
+import { CFG_FILE_EXT } from '@/types/constants.js'
 
 const SYSTEM_MAIN_CFG_NAME = 'system.main'
 

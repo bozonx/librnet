@@ -132,12 +132,7 @@ export class SquidletAppApiConnection<YourApp = AppBase> {
   }
 
   private handleAppMethod = async (path: string, args: any[]) => {
-    const resp = await this.send({
-      data: {
-        method: path,
-        arguments: args,
-      },
-    })
+    const resp = await this.send({ data: { method: path, arguments: args } })
 
     this.errorHandler(resp)
 

@@ -1,17 +1,17 @@
 import { pathJoin } from 'squidlet-lib'
 
-import type { System } from '../system/System.js'
+import type { System } from '@/system/System.js'
 import {
   HomeSubDirs,
   LocalDataSubDirs,
   RootDirs,
   SyncedDataSubDirs,
-} from '../types/Dirs.js'
+} from '@/types/Dirs.js'
 import {
   systemLocalCfgDefaults,
   systemSyncedCfgDefaults,
-} from '../types/SystemCfg.js'
-import { CFG_FILE_EXT } from '../types/constants.js'
+} from '@/types/SystemCfg.js'
+import { CFG_FILE_EXT } from '@/types/constants.js'
 
 export async function setupFileStructure(system: System) {
   // create root dirs
@@ -77,9 +77,7 @@ export async function setupFileStructure(system: System) {
           description: 'System',
           main: 'index.js',
           scripts: {},
-          dependencies: {
-            '@squidlet/lib': 'latest',
-          },
+          dependencies: { '@squidlet/lib': 'latest' },
         },
         null,
         2

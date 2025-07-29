@@ -1,11 +1,11 @@
 import type { LogLevels, Logger } from 'squidlet-lib'
 
-import type { System } from '../system/System.js'
-import type { DriverFactoryBase } from '../system/base/DriverFactoryBase.js'
-import type { IoBase } from '../system/base/IoBase.js'
-import type { AppContext } from '../system/context/AppContext.js'
-import type { ServiceContext } from '../system/context/ServiceContext.js'
 import type { DriverManifest } from './Manifests.js'
+import type { System } from '@/system/System.js'
+import type { DriverFactoryBase } from '@/system/base/DriverFactoryBase.js'
+import type { IoBase } from '@/system/base/IoBase.js'
+import type { AppContext } from '@/system/context/AppContext.js'
+import type { ServiceContext } from '@/system/context/ServiceContext.js'
 
 export interface IoContext {
   log: Logger

@@ -7,28 +7,28 @@ import {
   trimCharStart,
 } from 'squidlet-lib'
 
-import { ServiceBase } from '../../base/ServiceBase.js'
-import type { FilesDriver } from '../../packages/SystemCommonPkg/FilesDriver/FilesDriver.js'
+import { uiHtml } from './uiHtmlTmpl.js'
+import type { FilesDriver } from '@/services/packages/SystemCommonPkg/FilesDriver/FilesDriver.js'
 import type {
   HttpServerDriver,
   HttpServerInstance,
-} from '../../packages/SystemCommonPkg/HttpServerDriver/HttpServerDriver.js'
+} from '@/services/packages/SystemCommonPkg/HttpServerDriver/HttpServerDriver.js'
 import type {
   HttpDriverRequest,
   HttpDriverResponse,
-} from '../../packages/SystemCommonPkg/HttpServerDriver/HttpServerDriverLogic.js'
-import type { ServiceContext } from '../../system/context/ServiceContext.js'
-import type { ServiceProps } from '../../types/ServiceProps.js'
+} from '@/services/packages/SystemCommonPkg/HttpServerDriver/HttpServerDriverLogic.js'
+import { ServiceBase } from '@/system/base/ServiceBase.js'
+import type { ServiceContext } from '@/system/context/ServiceContext.js'
+import type { ServiceProps } from '@/types/ServiceProps.js'
 import {
   APP_FILES_PUBLIC_DIR,
   DEFAULT_UI_HTTP_PORT,
   DRIVER_NAMES,
   LOCAL_HOST,
   ROOT_DIRS,
-} from '../../types/constants.js'
-import type { HttpServerProps } from '../../types/io/HttpServerIoType.js'
-import type { ServiceIndex, SubprogramError } from '../../types/types.js'
-import { uiHtml } from './uiHtmlTmpl.js'
+} from '@/types/constants.js'
+import type { HttpServerProps } from '@/types/io/HttpServerIoType.js'
+import type { ServiceIndex, SubprogramError } from '@/types/types.js'
 
 // TODO: можно добавить специальный кукис сессии чтобы проверять откуда сделан запрос
 
@@ -98,15 +98,11 @@ export class UiHttpService extends ServiceBase {
     request: HttpDriverRequest
   ): Promise<HttpDriverResponse> {
     if (request.method !== 'get') {
-      return {
-        status: 405,
-      }
+      return { status: 405 }
     } else if (request.url === '/assets/squidletUi.js') {
       return {
         status: 200,
-        headers: {
-          'content-type': 'text/javascript',
-        } as any,
+        headers: { 'content-type': 'text/javascript' } as any,
         body: '',
       }
     }
@@ -115,10 +111,7 @@ export class UiHttpService extends ServiceBase {
     const appName = parsedUrl.search?.app as string | undefined
 
     if (!appName) {
-      return {
-        status: 404,
-        body: `Application hasn't set`,
-      }
+      return { status: 404, body: `Application hasn't set` }
     }
 
     // TODO: add images
@@ -137,9 +130,7 @@ export class UiHttpService extends ServiceBase {
     const found = staticFiles.find((item) => reqPath)
 
     if (!found) {
-      return {
-        status: 404,
-      }
+      return { status: 404 }
     }
 
     const ext = getExt(reqPath)
@@ -165,16 +156,12 @@ export class UiHttpService extends ServiceBase {
     try {
       fileContent = await this.fileDriver.readTextFile(filePath)
     } catch (e) {
-      return {
-        status: 404,
-      }
+      return { status: 404 }
     }
 
     return {
       status: 200,
-      headers: {
-        'content-type': contentType,
-      },
+      headers: { 'content-type': contentType },
       // TODO: add content type
       body: fileContent,
     }
@@ -201,9 +188,7 @@ export class UiHttpService extends ServiceBase {
 
     return {
       status: 200,
-      headers: {
-        'content-type': 'text/html; charset=utf-8',
-      } as any,
+      headers: { 'content-type': 'text/html; charset=utf-8' } as any,
       body,
     }
   }

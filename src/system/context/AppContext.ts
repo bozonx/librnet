@@ -1,7 +1,7 @@
-import type { AppManifest } from '../../types/types.js'
-import type { ApiSet } from '../managers/EntitiesApiManager.js'
 import { EntityBaseContext } from './EntityBaseContext.js'
+import type { ApiSet } from '@/system/managers/EntitiesApiManager.js'
 import type { EntityStatus } from '@/types/constants.js'
+import type { AppManifest } from '@/types/types.js'
 
 export class AppContext extends EntityBaseContext {
   readonly type = 'app' as const

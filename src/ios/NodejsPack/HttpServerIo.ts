@@ -2,14 +2,14 @@ import { IncomingMessage, Server, ServerResponse, createServer } from 'http'
 import { IndexedEvents, callPromised, makeUniqNumber } from 'squidlet-lib'
 import type { HttpMethods, HttpRequest, HttpResponse } from 'squidlet-lib'
 
-import { ServerIoBase } from '../../system/base/ServerIoBase.js'
-import { DEFAULT_ENCODE } from '../../types/constants.js'
-import { HttpServerEvent } from '../../types/io/HttpServerIoType.js'
+import { ServerIoBase } from '@/system/base/ServerIoBase.js'
+import { DEFAULT_ENCODE } from '@/types/constants.js'
+import { HttpServerEvent } from '@/types/io/HttpServerIoType.js'
 import type {
   HttpServerIoType,
   HttpServerProps,
-} from '../../types/io/HttpServerIoType.js'
-import type { IoContext, IoIndex } from '../../types/types.js'
+} from '@/types/io/HttpServerIoType.js'
+import type { IoContext, IoIndex } from '@/types/types.js'
 
 type ServerItem = [
   // Http server instance
@@ -216,9 +216,7 @@ export class HttpServerIo
         break
     }
 
-    res.writeHead(statusCode, statusMessage, {
-      'Content-Type': 'text/json',
-    })
+    res.writeHead(statusCode, statusMessage, { 'Content-Type': 'text/json' })
 
     res.end(JSON.stringify({ errorMsg }))
   }

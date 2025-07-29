@@ -1,4 +1,4 @@
-import type { System } from '../System.js'
+import type { System } from '@/system/System.js'
 
 const SYSTEM_PERMISSIONS_CFG_NAME = 'system.permissions'
 

@@ -1,8 +1,8 @@
 import { pathJoin, trimCharStart } from 'squidlet-lib'
 import type { LogLevel } from 'squidlet-lib'
 
-import type { System } from '../System'
-import { clearAbsolutePath } from '../helpers/helpers'
+import type { System } from '@/system/System'
+import { clearAbsolutePath } from '@/system/helpers/helpers'
 import {
   LOCAL_DATA_SUB_DIRS,
   ROOT_DIRS,

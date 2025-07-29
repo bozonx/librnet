@@ -1,6 +1,6 @@
-import type { WsServerProps } from '../../types/io/WsServerIoType.js'
 import type { ChannelType } from './ChannelType.js'
 import type { ChannelInstanceType } from './ChannelType.js'
+import type { WsServerProps } from '@/types/io/WsServerIoType.js'
 
 export class WsServerChannel implements ChannelType {
   private props: WsServerProps

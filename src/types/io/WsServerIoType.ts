@@ -1,7 +1,7 @@
 // TODO: лучше брать из конфига. И это не соединение а старт сервера
 import type { HttpRequest, HttpResponse } from 'squidlet-lib'
 
-import type { IoBase } from '../../system/base/IoBase.js'
+import type { IoBase } from '@/system/base/IoBase.js'
 
 export const WS_SERVER_CONNECTION_TIMEOUT_SEC = 20
 

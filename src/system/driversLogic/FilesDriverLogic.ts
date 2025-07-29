@@ -1,26 +1,19 @@
 import { pathBasename, pathDirname, pathJoin } from 'squidlet-lib'
 
-import type { FilesDriverType } from '../../types/FilesDriverType.js'
-import {
-  FILE_ACTION,
-  IS_TEXT_FILE_UTF8_SAMPLE_SIZE,
-} from '../../types/constants.js'
+import type { FilesEventData } from '@/types/EventsData.js'
+import type { FilesDriverType } from '@/types/FilesDriverType.js'
+import { IS_TEXT_FILE_UTF8_SAMPLE_SIZE } from '@/types/constants.js'
 import type {
   CopyOptions,
+  FullFilesIoType,
   ReadTextFileOptions,
   ReaddirOptions,
   RmOptions,
   StatsSimplified,
   WriteFileOptions,
-} from '../../types/io/FilesIoType.js'
-import type { MkdirOptions } from '../../types/io/FilesIoType.js'
-import type { FilesIoType } from '../../types/io/FilesIoType.js'
-import type {
-  BinTypes,
-  BinTypesNames,
-  FilesEventData,
-} from '../../types/types.js'
-import type { IoBase } from '../base/IoBase.js'
+} from '@/types/io/FilesIoType.js'
+import type { MkdirOptions } from '@/types/io/FilesIoType.js'
+import type { BinTypes, BinTypesNames } from '@/types/types.js'
 
 /**
  * Logic of the files driver which:
@@ -31,11 +24,9 @@ import type { IoBase } from '../base/IoBase.js'
  * - Uses preparePath which you should implement in your driver
  */
 export abstract class FilesDriverLogic implements FilesDriverType {
-  constructor(
-    protected readonly filesIo: FilesIoType & IoBase,
-    protected readonly riseEvent: (event: FilesEventData) => void
-  ) {}
+  constructor(protected readonly filesIo: FullFilesIoType) {}
 
+  protected abstract riseEvent(event: FilesEventData): void
   protected abstract preparePath(pathTo: string): string
 
   async readTextFile(

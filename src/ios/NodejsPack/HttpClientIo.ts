@@ -1,8 +1,8 @@
 import type { HttpRequest, HttpResponse } from 'squidlet-lib'
 
-import { IoBase } from '../../system/base/IoBase.js'
-import type { HttpClientIoType } from '../../types/io/HttpClientIoType.js'
-import type { IoContext, IoIndex } from '../../types/types.js'
+import { IoBase } from '@/system/base/IoBase.js'
+import type { HttpClientIoType } from '@/types/io/HttpClientIoType.js'
+import type { IoContext, IoIndex } from '@/types/types.js'
 
 export const HttpClientIoIndex: IoIndex = (ctx: IoContext) => {
   return new HttpClientIo(ctx)

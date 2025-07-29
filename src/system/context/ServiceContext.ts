@@ -1,7 +1,7 @@
-import type { ServiceManifest } from '../../types/types.js'
-import type { ApiSet } from '../managers/EntitiesApiManager.js'
 import { EntityBaseContext } from './EntityBaseContext.js'
+import type { ApiSet } from '@/system/managers/EntitiesApiManager.js'
 import type { EntityStatus } from '@/types/constants.js'
+import type { ServiceManifest } from '@/types/types.js'
 
 export class ServiceContext extends EntityBaseContext {
   readonly type = 'service' as const

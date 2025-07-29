@@ -1,10 +1,10 @@
-import type { System } from '../../../system/System.js'
-import { DriverFactoryBase } from '../../../system/base/DriverFactoryBase.js'
-import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js'
-import { RootDirDriverLogic } from '../../../system/driversLogic/RootDirDriverLogic.js'
-import { checkPermissions } from '../../../system/helpers/CheckPathPermission.js'
-import { clearAbsolutePath } from '../../../system/helpers/helpers.js'
-import { FILE_ACTION, IO_NAMES } from '../../../types/constants.js'
+import type { System } from '@/system/System.js'
+import { DriverFactoryBase } from '@/system/base/DriverFactoryBase.js'
+import DriverInstanceBase from '@/system/base/DriverInstanceBase.js'
+import { RootDirDriverLogic } from '@/system/driversLogic/RootDirDriverLogic.js'
+import { checkPermissions } from '@/system/helpers/CheckPathPermission.js'
+import { clearAbsolutePath } from '@/system/helpers/helpers.js'
+import { FILE_ACTION, IO_NAMES } from '@/types/constants.js'
 import type {
   CopyOptions,
   MkdirOptions,
@@ -13,13 +13,13 @@ import type {
   RmOptions,
   StatsSimplified,
   WriteFileOptions,
-} from '../../../types/io/FilesIoType.js'
+} from '@/types/io/FilesIoType.js'
 import type {
   BinTypes,
   BinTypesNames,
   DriverIndex,
   DriverManifest,
-} from '../../../types/types.js'
+} from '@/types/types.js'
 
 export const FILE_PERM_DELIMITER = '|'
 

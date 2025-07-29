@@ -1,6 +1,6 @@
 import type { HttpResponse } from 'squidlet-lib'
 
-import type { IoBase } from '../../system/base/IoBase'
+import type { IoBase } from '@/system/base/IoBase'
 
 export enum WsClientEvent {
   open,

@@ -3,9 +3,7 @@
     "rootDir": ".",
     "types": ["jest", "node"],
     "verbatimModuleSyntax": false,
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "paths": { "@/*": ["./src/*"] }
   },
   "exclude": [
     "src/_not_used",

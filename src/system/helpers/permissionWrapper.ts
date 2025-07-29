@@ -1,4 +1,4 @@
-import type { System } from '../System.js'
+import type { System } from '@/system/System.js'
 
 export function permissionWrapper(
   system: System,

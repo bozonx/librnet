@@ -1,15 +1,15 @@
 import { IndexedEventEmitter, parseUrl } from 'squidlet-lib'
 
-import type { System } from '../../../system/System.js'
-import { DriverFactoryBase } from '../../../system/base/DriverFactoryBase.js'
-import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js'
-import { IO_NAMES, SystemEvents } from '../../../types/constants.js'
+import type { System } from '@/system/System.js'
+import { DriverFactoryBase } from '@/system/base/DriverFactoryBase.js'
+import DriverInstanceBase from '@/system/base/DriverInstanceBase.js'
+import { IO_NAMES, SystemEvents } from '@/types/constants.js'
 import {
   WsClientEvent,
   type WsClientIoFullType,
   type WsClientProps,
-} from '../../../types/io/WsClientIoType.js'
-import type { DriverIndex, DriverManifest } from '../../../types/types.js'
+} from '@/types/io/WsClientIoType.js'
+import type { DriverIndex, DriverManifest } from '@/types/types.js'
 
 export enum WsClientStatus {
   disconnected = 'disconnected',
@@ -100,10 +100,7 @@ export class WsClientDriver extends DriverFactoryBase<
     const { entityWhoAsk, ...rest } = instanceProps
     const connectionId = await this.common.io.newConnection(rest)
 
-    return {
-      ...instanceProps,
-      connectionId,
-    }
+    return { ...instanceProps, connectionId }
   }
 
   protected async destroyCb(instanceId: number): Promise<void> {

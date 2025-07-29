@@ -7,14 +7,14 @@ import {
 } from 'squidlet-lib'
 import WebSocket from 'ws'
 
-import { IoBase } from '../../system/base/IoBase.js'
-import { WsClientEvent, WsCloseStatus } from '../../types/io/WsClientIoType.js'
+import { makeWsResponseObject } from './WsServerIo.js'
+import { IoBase } from '@/system/base/IoBase.js'
+import { WsClientEvent, WsCloseStatus } from '@/types/io/WsClientIoType.js'
 import type {
   WebSocketClientProps,
   WsClientIoType,
-} from '../../types/io/WsClientIoType.js'
-import type { IoContext, IoIndex } from '../../types/types.js'
-import { makeWsResponseObject } from './WsServerIo.js'
+} from '@/types/io/WsClientIoType.js'
+import type { IoContext, IoIndex } from '@/types/types.js'
 
 export const WsClientIoIndex: IoIndex = (ctx: IoContext) => {
   return new WsClientIo(ctx)

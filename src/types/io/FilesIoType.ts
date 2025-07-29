@@ -1,4 +1,5 @@
-import type { BinTypes, BinTypesNames } from '../types'
+import type { IoBase } from '@/system/base/IoBase'
+import type { BinTypes, BinTypesNames } from '@/types/types'
 
 export interface StatsSimplified {
   // in bytes
@@ -359,3 +360,5 @@ export interface FilesIoType {
    */
   chmod(pathTo: string, mode: number): Promise<void>
 }
+
+export type FullFilesIoType = FilesIoType & IoBase

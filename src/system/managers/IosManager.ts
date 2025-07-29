@@ -1,8 +1,8 @@
 import { IndexedEvents } from 'squidlet-lib'
 
-import type { IoSetClient } from '../../ioSets/IoSetClient.js'
-import type { System } from '../System.js'
-import { allSettledWithTimeout } from '../helpers/helpers.js'
+import type { IoSetClient } from '@/ioSets/IoSetClient.js'
+import type { System } from '@/system/System.js'
+import { allSettledWithTimeout } from '@/system/helpers/helpers.js'
 import {
   GET_IO_NAMES_METHOD_NAME,
   IO_SET_SERVER_NAME,

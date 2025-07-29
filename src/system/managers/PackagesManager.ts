@@ -2,7 +2,7 @@ import semver from 'semver'
 import { pathJoin, trimChar } from 'squidlet-lib'
 import yaml from 'yaml'
 
-import type { System } from '../System.js'
+import type { System } from '@/system/System.js'
 import type { ArchiveDriver } from '@/system/drivers/ArchiveDriver/ArchiveDriver.js'
 import {
   DRIVER_NAMES,

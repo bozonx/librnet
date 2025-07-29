@@ -1,15 +1,15 @@
 import { ConsoleLogger, LogLevels } from 'squidlet-lib'
 
-import { IoSetServer } from '../../ioSets/IoSetServer.js'
-import { HttpClientIoIndex } from '../../ios/NodejsPack/HttpClientIo.js'
-import { HttpServerIoIndex } from '../../ios/NodejsPack/HttpServerIo.js'
-import { FilesIoIndex } from '../../ios/NodejsPack/LocalFilesIo.js'
-import { WsClientIoIndex } from '../../ios/NodejsPack/WsClientIo.js'
-import { WsServerIoIndex } from '../../ios/NodejsPack/WsServerIo.js'
-import { IoNames } from '../../types/EntitiesNames.js'
-import { EnvModes } from '../../types/types.js'
 import { startSystemDev } from './startSystemDev'
 import { IoSetClient } from '@/ioSets/IoSetClient'
+import { IoSetServer } from '@/ioSets/IoSetServer.js'
+import { HttpClientIoIndex } from '@/ios/NodejsPack/HttpClientIo.js'
+import { HttpServerIoIndex } from '@/ios/NodejsPack/HttpServerIo.js'
+import { FilesIoIndex } from '@/ios/NodejsPack/LocalFilesIo.js'
+import { WsClientIoIndex } from '@/ios/NodejsPack/WsClientIo.js'
+import { WsServerIoIndex } from '@/ios/NodejsPack/WsServerIo.js'
+import { IoNames } from '@/types/EntitiesNames.js'
+import { EnvModes } from '@/types/types.js'
 
 ;(async () => {
   const logger = new ConsoleLogger(LogLevels.debug)

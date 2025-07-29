@@ -1,4 +1,4 @@
-import type { System } from '../System'
+import type { System } from '@/system/System'
 import type { MountPoint } from '@/types/types'
 
 const SYSTEM_MOUNT_POINT_CFG_NAME = 'system.mountPoints'

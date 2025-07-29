@@ -6,8 +6,8 @@ import {
   trimCharStart,
 } from 'squidlet-lib'
 
-import { REQUEST_ID_LENGTH } from '../../types/constants'
-import type { MountPoint } from '../../types/types'
+import { REQUEST_ID_LENGTH } from '@/types/constants'
+import type { MountPoint } from '@/types/types'
 
 export interface RequestError {
   code: number
@@ -15,10 +15,7 @@ export interface RequestError {
 }
 
 export function requestError(code: number, message: string): RequestError {
-  return {
-    code,
-    message,
-  }
+  return { code, message }
 }
 
 /** Common request id. Used by WsAppApi service */

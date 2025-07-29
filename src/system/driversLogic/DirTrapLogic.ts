@@ -1,7 +1,6 @@
-import { SystemEvents } from '../../types/types.js'
-import type { System } from '../System.js'
-import { clearAbsolutePath } from '../helpers/helpers.js'
 import { FilesDriverLogic } from './FilesDriverLogic.js'
+import type { System } from '@/system/System.js'
+import { clearAbsolutePath } from '@/system/helpers/helpers.js'
 import { IoNames } from '@/types/EntitiesNames.js'
 import type {
   CopyOptions,
@@ -9,6 +8,7 @@ import type {
   RmOptions,
   WriteFileOptions,
 } from '@/types/io/FilesIoType.js'
+import { SystemEvents } from '@/types/types.js'
 
 export class DirTrapLogic extends FilesDriverLogic {
   constructor(

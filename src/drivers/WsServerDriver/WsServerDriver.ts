@@ -5,17 +5,17 @@ import {
   Promised,
 } from 'squidlet-lib'
 
-import type { System } from '../../../system/System.js'
-import { DriverFactoryBase } from '../../../system/base/DriverFactoryBase.js'
-import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js'
-import { IO_NAMES, SystemEvents } from '../../../types/constants.js'
-import { LOCAL_HOST } from '../../../types/constants.js'
-import { WsServerEvent } from '../../../types/io/WsServerIoType.js'
+import type { System } from '@/system/System.js'
+import { DriverFactoryBase } from '@/system/base/DriverFactoryBase.js'
+import DriverInstanceBase from '@/system/base/DriverInstanceBase.js'
+import { IO_NAMES, SystemEvents } from '@/types/constants.js'
+import { LOCAL_HOST } from '@/types/constants.js'
+import { WsServerEvent } from '@/types/io/WsServerIoType.js'
 import type {
   WsServerIoFullType,
   WsServerProps,
-} from '../../../types/io/WsServerIoType.js'
-import type { DriverIndex, DriverManifest } from '../../../types/types.js'
+} from '@/types/io/WsServerIoType.js'
+import type { DriverIndex, DriverManifest } from '@/types/types.js'
 
 // TODO: можно ли установить cookie? стандартным способом?
 // TODO: а если сервер сам неожиданно отвалился?
@@ -119,10 +119,7 @@ export class WsServerDriver extends DriverFactoryBase<
 
     await startedPromised
 
-    return {
-      ...instanceProps,
-      serverId,
-    }
+    return { ...instanceProps, serverId }
   }
 
   protected async destroyCb(instanceId: number): Promise<void> {

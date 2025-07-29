@@ -1,6 +1,6 @@
-import type { ServiceManifest, ServiceOnInit } from '../../types/types.js'
-import { EntityManagerBase } from '../base/EntityManagerBase.js'
-import { ServiceContext } from '../context/ServiceContext.js'
+import { EntityManagerBase } from '@/system/base/EntityManagerBase.js'
+import { ServiceContext } from '@/system/context/ServiceContext.js'
+import type { ServiceManifest, ServiceOnInit } from '@/types/types.js'
 
 export class ServicesManager extends EntityManagerBase<ServiceContext> {
   readonly type = 'service' as const

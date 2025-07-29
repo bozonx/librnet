@@ -1,12 +1,12 @@
 import { ConsoleLogger, LogLevels, type Logger } from 'squidlet-lib'
 
-import type { IoBase } from '../system/base/IoBase.js'
-import { allSettledWithTimeout } from '../system/helpers/helpers.js'
+import type { IoBase } from '@/system/base/IoBase.js'
+import { allSettledWithTimeout } from '@/system/helpers/helpers.js'
 import {
   GET_IO_NAMES_METHOD_NAME,
   IO_SET_SERVER_NAME,
-} from '../types/constants.js'
-import type { IoContext, IoIndex } from '../types/types.js'
+} from '@/types/constants.js'
+import type { IoContext, IoIndex } from '@/types/types.js'
 
 export class IoSetServer {
   private readonly ios: { [index: string]: IoBase } = {}

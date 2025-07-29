@@ -1,6 +1,6 @@
-import type { ServiceOnInit } from '../../../types/types.js'
-import type { ServiceContext } from '../../context/ServiceContext.js'
-import { Channel } from '../../driversLogic/Channel.js'
+import type { ServiceContext } from '@/system/context/ServiceContext.js'
+import { Channel } from '@/system/driversLogic/Channel.js'
+import type { ServiceOnInit } from '@/types/types.js'
 
 // TODO:  remake to driver
 

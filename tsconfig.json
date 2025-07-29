@@ -15,9 +15,7 @@
     "rootDir": "src",
     "declarationDir": "./distr/types",
     "outDir": "./distr/src",
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "paths": { "@/*": ["./src/*"] }
   },
   "exclude": [
     "src/_not_used",

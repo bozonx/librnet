@@ -1,7 +1,7 @@
-import type { DriverManifest } from '../../types/Manifests.js'
-import type { System } from '../System.js'
 import type DriverInstanceBase from './DriverInstanceBase.js'
 import type { DriverInstanceClass } from './DriverInstanceBase.js'
+import type { System } from '@/system/System.js'
+import type { DriverManifest } from '@/types/Manifests.js'
 
 /**
  * This factory creates instances of sub drivers and keeps them in the memory.

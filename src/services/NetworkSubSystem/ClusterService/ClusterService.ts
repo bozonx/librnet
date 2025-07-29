@@ -1,9 +1,9 @@
-import { ServiceBase } from '../../base/ServiceBase.js'
-import type { ServiceContext } from '../../system/context/ServiceContext.js'
-import type { ServiceProps } from '../../types/ServiceProps.js'
-import { DEFAULT_WS_CTRL_PORT, LOCAL_HOST } from '../../types/constants.js'
-import type { WsServerProps } from '../../types/io/WsServerIoType.js'
-import type { ServiceIndex, SubprogramError } from '../../types/types.js'
+import { ServiceBase } from '@/system/base/ServiceBase.js'
+import type { ServiceContext } from '@/system/context/ServiceContext.js'
+import type { ServiceProps } from '@/types/ServiceProps.js'
+import { DEFAULT_WS_CTRL_PORT, LOCAL_HOST } from '@/types/constants.js'
+import type { WsServerProps } from '@/types/io/WsServerIoType.js'
+import type { ServiceIndex, SubprogramError } from '@/types/types.js'
 
 // TODO: выбирает главного в локальной сети и в интернете
 // TODO: все сихронизируют базовую инфу между собой в реальном времени

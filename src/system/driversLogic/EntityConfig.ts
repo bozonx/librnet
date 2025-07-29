@@ -1,4 +1,4 @@
-import { System } from '../System.js'
+import { System } from '@/system/System.js'
 import type { EntityManifest } from '@/types/types.js'
 
 export class EntityConfig<Config extends Record<string, any>> {

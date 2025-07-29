@@ -1,5 +1,5 @@
-import type { System } from '../System.js'
 import type { DriverFactoryBase } from './DriverFactoryBase.js'
+import type { System } from '@/system/System.js'
 
 export type DriverInstanceClass<
   Instance extends DriverInstanceBase<any, any, any> = DriverInstanceBase<

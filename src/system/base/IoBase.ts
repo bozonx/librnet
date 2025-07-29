@@ -1,4 +1,4 @@
-import type { IoContext } from '../../types/types.js'
+import type { IoContext } from '@/types/types.js'
 
 export abstract class IoBase {
   // put name of the IO here it it not the same as class name

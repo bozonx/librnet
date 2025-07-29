@@ -5,10 +5,12 @@ import {
   omitUndefined,
 } from 'squidlet-lib'
 
-import { System } from '../../system/System.js'
-import { type AppManifest } from '../../types/Manifests.js'
-import { type ServiceManifest } from '../../types/Manifests.js'
-import { type DriverManifest } from '../../types/Manifests.js'
+import { setupFileStructure } from '@/installer/setupFileStructure.js'
+import type { IoSetClient } from '@/ioSets/IoSetClient.js'
+import { System } from '@/system/System.js'
+import { type AppManifest } from '@/types/Manifests.js'
+import { type ServiceManifest } from '@/types/Manifests.js'
+import { type DriverManifest } from '@/types/Manifests.js'
 import {
   type AppOnInit,
   type DriverIndex,
@@ -16,9 +18,7 @@ import {
   type ServiceOnInit,
   type SystemEnv,
   SystemEvents,
-} from '../../types/types.js'
-import { setupFileStructure } from '@/installer/setupFileStructure.js'
-import type { IoSetClient } from '@/ioSets/IoSetClient.js'
+} from '@/types/types.js'
 
 export async function startSystemDev(
   env: Partial<SystemEnv>,

@@ -141,10 +141,7 @@ export class PublicApiService extends ServiceBase {
       const resp = await network.sendRequest({
         toHostId,
         category: PUBLIC_API_CATEGORY,
-        payload: {
-          method: pathToMethod,
-          args,
-        } as PublicApiServicePayload,
+        payload: { method: pathToMethod, args } as PublicApiServicePayload,
       })
 
       if (resp.error) throw resp.error

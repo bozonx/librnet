@@ -7,12 +7,7 @@
 Добавлены в `package.json`:
 
 ```json
-{
-  "devDependencies": {
-    "@types/jest": "^29.5.12",
-    "ts-jest": "^29.1.2"
-  }
-}
+{ "devDependencies": { "@types/jest": "^29.5.12", "ts-jest": "^29.1.2" } }
 ```
 
 ### 2. Создана конфигурация Jest
@@ -160,10 +155,7 @@ it('should handle async operations', async () => {
 ### Тест с моками
 
 ```typescript
-jest.mock('fs', () => ({
-  ...jest.requireActual('fs'),
-  readFile: jest.fn(),
-}))
+jest.mock('fs', () => ({ ...jest.requireActual('fs'), readFile: jest.fn() }))
 
 it('should read file', async () => {
   const mockReadFile = require('fs').readFile

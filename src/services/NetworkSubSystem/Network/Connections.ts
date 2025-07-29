@@ -4,13 +4,13 @@
 //       это конечный пункт то в network
 import { serializeJson } from 'squidlet-lib'
 
+import type { NetworkService } from './NetworkService.js'
 import type {
   NetworkIncomeRequest,
   NetworkMessageBase,
   NetworkSendRequest,
-} from '../../types/Network.js'
-import type { NetworkIncomeResponse } from '../../types/Network.js'
-import type { NetworkService } from './NetworkService.js'
+} from '@/types/Network.js'
+import type { NetworkIncomeResponse } from '@/types/Network.js'
 
 export type ConnectionsIncomeMsgHandler = (
   incomeMsg: NetworkIncomeRequest | NetworkIncomeResponse

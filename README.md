@@ -32,12 +32,14 @@ Personal decentralised OS based on overlay network.
 #### Форматирование JSDoc
 
 JSDoc комментарии автоматически форматируются:
+
 - Добавляются пустые строки между описанием и тегами
 - Правильное выравнивание параметров и возвращаемых значений
 
 #### Форматирование JSON
 
 JSON файлы автоматически сортируются:
+
 - Ключи сортируются в алфавитном порядке
 - `package.json` получает логическую структуру полей
 
@@ -68,8 +70,8 @@ import { WebSocket } from 'ws'
 
 // Локальные импорты (относительные пути и алиасы)
 import { System } from '../system/System.js'
-import { IoSetClient } from '@/ioSets/IoSetClient'
 import { startSystemDev } from './startSystemDev'
+import { IoSetClient } from '@/ioSets/IoSetClient'
 ```
 
 #### Пример форматирования JSDoc
