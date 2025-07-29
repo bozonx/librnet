@@ -9,6 +9,7 @@ trailingComma: es5
 bracketSpacing: true
 bracketSameLine: false
 arrowParens: always
+objectWrap: collapse
 
 # Плагины
 plugins:
