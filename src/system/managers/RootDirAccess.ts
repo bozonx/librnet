@@ -22,6 +22,7 @@ export class RootDirAccess extends FilesDriverLogic {
   // Make real path on external file system
   protected preparePath(pathTo: string): string {
     // TODO: review
+    // TODO: очищать от urls и относительных путей
     return resolveRealPath(
       pathTo,
       this.system.mountPoints.rootDir,

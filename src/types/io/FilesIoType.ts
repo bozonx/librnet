@@ -207,7 +207,7 @@ export interface FilesIoType {
   isTextFileUtf8(pathTo: string): Promise<boolean>
 
   /**
-   * Resolve path to real path through symlinks Encoding is UTF-8
+   * Resolve path to real path through symlinks. Encoding is UTF-8
    *
    * @param pathTo
    * @returns Absolute path to deeply linked target file

@@ -3,8 +3,7 @@ import { DriverFactoryBase } from '@/system/base/DriverFactoryBase.js'
 import DriverInstanceBase from '@/system/base/DriverInstanceBase.js'
 import { checkPermissions } from '@/system/helpers/CheckPathPermission.js'
 import { clearAbsolutePath } from '@/system/helpers/helpers.js'
-import { RootDirDriverLogic } from '@/system/managers/RootDirAccess.js'
-import { FILE_ACTION, IO_NAMES } from '@/types/constants.js'
+import { RootDirAccess } from '@/system/managers/RootDirAccess.js'
 import type {
   CopyOptions,
   MkdirOptions,
@@ -14,12 +13,7 @@ import type {
   StatsSimplified,
   WriteFileOptions,
 } from '@/types/io/FilesIoType.js'
-import type {
-  BinTypes,
-  BinTypesNames,
-  DriverIndex,
-  DriverManifest,
-} from '@/types/types.js'
+import type { BinTypes, BinTypesNames, DriverIndex } from '@/types/types.js'
 
 export const FILE_PERM_DELIMITER = '|'
 
@@ -61,7 +55,8 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
   RootFilesDriverProps,
   Record<string, any>
 > {
-  private driver = new RootDirDriverLogic(this.system, '/')
+  // TODO: почуму не  FilesDriverLogic ?
+  private driver = new RootDirAccess(this.system, '/')
 
   ////// READ ONLY METHODS
   async readTextFile(

@@ -2,8 +2,10 @@ import { FilesDriverLogic } from './FilesDriverLogic.js'
 import type { System } from '@/system/System.js'
 import { clearAbsolutePath } from '@/system/helpers/helpers.js'
 import { IoNames } from '@/types/EntitiesNames.js'
+import type { FilesEventData } from '@/types/EventsData.js'
 import type {
   CopyOptions,
+  FullFilesIoType,
   MkdirOptions,
   RmOptions,
   WriteFileOptions,
@@ -16,9 +18,11 @@ export class DirTrapLogic extends FilesDriverLogic {
     protected readonly isReadonly: boolean,
     protected readonly system: System
   ) {
-    super(system.ios.getIo(IoNames.LocalFilesIo), (event) =>
-      system.events.emit(SystemEvents.localFiles, event)
-    )
+    super(system.ios.getIo<FullFilesIoType>(IoNames.LocalFilesIo))
+  }
+
+  protected riseEvent(event: FilesEventData): void {
+    this.system.events.emit(SystemEvents.localFiles, event)
   }
 
   protected preparePath(pathTo: string): string {

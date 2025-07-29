@@ -1,28 +1,36 @@
 import type {
+  AccessMode,
   CopyOptions,
+  GlobOptions,
+  LinkOptions,
   MkdirOptions,
+  ReadBinFileOptions,
   ReadTextFileOptions,
   ReaddirOptions,
   RmOptions,
   StatsSimplified,
+  UtimesOptions,
   WriteFileOptions,
 } from './io/FilesIoType.js'
-import type { BinTypes, BinTypesNames } from './types'
+import type { BinTypes } from './types'
 
 export interface ReadOnlyFilesDriverType {
   readTextFile(pathTo: string, options?: ReadTextFileOptions): Promise<string>
-  readBinFile(pathTo: string, returnType?: BinTypesNames): Promise<BinTypes>
+  readBinFile(pathTo: string, options?: ReadBinFileOptions): Promise<BinTypes>
   stat(pathTo: string): Promise<StatsSimplified | undefined>
+  exists(pathTo: string): Promise<boolean>
   readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]>
   readlink(pathTo: string): Promise<string>
-  // skip realpath
+  isTextFileUtf8(pathTo: string): Promise<boolean>
+  realpath(pathTo: string): Promise<string>
+  glob(pattern: string | string[], options?: GlobOptions): Promise<string[]>
+  access(pathTo: string, mode?: AccessMode): Promise<boolean>
 
   ////////// ADDITIONAL
   isDir(pathToDir: string): Promise<boolean>
   isFile(pathToFile: string): Promise<boolean>
   isSymLink(pathToSymLink: string): Promise<boolean>
   isExists(pathToFileOrDir: string): Promise<boolean>
-  isTextFileUtf8(pathTo: string): Promise<boolean>
 }
 
 export interface WriteFilesDriverType {
@@ -40,7 +48,16 @@ export interface WriteFilesDriverType {
   cp(files: [string, string][], options?: CopyOptions): Promise<void>
   rename(files: [string, string][]): Promise<void>
   mkdir(pathTo: string, options?: MkdirOptions): Promise<void>
-  symlink(target: string, pathTo: string): Promise<void>
+  link(target: string, pathTo: string, options?: LinkOptions): Promise<void>
+  utimes(
+    pathTo: string,
+    atime: number | string,
+    mtime: number | string,
+    options?: UtimesOptions
+  ): Promise<void>
+  truncate(pathTo: string, len: number): Promise<void>
+  chown(pathTo: string, uid: number, gid: number): Promise<void>
+  chmod(pathTo: string, mode: number): Promise<void>
 
   ////////// ADDITIONAL
 

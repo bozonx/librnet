@@ -6,6 +6,7 @@ import { IS_TEXT_FILE_UTF8_SAMPLE_SIZE } from '@/types/constants.js'
 import type {
   CopyOptions,
   FullFilesIoType,
+  MkdirOptions,
   ReadTextFileOptions,
   ReaddirOptions,
   RmOptions,
@@ -18,13 +19,15 @@ import {
   FileActions,
 } from '@/types/types.js'
 
+// TODO:  resolve glob patterns in all the methods
+
 /**
  * Logic of the files driver which:
  *
  * - Adds more methods
- * - ️️‼️❓resolves glob patterns
  * - Emits events
  * - Uses preparePath which you should implement in your driver
+ * - Resolves glob patterns in all the methods which are support it
  */
 export abstract class FilesDriverLogic implements FilesDriverType {
   constructor(protected readonly filesIo: FullFilesIoType) {}
@@ -307,7 +310,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     const preparedTarget = this.preparePath(target)
     const preparedPathTo = this.preparePath(pathTo)
 
-    await this.filesIo.symlink(preparedTarget, preparedPathTo)
+    await this.filesIo.link(preparedTarget, preparedPathTo)
 
     this.riseEvent({
       path: pathTo,
