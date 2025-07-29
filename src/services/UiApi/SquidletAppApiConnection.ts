@@ -1,40 +1,44 @@
 import {
-  serializeJson,
-  deserializeJson,
   IndexedEvents,
-  Promised
+  Promised,
+  deserializeJson,
+  serializeJson,
 } from 'squidlet-lib'
-import type {UiApiRequestData} from '../services/UiWsApiService/UiWsApiService.js'
-import {makeRequestId} from '../helpers/helpers.js'
-import {DEFAULT_UI_WS_PORT} from '../types/constants.js'
-import type {ResponseMessage, RequestMessage} from '../types/Message.js'
-import type {AppBase} from '../base/AppBase.js'
-import { CTX_SUB_ITEMS } from '../services/AppsService/AppContext.js';
-import {NOT_ALLOWED_APP_PROPS} from '../base/AppBase.js'
+
+import type { AppBase } from '../base/AppBase.js'
+import { NOT_ALLOWED_APP_PROPS } from '../base/AppBase.js'
+import { makeRequestId } from '../helpers/helpers.js'
+import { CTX_SUB_ITEMS } from '../services/AppsService/AppContext.js'
+import type { UiApiRequestData } from '../services/UiWsApiService/UiWsApiService.js'
+import type { RequestMessage, ResponseMessage } from '../types/Message.js'
+import { DEFAULT_UI_WS_PORT } from '../types/constants.js'
 
 // it needs to export the port
 export const APP_API_WS_PORT = DEFAULT_UI_WS_PORT
 
-
 // TODO: таймаут ожидания и реконнект
 
-
-export function squidletAppWrapper<YourApp = AppBase>(handleCall: (path: string, args: any[]) => any): YourApp {
+export function squidletAppWrapper<YourApp = AppBase>(
+  handleCall: (path: string, args: any[]) => any
+): YourApp {
   const handler: ProxyHandler<AppBase> = {
     get(target: any, prop: string) {
       if (prop === 'ctx') {
-        return new Proxy({} as any, { get(target: any, ctxProp: string) {
-          //if (NOT_ALLOWED_CTX_PROPS.includes(prop)) return
-          if (CTX_SUB_ITEMS.includes(ctxProp)) {
-            return new Proxy({} as any, { get(target: any, ctxPropParam: string) {
-              return function (...a: any[]) {
-                return handleCall(`${prop}.${ctxProp}.${ctxPropParam}`, a)
-              }
-            }})
-          }
-        }})
-      }
-      else if (NOT_ALLOWED_APP_PROPS.includes(prop)) return
+        return new Proxy({} as any, {
+          get(target: any, ctxProp: string) {
+            //if (NOT_ALLOWED_CTX_PROPS.includes(prop)) return
+            if (CTX_SUB_ITEMS.includes(ctxProp)) {
+              return new Proxy({} as any, {
+                get(target: any, ctxPropParam: string) {
+                  return function (...a: any[]) {
+                    return handleCall(`${prop}.${ctxProp}.${ctxPropParam}`, a)
+                  }
+                },
+              })
+            }
+          },
+        })
+      } else if (NOT_ALLOWED_APP_PROPS.includes(prop)) return
       // user defined props
       return (...a: any[]) => handleCall(prop, a)
     },
@@ -42,8 +46,6 @@ export function squidletAppWrapper<YourApp = AppBase>(handleCall: (path: string,
 
   return new Proxy({} as any, handler)
 }
-
-
 
 export class SquidletAppApiConnection<YourApp = AppBase> {
   incomeMessages = new IndexedEvents()
@@ -56,7 +58,6 @@ export class SquidletAppApiConnection<YourApp = AppBase> {
     return this._startedPromised.promise
   }
 
-
   constructor(
     appName: string,
     wsHost: string,
@@ -67,20 +68,16 @@ export class SquidletAppApiConnection<YourApp = AppBase> {
   ) {
     this.errorHandler = errorHandler
     this.app = squidletAppWrapper<YourApp>(this.handleAppMethod)
-    const url = `${(isSecure) ? 'wss' : 'ws'}://${wsHost}:${wsPort}/${appName}`
+    const url = `${isSecure ? 'wss' : 'ws'}://${wsHost}:${wsPort}/${appName}`
     this.socket = new WsClass(url, '0')
 
     this.socket.onmessage = this.handleWebsocketMessage
     this.socket.onclose = this.handleWebsocketClose
 
-    this.socket.addEventListener("open", (event) => {
+    this.socket.addEventListener('open', (event) => {
       this._startedPromised.resolve()
     })
   }
-
-
-
-
 
   // async start() {
   //   await this.startedPromise
@@ -94,7 +91,9 @@ export class SquidletAppApiConnection<YourApp = AppBase> {
   // }
 
   // TODO: review RequestMessage
-  async send(msgObj: Omit<RequestMessage<UiApiRequestData>, 'requestId' | 'url'>): Promise<ResponseMessage> {
+  async send(
+    msgObj: Omit<RequestMessage<UiApiRequestData>, 'requestId' | 'url'>
+  ): Promise<ResponseMessage> {
     await this.startedPromise
 
     const request: Omit<RequestMessage<UiApiRequestData>, 'url'> = {
@@ -119,12 +118,11 @@ export class SquidletAppApiConnection<YourApp = AppBase> {
   }
 
   private handleWebsocketMessage = (message: MessageEvent) => {
-    (async () => {
+    ;(async () => {
       const arrBuf = new Uint8Array(await message.data.arrayBuffer(8))
 
       this.incomeMessages.emit(deserializeJson(arrBuf))
-    })()
-      .catch((er: string) => console.error(er))
+    })().catch((er: string) => console.error(er))
   }
 
   private handleWebsocketClose = () => {
@@ -145,5 +143,4 @@ export class SquidletAppApiConnection<YourApp = AppBase> {
 
     return resp
   }
-
 }

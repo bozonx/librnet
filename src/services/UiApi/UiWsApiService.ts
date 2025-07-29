@@ -1,66 +1,67 @@
-import { serializeJson, deserializeJson, getDeepMethod } from 'squidlet-lib';
-import type { ServiceIndex, SubprogramError } from '../../../types/types.js';
-import type { ServiceContext } from '../../context/ServiceContext.js';
-import { ServiceBase } from '../../../system/base/ServiceBase.js';
+import { deserializeJson, getDeepMethod, serializeJson } from 'squidlet-lib'
+
+import { requestError } from '../../../helpers/helpers.js'
+import type { RequestError } from '../../../helpers/helpers.js'
+import { ServiceBase } from '../../../system/base/ServiceBase.js'
+import type { ServiceProps } from '../../../types/ServiceProps.js'
 import {
   DEFAULT_UI_WS_PORT,
   DRIVER_NAMES,
   LOCAL_HOST,
-} from '../../../types/constants.js';
-import type { ServiceProps } from '../../../types/ServiceProps.js';
+} from '../../../types/constants.js'
 import type {
   WsServerConnectionParams,
   WsServerProps,
-} from '../../../types/io/WsServerIoType.js';
-import type {
-  WsServerDriver,
-  WsServerInstance,
-} from '../WsServerDriver/WsServerDriver.js';
-import { requestError } from '../../../helpers/helpers.js';
-import type { RequestError } from '../../../helpers/helpers.js';
+} from '../../../types/io/WsServerIoType.js'
+import type { ServiceIndex, SubprogramError } from '../../../types/types.js'
+import type { ServiceContext } from '../../context/ServiceContext.js'
 import type {
   RequestMessage,
   ResponseMessage,
-} from '../NetworkSubSystem/Message.js';
+} from '../NetworkSubSystem/Message.js'
+import type {
+  WsServerDriver,
+  WsServerInstance,
+} from '../WsServerDriver/WsServerDriver.js'
 
 export interface UiApiRequestData {
   // api method to call can be with "." separator
-  method: string;
+  method: string
   // arguments for the method
-  arguments: any[];
+  arguments: any[]
 }
 
 export const UiWsApiServiceIndex: ServiceIndex = (
   ctx: ServiceContext
 ): ServiceBase => {
-  return new UiWsApiService(ctx);
-};
+  return new UiWsApiService(ctx)
+}
 
 export interface UiWsApiServiceCfg extends WsServerProps {}
 
 export const DEFAULT_UI_WS_SERVICE_CFG = {
   host: LOCAL_HOST,
   port: DEFAULT_UI_WS_PORT,
-};
+}
 
 export class UiWsApiService extends ServiceBase {
-  private wsServer!: WsServerInstance;
-  private cfg!: UiWsApiServiceCfg;
+  private wsServer!: WsServerInstance
+  private cfg!: UiWsApiServiceCfg
 
   props: ServiceProps = {
     requireDriver: [DRIVER_NAMES.WsServerDriver],
 
     // @ts-ignore
     ...super.props,
-  };
+  }
 
   async init(
     onFall: (err: SubprogramError) => void,
     loadedCfg?: UiWsApiServiceCfg
   ) {
-    await super.init(onFall);
+    await super.init(onFall)
 
-    this.cfg = loadedCfg ? loadedCfg : DEFAULT_UI_WS_SERVICE_CFG;
+    this.cfg = loadedCfg ? loadedCfg : DEFAULT_UI_WS_SERVICE_CFG
 
     // TODO: если конфина нет то по умолчанию
 
@@ -69,10 +70,10 @@ export class UiWsApiService extends ServiceBase {
       .subDriver({
         host: this.cfg.host,
         port: this.cfg.port,
-      } as WsServerProps);
+      } as WsServerProps)
 
-    this.wsServer.onConnection(this.handleConnection);
-    this.wsServer.onMessage(this.handleMessage);
+    this.wsServer.onConnection(this.handleConnection)
+    this.wsServer.onMessage(this.handleMessage)
   }
 
   async destroy() {}
@@ -83,7 +84,7 @@ export class UiWsApiService extends ServiceBase {
   }
 
   async stop(force?: boolean) {
-    await this.wsServer.closeServer(force);
+    await this.wsServer.closeServer(force)
   }
 
   private handleConnection = (
@@ -94,43 +95,43 @@ export class UiWsApiService extends ServiceBase {
     // TODO: в request передается имя приложения в url
     // TODO: хотя наверное его проще резолвить из sessionId
     //console.log(222, connectionId, request)
-  };
+  }
 
   private handleMessage = (connectionId: string, data: Uint8Array) => {
-    (async () => {
-      const msgObj = deserializeJson(data);
-      let resultData;
+    ;(async () => {
+      const msgObj = deserializeJson(data)
+      let resultData
 
       try {
-        resultData = await this.processMessage(msgObj);
+        resultData = await this.processMessage(msgObj)
       } catch (e) {
-        const err = e as RequestError;
+        const err = e as RequestError
         const errResp: ResponseMessage = {
           requestId: msgObj.requestId,
           errorStatus: err.code,
           errorMessage: err.message,
-        };
+        }
 
         this.ctx.log.debug(
           `UiWsApiService ERROR response ${JSON.stringify(errResp)}`
-        );
+        )
 
-        await this.wsServer.send(connectionId, serializeJson(errResp));
+        await this.wsServer.send(connectionId, serializeJson(errResp))
 
-        return;
+        return
       }
 
       const resp: ResponseMessage = {
         requestId: msgObj.requestId,
         data: resultData,
-      };
+      }
 
-      this.ctx.log.debug(`UiWsApiService response ${JSON.stringify(resp)}`);
+      this.ctx.log.debug(`UiWsApiService response ${JSON.stringify(resp)}`)
 
       // send response
-      await this.wsServer.send(connectionId, serializeJson(resp));
-    })().catch((er: string) => this.ctx.log.error(er));
-  };
+      await this.wsServer.send(connectionId, serializeJson(resp))
+    })().catch((er: string) => this.ctx.log.error(er))
+  }
 
   private async processMessage(
     msgObj: RequestMessage<UiApiRequestData>
@@ -138,32 +139,32 @@ export class UiWsApiService extends ServiceBase {
     // TODO: обработать url
     // TODO: resolve sessionId
     // TODO: взять имя приложение из сессии
-    const appName = 'bozonx.publisher';
-    const app = this.ctx.apps.getApp(appName);
+    const appName = 'bozonx.publisher'
+    const app = this.ctx.apps.getApp(appName)
 
-    if (!app) throw requestError(500, `Can't find an app "${appName}"`);
+    if (!app) throw requestError(500, `Can't find an app "${appName}"`)
 
-    const method = getDeepMethod(app, msgObj.data!.method);
+    const method = getDeepMethod(app, msgObj.data!.method)
 
     if (!method)
       throw requestError(
         500,
         `Can't find a method "${msgObj.data!.method}" of an app "${appName}"`
-      );
+      )
 
-    let result: any;
+    let result: any
 
     try {
-      result = await method(...msgObj.data!.arguments);
+      result = await method(...msgObj.data!.arguments)
     } catch (e) {
       throw requestError(
         500,
         `Error calling method "${
           msgObj.data!.method
         }" of an app "${appName}": ${e}`
-      );
+      )
     }
 
-    return result;
+    return result
   }
 }

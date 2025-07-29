@@ -1,0 +1,13 @@
+# Игнорировать старый код
+src/_not_used/
+
+# Игнорировать скомпилированные файлы
+distr/
+build/
+coverage/
+
+# Игнорировать node_modules
+node_modules/
+
+# Игнорировать тестовые данные
+_testData/ 

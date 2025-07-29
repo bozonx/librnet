@@ -1,9 +1,9 @@
-import type { ServiceManifest, ServiceOnInit } from '../../types/types.js';
-import { EntityManagerBase } from '../base/EntityManagerBase.js';
-import { ServiceContext } from '../context/ServiceContext.js';
+import type { ServiceManifest, ServiceOnInit } from '../../types/types.js'
+import { EntityManagerBase } from '../base/EntityManagerBase.js'
+import { ServiceContext } from '../context/ServiceContext.js'
 
 export class ServicesManager extends EntityManagerBase<ServiceContext> {
-  readonly type = 'service' as const;
+  readonly type = 'service' as const
 
   /**
    * Register service in the system in development mode.
@@ -13,10 +13,10 @@ export class ServicesManager extends EntityManagerBase<ServiceContext> {
     if (!this.system.isDevMode)
       throw new Error(
         `You try to register a service "${manifest.name}" not in development mode`
-      );
+      )
 
-    const context = new ServiceContext(this.system, manifest);
+    const context = new ServiceContext(this.system, manifest)
 
-    this.useEntity(manifest, serviceOnInit, context);
+    this.useEntity(manifest, serviceOnInit, context)
   }
 }

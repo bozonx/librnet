@@ -1,5 +1,5 @@
-import { FILE_ACTION } from '@/types/constants';
-import { FILE_PERM_DELIMITER } from '@/packages/SystemCommonPkg/RootFilesDriver/RootFilesDriver.js';
+import { FILE_PERM_DELIMITER } from '@/packages/SystemCommonPkg/RootFilesDriver/RootFilesDriver.js'
+import { FILE_ACTION } from '@/types/constants'
 
 // TODO: при проходе вверх как будут отрабатывать слэши?
 
@@ -7,7 +7,7 @@ type CheckPermCb = (
   entityWhoAsk: string,
   permitForEntity: string,
   path: string
-) => Promise<boolean>;
+) => Promise<boolean>
 
 export async function checkPermissions(
   checkPermCb: CheckPermCb,
@@ -18,7 +18,7 @@ export async function checkPermissions(
 ) {
   for (const path of paths) {
     if (path.indexOf('/') !== 0) {
-      throw new Error(`Path has to start with "/": ${path}`);
+      throw new Error(`Path has to start with "/": ${path}`)
     }
 
     const hasPermission = await checkPathAndParentPermissions(
@@ -27,10 +27,10 @@ export async function checkPermissions(
       permitForEntity,
       path,
       action
-    );
+    )
 
     if (!hasPermission) {
-      throw new Error(`Path "${path}" is not allowed to be ${action}`);
+      throw new Error(`Path "${path}" is not allowed to be ${action}`)
     }
   }
 }
@@ -58,11 +58,11 @@ async function checkPathAndParentPermissions(
       action
     )
   ) {
-    return true;
+    return true
   }
 
   // Проверяем права на родительские директории
-  const parentPaths = getParentPaths(path);
+  const parentPaths = getParentPaths(path)
   for (const parentPath of parentPaths) {
     if (
       await checkPathPermissions(
@@ -73,11 +73,11 @@ async function checkPathAndParentPermissions(
         action
       )
     ) {
-      return true;
+      return true
     }
   }
 
-  return false;
+  return false
 }
 
 /**
@@ -103,7 +103,7 @@ async function checkPathPermissions(
       action
     )
   ) {
-    return true;
+    return true
   }
 
   // Для операций чтения проверяем право на запись как fallback
@@ -117,10 +117,10 @@ async function checkPathPermissions(
       FILE_ACTION.write
     ))
   ) {
-    return true;
+    return true
   }
 
-  return false;
+  return false
 }
 
 /**
@@ -140,7 +140,7 @@ async function hasPermission(
     entityWhoAsk,
     permitForEntity,
     action + FILE_PERM_DELIMITER + path
-  );
+  )
 }
 
 /**
@@ -149,24 +149,24 @@ async function hasPermission(
  * @returns массив родительских путей в порядке от ближайшего к корню
  */
 function getParentPaths(path: string): string[] {
-  const parentPaths: string[] = [];
-  let currentPath = path;
+  const parentPaths: string[] = []
+  let currentPath = path
 
   // Убираем завершающий слеш если есть (кроме корня)
   if (currentPath !== '/' && currentPath.endsWith('/')) {
-    currentPath = currentPath.slice(0, -1);
+    currentPath = currentPath.slice(0, -1)
   }
 
   // Получаем родительские пути
   while (currentPath !== '/' && currentPath !== '') {
-    const parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+    const parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'))
     if (parentPath === '') {
-      parentPaths.push('/');
-      break;
+      parentPaths.push('/')
+      break
     }
-    parentPaths.push(parentPath);
-    currentPath = parentPath;
+    parentPaths.push(parentPath)
+    currentPath = parentPath
   }
 
-  return parentPaths;
+  return parentPaths
 }

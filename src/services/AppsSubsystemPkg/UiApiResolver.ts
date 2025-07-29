@@ -1,4 +1,4 @@
-import type { AppsService } from './AppsService';
+import type { AppsService } from './AppsService'
 
 // function channnelRouterMiddleware(channelName: string) {
 //   return async (ctx: RequestCatcherContext) => {
@@ -7,17 +7,17 @@ import type { AppsService } from './AppsService';
 // }
 
 export class UiApiResolver {
-  private appsService: AppsService;
+  private appsService: AppsService
 
   constructor(appsService: AppsService) {
-    this.appsService = appsService;
+    this.appsService = appsService
   }
 
   async callFunction(path: string, args: any[]) {
-    const app = this.appsService.ctx.getApp(path);
+    const app = this.appsService.ctx.getApp(path)
     if (!app) {
-      throw new Error(`App ${path} not found`);
+      throw new Error(`App ${path} not found`)
     }
-    return app.callFunction(path, args);
+    return app.callFunction(path, args)
   }
 }

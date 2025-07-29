@@ -1,112 +1,112 @@
-import type { BinTypes, BinTypesNames } from '../types';
+import type { BinTypes, BinTypesNames } from '../types'
 
 export interface StatsSimplified {
   // in bytes
-  size: number;
+  size: number
   // is it dir or file
-  dir: boolean;
-  symbolicLink: boolean;
+  dir: boolean
+  symbolicLink: boolean
   // modified time - number of milliseconds elapsed since 1 January 1970 00:00:00 UTC
-  mtime: number;
+  mtime: number
   // access time - number of milliseconds elapsed since 1 January 1970 00:00:00 UTC
-  atime: number;
+  atime: number
   // change time - number of milliseconds elapsed since 1 January 1970 00:00:00 UTC
-  ctime: number;
+  ctime: number
   // birth time - number of milliseconds elapsed since 1 January 1970 00:00:00 UTC
-  birthtime: number;
+  birthtime: number
   // file mode (permissions)
-  mode: number;
+  mode: number
   // user ID of owner
-  uid: number;
+  uid: number
   // group ID of owner
-  gid: number;
+  gid: number
   // device ID
-  dev: number;
+  dev: number
   // inode number
-  ino: number;
+  ino: number
   // number of hard links
-  nlink: number;
+  nlink: number
   // device ID (if special file)
-  rdev: number;
+  rdev: number
   // block size for I/O operations
-  blksize: number;
+  blksize: number
   // number of blocks allocated
-  blocks: number;
+  blocks: number
 }
 
 export interface CopyOptions {
   // overwrite existing file or directory. The copy operation will ignore errors if you set this to false and the destination exists. Use the errorOnExist option to change this behavior. Default: true.
-  force?: boolean;
+  force?: boolean
   // When true timestamps from src will be preserved. Default: false.
-  preserveTimestamps?: boolean;
+  preserveTimestamps?: boolean
   // copy directories recursively Default: false
-  recursive?: boolean;
+  recursive?: boolean
   // when force is false, and the destination exists, throw an error. Default: false.
-  errorOnExist?: boolean;
+  errorOnExist?: boolean
   // Set User ID to the destination file or directory
-  uid?: number;
+  uid?: number
   // Set Group ID to the destination file or directory
-  gid?: number;
+  gid?: number
 }
 
 export interface RmOptions {
   // When true, exceptions will be ignored if path does not exist. Default: false
-  force?: boolean;
+  force?: boolean
   // If true, perform a recursive directory removal. In recursive mode operations are retried on failure. Default: false.
-  recursive?: boolean;
+  recursive?: boolean
 }
 
 export interface ReadTextFileOptions {
   // if not set then it will be UTF-8
-  encoding?: BufferEncoding;
+  encoding?: BufferEncoding
   // Position to start reading from
-  pos?: number;
+  pos?: number
   // Number of bytes to read
-  size?: number;
+  size?: number
 }
 
 export interface ReadBinFileOptions {
   // if not set then it will be Uint8Array
-  returnType?: BinTypesNames;
+  returnType?: BinTypesNames
   // Position to start reading from
-  pos?: number;
+  pos?: number
   // Number of bytes to read
-  size?: number;
+  size?: number
 }
 
 export interface WriteFileOptions {
   // if not set then it will be UTF-8
-  encoding?: BufferEncoding;
+  encoding?: BufferEncoding
   // Set User ID to the created file
-  uid?: number;
+  uid?: number
   // Set Group ID to the created file
-  gid?: number;
+  gid?: number
 }
 
 export interface ReaddirOptions {
   // if not set then it will be UTF-8
-  encoding?: BufferEncoding;
+  encoding?: BufferEncoding
   // If true, reads the contents of a directory recursively. In recursive mode, it will list all files, sub files, and directories. Default: false.
-  recursive?: boolean;
+  recursive?: boolean
 }
 
 export interface MkdirOptions {
   // If true, creates parent directories recursively. Default: false.
-  recursive?: boolean;
+  recursive?: boolean
   // Set User ID to the created directory
-  uid?: number;
+  uid?: number
   // Set Group ID to the created directory
-  gid?: number;
+  gid?: number
 }
 
 export interface GlobOptions {
   // The current working directory of the process
   // You have to pass it if you use relative paths
-  cwd?: string;
+  cwd?: string
   // Patterns to exclude. Default: [].
-  exclude?: string[];
+  exclude?: string[]
   // If true, the result will contain file info objects. Default: false.
-  withFileTypes?: boolean;
+  withFileTypes?: boolean
 }
 
 export enum AccessMode {
@@ -120,18 +120,18 @@ export interface UtimesOptions {
   // If true, the access time will be set to the target of the symlink.
   // If false, the access time will be set to the symlink itself.
   // Default: true.
-  followSymlinks?: boolean;
+  followSymlinks?: boolean
 }
 
 export interface LinkOptions {
   // If true, the link will be a symlink.
   // If false, the link will be a hard link.
   // Default: true.
-  symlink?: boolean;
+  symlink?: boolean
   // Set User ID to the created link
-  uid?: number;
+  uid?: number
   // Set Group ID to the created link
-  gid?: number;
+  gid?: number
 }
 
 /**
@@ -149,7 +149,7 @@ export interface FilesIoType {
    * @param options
    * @returns
    */
-  readTextFile(pathTo: string, options?: ReadTextFileOptions): Promise<string>;
+  readTextFile(pathTo: string, options?: ReadTextFileOptions): Promise<string>
 
   /**
    * Read binary file and return it as specified type
@@ -157,7 +157,7 @@ export interface FilesIoType {
    * @param options - Default returnType is Uint8Array
    * @returns
    */
-  readBinFile(pathTo: string, options?: ReadBinFileOptions): Promise<BinTypes>;
+  readBinFile(pathTo: string, options?: ReadBinFileOptions): Promise<BinTypes>
 
   /**
    * Get file or directory stats.
@@ -165,14 +165,14 @@ export interface FilesIoType {
    * @param pathTo
    * @returns
    */
-  stat(pathTo: string): Promise<StatsSimplified | undefined>;
+  stat(pathTo: string): Promise<StatsSimplified | undefined>
 
   /**
    * Check if file or directory exists
    * @param pathTo
    * @returns true if file or directory exists, false otherwise
    */
-  exists(pathTo: string): Promise<boolean>;
+  exists(pathTo: string): Promise<boolean>
 
   /**
    * Read directory
@@ -180,7 +180,7 @@ export interface FilesIoType {
    * @param options - Default encoding is UTF-8
    * @returns
    */
-  readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]>;
+  readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]>
 
   /**
    * You should pass only symlink. Resolve it by using stat().
@@ -189,14 +189,14 @@ export interface FilesIoType {
    * @param pathTo
    * @returns path to target file which is set in symlink (can be relative)
    */
-  readlink(pathTo: string): Promise<string>;
+  readlink(pathTo: string): Promise<string>
 
   /**
    * Check if file is a valid UTF-8 text file
    * @param pathTo - path to file to check
    * @returns true if file is valid UTF-8 text, false otherwise
    */
-  isTextFileUtf8(pathTo: string): Promise<boolean>;
+  isTextFileUtf8(pathTo: string): Promise<boolean>
 
   /**
    * Resolve path to real path through symlinks
@@ -204,7 +204,7 @@ export interface FilesIoType {
    * @param pathTo
    * @returns absolute path to deeply linked target file
    */
-  realpath(pathTo: string): Promise<string>;
+  realpath(pathTo: string): Promise<string>
 
   /**
    * Get all files by pattern
@@ -212,7 +212,7 @@ export interface FilesIoType {
    * @param options
    * @returns
    */
-  glob(pattern: string | string[], options?: GlobOptions): Promise<string[]>;
+  glob(pattern: string | string[], options?: GlobOptions): Promise<string[]>
 
   /**
    * Check if file or directory exists and has access to it
@@ -220,7 +220,7 @@ export interface FilesIoType {
    * @param mode - default is AccessMode.F_OK
    * @returns
    */
-  access(pathTo: string, mode?: AccessMode): Promise<boolean>;
+  access(pathTo: string, mode?: AccessMode): Promise<boolean>
 
   ////// WRITING //////
 
@@ -237,7 +237,7 @@ export interface FilesIoType {
     pathTo: string,
     data: string | Uint8Array,
     options?: WriteFileOptions
-  ): Promise<void>;
+  ): Promise<void>
 
   /**
    * Write or overwrite file
@@ -249,7 +249,7 @@ export interface FilesIoType {
     pathTo: string,
     data: string | BinTypes,
     options?: WriteFileOptions
-  ): Promise<void>;
+  ): Promise<void>
 
   /**
    * Try to remove all the files.
@@ -259,7 +259,7 @@ export interface FilesIoType {
    * @param options
    * @returns
    */
-  rm(paths: string[], options?: RmOptions): Promise<void>;
+  rm(paths: string[], options?: RmOptions): Promise<void>
 
   /**
    * Copy specified files. Use full path
@@ -270,7 +270,7 @@ export interface FilesIoType {
    * @param options
    * @returns
    */
-  cp(files: [string, string][], options?: CopyOptions): Promise<void>;
+  cp(files: [string, string][], options?: CopyOptions): Promise<void>
 
   /**
    * Rename or move files and dirs. Use full path
@@ -282,7 +282,7 @@ export interface FilesIoType {
    * @param options
    * @returns
    */
-  rename(files: [string, string][]): Promise<void>;
+  rename(files: [string, string][]): Promise<void>
 
   /**
    * Create directory
@@ -293,7 +293,7 @@ export interface FilesIoType {
    * @param options
    * @returns
    */
-  mkdir(pathTo: string, options?: MkdirOptions): Promise<void>;
+  mkdir(pathTo: string, options?: MkdirOptions): Promise<void>
 
   /**
    * Create a link.
@@ -302,7 +302,7 @@ export interface FilesIoType {
    * @param pathTo - path to place link
    * @returns
    */
-  link(target: string, pathTo: string, options?: LinkOptions): Promise<void>;
+  link(target: string, pathTo: string, options?: LinkOptions): Promise<void>
 
   /**
    * Set access and modification times of a file
@@ -316,7 +316,7 @@ export interface FilesIoType {
     atime: number | string,
     mtime: number | string,
     options?: UtimesOptions
-  ): Promise<void>;
+  ): Promise<void>
 
   /**
    * Truncate file to specified length
@@ -324,7 +324,7 @@ export interface FilesIoType {
    * @param len default is 0
    * @returns
    */
-  truncate(pathTo: string, len: number): Promise<void>;
+  truncate(pathTo: string, len: number): Promise<void>
 
   /**
    * Change file or directory owner
@@ -333,7 +333,7 @@ export interface FilesIoType {
    * @param gid
    * @returns
    */
-  chown(pathTo: string, uid: number, gid: number): Promise<void>;
+  chown(pathTo: string, uid: number, gid: number): Promise<void>
 
   /**
    * Change file or directory permissions
@@ -341,5 +341,5 @@ export interface FilesIoType {
    * @param mode
    * @returns
    */
-  chmod(pathTo: string, mode: number): Promise<void>;
+  chmod(pathTo: string, mode: number): Promise<void>
 }

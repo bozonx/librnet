@@ -1,5 +1,5 @@
-let myWindowId;
-const text = window.document.querySelector(".text")
+let myWindowId
+const text = window.document.querySelector('.text')
 const appPageBtn = window.document.querySelector('.app-page')
 const newTabBtn = window.document.querySelector('.new-tab')
 
@@ -16,9 +16,8 @@ function debugJson(js) {
 appPageBtn.addEventListener('click', () => {
   let creating = browser.tabs.create({
     active: true,
-    url: "/app-page/app-page.html?p=123",
+    url: '/app-page/app-page.html?p=123',
   })
-
 })
 
 newTabBtn.addEventListener('click', () => {
@@ -31,11 +30,9 @@ newTabBtn.addEventListener('click', () => {
 
   let creating = browser.tabs.create({
     active: true,
-    url: "about:blank",
+    url: 'about:blank',
   })
-
 })
-
 
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.to !== 'sidebar') return
@@ -93,8 +90,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 When the sidebar loads, get the ID of its window,
 and update its content.
 */
-browser.windows.getCurrent({populate: true}).then((windowInfo) => {
-  myWindowId = windowInfo.id;
-  updateContent();
-});
-
+browser.windows.getCurrent({ populate: true }).then((windowInfo) => {
+  myWindowId = windowInfo.id
+  updateContent()
+})

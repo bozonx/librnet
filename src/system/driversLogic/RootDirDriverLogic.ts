@@ -1,10 +1,10 @@
-import { resolveRealPath } from '../helpers/helpers.js';
-import { System } from '../System.js';
-import { FilesDriverLogic } from './FilesDriverLogic.js';
-import type { FilesIoType } from '../../types/io/FilesIoType.js';
-import type { IoBase } from '../base/IoBase.js';
-import { IO_NAMES, SystemEvents } from '../../types/constants.js';
-import type { FilesEventData } from '../../types/types.js';
+import { IO_NAMES, SystemEvents } from '../../types/constants.js'
+import type { FilesIoType } from '../../types/io/FilesIoType.js'
+import type { FilesEventData } from '../../types/types.js'
+import { System } from '../System.js'
+import type { IoBase } from '../base/IoBase.js'
+import { resolveRealPath } from '../helpers/helpers.js'
+import { FilesDriverLogic } from './FilesDriverLogic.js'
 
 export class RootDirDriverLogic extends FilesDriverLogic {
   constructor(
@@ -14,9 +14,9 @@ export class RootDirDriverLogic extends FilesDriverLogic {
     super(
       system.io.getIo<FilesIoType & IoBase>(IO_NAMES.LocalFilesIo),
       (data: FilesEventData) => {
-        this.system.events.emit(SystemEvents.localFiles, data);
+        this.system.events.emit(SystemEvents.localFiles, data)
       }
-    );
+    )
   }
 
   // Make real path on external file system
@@ -25,6 +25,6 @@ export class RootDirDriverLogic extends FilesDriverLogic {
       pathTo,
       this.system.mountPoints.rootDir,
       this.system.mountPoints.getMountPoints()
-    );
+    )
   }
 }

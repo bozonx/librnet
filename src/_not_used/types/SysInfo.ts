@@ -27,7 +27,7 @@ export const DEVICE_TYPE = {
   vrHelmet: 'vrHelmet',
   // AR glasses
   glasses: 'glasses',
-};
+}
 
 export type DeviceType = keyof typeof DEVICE_TYPE
 
@@ -60,7 +60,6 @@ export const RUNTIME_ENV = {
 
 export type RuntimeEnv = keyof typeof RUNTIME_ENV
 
-
 export interface SysPermanentInfo {
   os: {
     type: keyof typeof OS_TYPE
@@ -78,7 +77,6 @@ export interface SysPermanentInfo {
 
   runtimeEnv: RuntimeEnv
 }
-
 
 export interface SysVariableInfo {
   /////// WAS SET ON INSTALL STEP
@@ -101,7 +99,6 @@ export interface SysVariableInfo {
   // is it working on battery right now
   workingOnBattery?: boolean
 }
-
 
 // connections: {
 //   wifi: boolean

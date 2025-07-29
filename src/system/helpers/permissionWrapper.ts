@@ -1,4 +1,4 @@
-import type { System } from '../System.js';
+import type { System } from '../System.js'
 
 export function permissionWrapper(
   system: System,
@@ -9,11 +9,11 @@ export function permissionWrapper(
   return new Proxy(api, {
     get: (target, prop) => {
       // Преобразуем prop в строку для проверки разрешений
-      const propName = String(prop);
+      const propName = String(prop)
 
       // Проверяем разрешения для данного метода API
       try {
-        system.permissions.checkPermissions(entityWhoAsk, entityName, propName);
+        system.permissions.checkPermissions(entityWhoAsk, entityName, propName)
       } catch (error) {
         // Если разрешение не предоставлено, возвращаем функцию которая выбросит ошибку
         return (...args: any[]) => {
@@ -21,13 +21,13 @@ export function permissionWrapper(
             `Permission denied: ${entityName}.${propName} - ${
               error instanceof Error ? error.message : 'Access denied'
             }`
-          );
-        };
+          )
+        }
       }
 
       // Если разрешение предоставлено, проверяем что это функция
       if (prop in target) {
-        const method = target[prop as keyof typeof target];
+        const method = target[prop as keyof typeof target]
 
         // Проверяем что это функция - только функции разрешены для вызова
         if (typeof method === 'function') {
@@ -38,25 +38,25 @@ export function permissionWrapper(
                 entityWhoAsk,
                 entityName,
                 propName
-              );
-              return method.apply(target, args);
+              )
+              return method.apply(target, args)
             } catch (error) {
               throw new Error(
                 `Permission denied: ${entityName}.${propName} - ${
                   error instanceof Error ? error.message : 'Access denied'
                 }`
-              );
+              )
             }
-          };
+          }
         } else {
           // Если это не функция, выбрасываем ошибку
           throw new Error(
             `Access denied: ${entityName}.${propName} - only function calls are allowed`
-          );
+          )
         }
       }
 
-      return undefined;
+      return undefined
     },
-  });
+  })
 }

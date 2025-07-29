@@ -1,19 +1,15 @@
-import type {ChannelType} from './ChannelType.js'
-import type {WsServerProps} from '../../types/io/WsServerIoType.js'
-import type {ChannelInstanceType} from './ChannelType.js'
-
+import type { WsServerProps } from '../../types/io/WsServerIoType.js'
+import type { ChannelType } from './ChannelType.js'
+import type { ChannelInstanceType } from './ChannelType.js'
 
 export class WsServerChannel implements ChannelType {
   private props: WsServerProps
-
 
   constructor(props: WsServerProps) {
     this.props = props
   }
 
-
   async init() {
-
     // this.wsServer = await this.ctx.drivers
     //   .getDriver<WsServerDriver>(DRIVER_NAMES.WsServerDriver)
     //   .subDriver({
@@ -33,13 +29,9 @@ export class WsServerChannel implements ChannelType {
     return `${this.props.host}:${this.props.port}`
   }
 
-
-  async send(channel: number) {
-
-  }
+  async send(channel: number) {}
 
   registerChannel(connectionId: string, channel: number): ChannelInstanceType {
     return {} as any
   }
-
 }

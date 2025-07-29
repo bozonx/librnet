@@ -1,12 +1,13 @@
-import { pathJoin, trimCharStart } from 'squidlet-lib';
-import type { LogLevel } from 'squidlet-lib';
-import type { System } from '../System';
+import { pathJoin, trimCharStart } from 'squidlet-lib'
+import type { LogLevel } from 'squidlet-lib'
+
+import type { System } from '../System'
+import { clearAbsolutePath } from '../helpers/helpers'
 import {
   LOCAL_DATA_SUB_DIRS,
   ROOT_DIRS,
   SYNCED_DATA_SUB_DIRS,
-} from '@/types/constants';
-import { clearAbsolutePath } from '../helpers/helpers';
+} from '@/types/constants'
 
 export class FileLogsManager {
   constructor(private readonly system: System) {}
@@ -21,13 +22,13 @@ export class FileLogsManager {
     msg: string,
     logLevel: LogLevel
   ) {
-    const pathToLog = this.preparePath(entityName, isSynced, relPathToLog);
+    const pathToLog = this.preparePath(entityName, isSynced, relPathToLog)
 
-    await this.system.localFiles.mkDirP(pathToLog);
+    await this.system.localFiles.mkDirP(pathToLog)
     await this.system.localFiles.appendFile(
       pathToLog,
       this.makeMsg(logLevel, msg)
-    );
+    )
 
     // TODO: поддержка ротации
   }
@@ -40,9 +41,9 @@ export class FileLogsManager {
     linesCount: number = 100,
     fromLine: number = 0
   ) {
-    const pathToLog = this.preparePath(entityName, isSynced, relPathToLog);
+    const pathToLog = this.preparePath(entityName, isSynced, relPathToLog)
 
-    return await this.system.localFiles.readTextFile(pathToLog);
+    return await this.system.localFiles.readTextFile(pathToLog)
   }
 
   private preparePath(
@@ -50,7 +51,7 @@ export class FileLogsManager {
     isSynced: boolean,
     relPathToLog: string
   ) {
-    const preparedRelPath = trimCharStart(clearAbsolutePath(relPathToLog), '/');
+    const preparedRelPath = trimCharStart(clearAbsolutePath(relPathToLog), '/')
 
     return pathJoin(
       '/',
@@ -58,12 +59,12 @@ export class FileLogsManager {
       isSynced ? SYNCED_DATA_SUB_DIRS.logs : LOCAL_DATA_SUB_DIRS.logs,
       entityName,
       preparedRelPath
-    );
+    )
   }
 
   private makeMsg(logLevel: LogLevel, msg: string) {
-    const date = new Date().toISOString();
+    const date = new Date().toISOString()
 
-    return `${date} ${logLevel.toUpperCase()}: ${msg}\n`;
+    return `${date} ${logLevel.toUpperCase()}: ${msg}\n`
   }
 }

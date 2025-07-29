@@ -1,30 +1,27 @@
 import {
+  type HttpRequest,
+  type HttpResponse,
   IndexedEventEmitter,
   Promised,
-  type HttpResponse,
-  type HttpRequest,
-} from 'squidlet-lib';
-import type { DriverIndex, DriverManifest } from '../../../types/types.js';
-import DriverInstanceBase from '../../base/DriverInstanceBase.js';
-import {
-  IO_NAMES,
-  LOCAL_HOST,
-  SystemEvents,
-} from '../../../types/constants.js';
-import { HttpServerEvent } from '../../../types/io/HttpServerIoType.js';
+} from 'squidlet-lib'
+
+import { IO_NAMES, LOCAL_HOST, SystemEvents } from '../../../types/constants.js'
+import { HttpServerEvent } from '../../../types/io/HttpServerIoType.js'
 import type {
   HttpServerIoFullType,
   HttpServerProps,
-} from '../../../types/io/HttpServerIoType.js';
-import type { System } from '../../System.js';
-import { DriverFactoryBase } from '../../base/DriverFactoryBase.js';
+} from '../../../types/io/HttpServerIoType.js'
+import type { DriverIndex, DriverManifest } from '../../../types/types.js'
+import type { System } from '../../System.js'
+import { DriverFactoryBase } from '../../base/DriverFactoryBase.js'
+import DriverInstanceBase from '../../base/DriverInstanceBase.js'
 
 export interface HttpServerDriverProps extends HttpServerProps {
-  entityWhoAsk: string;
+  entityWhoAsk: string
 }
 
 export interface HttpServerDriverInstanceProps extends HttpServerDriverProps {
-  serverId: string;
+  serverId: string
 }
 
 export const HttpServerDriverIndex: DriverIndex = (
@@ -34,24 +31,24 @@ export const HttpServerDriverIndex: DriverIndex = (
   return new HttpServerDriver(system, manifest) as unknown as DriverFactoryBase<
     HttpServerInstance,
     Record<string, any>
-  >;
-};
+  >
+}
 
 export class HttpServerDriver extends DriverFactoryBase<
   HttpServerInstance,
   HttpServerProps
 > {
-  readonly requireIo = [IO_NAMES.HttpServerIo];
-  protected SubDriverClass = HttpServerInstance;
+  readonly requireIo = [IO_NAMES.HttpServerIo]
+  protected SubDriverClass = HttpServerInstance
 
   protected common = {
     io: this.system.io.getIo<HttpServerIoFullType>(IO_NAMES.HttpServerIo),
-  };
+  }
 
-  private handlerIndex: number = -1;
+  private handlerIndex: number = -1
 
   async init(...p: any[]) {
-    await super.init(...p);
+    await super.init(...p)
 
     this.handlerIndex = await this.common.io.on(
       (eventName: HttpServerEvent, serverId: string, ...p: any[]) => {
@@ -62,14 +59,14 @@ export class HttpServerDriver extends DriverFactoryBase<
           eventName,
           serverId,
           ...p
-        );
+        )
 
         const instance = this.instances.find(
           (instance) => instance.serverId === serverId
-        );
+        )
 
         if (instance) {
-          this.logToConsole(instance, eventName, ...p);
+          this.logToConsole(instance, eventName, ...p)
         }
 
         // skip listening and serverClosed events because
@@ -78,65 +75,65 @@ export class HttpServerDriver extends DriverFactoryBase<
           eventName === HttpServerEvent.listening ||
           eventName === HttpServerEvent.serverClosed
         )
-          return;
+          return
 
         if (instance) {
-          instance.$handleDriverEvent(eventName, ...p);
+          instance.$handleDriverEvent(eventName, ...p)
         } else {
           this.system.log.warn(
             `WsServerDriver: Can't find instance of Ws server "${serverId}"`
-          );
+          )
         }
       }
-    );
+    )
   }
 
   async destroy(destroyReason: string) {
-    await super.destroy(destroyReason);
-    await this.common.io.off(this.handlerIndex);
+    await super.destroy(destroyReason)
+    await this.common.io.off(this.handlerIndex)
   }
 
   protected makeMatchString(instanceProps: HttpServerDriverProps): string {
-    return `${instanceProps.host}:${instanceProps.port}`;
+    return `${instanceProps.host}:${instanceProps.port}`
   }
 
   protected async makeInstanceProps(
     instanceProps: HttpServerDriverProps
   ): Promise<HttpServerDriverInstanceProps> {
-    const { entityWhoAsk, ...rest } = instanceProps;
-    const serverId = await this.common.io.newServer(rest);
-    const startedPromised = new Promised<void>();
+    const { entityWhoAsk, ...rest } = instanceProps
+    const serverId = await this.common.io.newServer(rest)
+    const startedPromised = new Promised<void>()
 
     // TODO: use timeout
 
     const handlerIndex = await this.common.io.on(
       (eventName: HttpServerEvent, serverId: string, ...p: any[]) => {
         if (eventName === HttpServerEvent.listening) {
-          startedPromised.resolve();
+          startedPromised.resolve()
 
-          this.common.io.off(handlerIndex);
+          this.common.io.off(handlerIndex)
         }
       }
-    );
+    )
 
-    await startedPromised;
+    await startedPromised
 
     return {
       ...instanceProps,
       serverId,
-    };
+    }
   }
 
   protected async destroyCb(instanceId: number): Promise<void> {
-    await super.destroyCb(instanceId);
-    await this.common.io.stopServer(this.instances[instanceId].serverId);
+    await super.destroyCb(instanceId)
+    await this.common.io.stopServer(this.instances[instanceId].serverId)
     // TODO: ожидать событие останоки сервера
   }
 
   protected async validateInstanceProps(
     instanceProps: HttpServerDriverProps
   ): Promise<void> {
-    await super.validateInstanceProps(instanceProps);
+    await super.validateInstanceProps(instanceProps)
 
     if (
       instanceProps.host === LOCAL_HOST ||
@@ -146,25 +143,25 @@ export class HttpServerDriver extends DriverFactoryBase<
         instanceProps.entityWhoAsk,
         this.name,
         LOCAL_HOST
-      );
+      )
 
       if (!isPermitted) {
-        throw new Error('Permission for localhost denied');
+        throw new Error('Permission for localhost denied')
       }
     } else {
       const isPermitted = await this.system.permissions.checkPermissions(
         instanceProps.entityWhoAsk,
         this.name,
         '0.0.0.0'
-      );
+      )
 
       if (!isPermitted) {
-        throw new Error('Permission for 0.0.0.0 denied');
+        throw new Error('Permission for 0.0.0.0 denied')
       }
     }
 
     if (await this.system.ports.isTcpPortFree(instanceProps.port)) {
-      throw new Error(`TCP port ${instanceProps.port} is already in use`);
+      throw new Error(`TCP port ${instanceProps.port} is already in use`)
     }
   }
 
@@ -177,44 +174,44 @@ export class HttpServerDriver extends DriverFactoryBase<
       case HttpServerEvent.listening:
         this.system.log.info(
           `HttpServerDriver: Starting http server: ${instance.props.host}:${instance.props.port}`
-        );
-        break;
+        )
+        break
       case HttpServerEvent.serverClosed:
         this.system.log.info(
           `HttpServerDriver: destroying http server: ${instance.props.host}:${instance.props.port}`
-        );
-        break;
+        )
+        break
       case HttpServerEvent.serverError:
         this.system.log.error(
           `HttpServerDriver: error on http server ${instance.props.host}:${instance.props.port}. ${p[0]}`
-        );
-        break;
+        )
+        break
       case HttpServerEvent.request:
         this.system.log.debug(
           `HttpServerDriver: new request id ${p[0]} on http server ${
             instance.props.host
           }:${instance.props.port}. ${JSON.stringify(p[1])}`
-        );
-        break;
+        )
+        break
       default:
         this.system.log.warn(
           `HttpServerDriver: Unrecognized event ${eventName} on server ${instance.props.host}:${instance.props.port}`
-        );
-        break;
+        )
+        break
     }
   }
 }
 
 export class HttpServerInstance extends DriverInstanceBase<HttpServerDriverInstanceProps> {
-  readonly events = new IndexedEventEmitter<(...args: any[]) => void>();
+  readonly events = new IndexedEventEmitter<(...args: any[]) => void>()
 
   get serverId(): string {
-    return this.props.serverId;
+    return this.props.serverId
   }
 
   async destroy() {
-    await super.destroy();
-    this.events.destroy();
+    await super.destroy()
+    this.events.destroy()
   }
 
   /**
@@ -223,7 +220,7 @@ export class HttpServerInstance extends DriverInstanceBase<HttpServerDriverInsta
    * @param response - response
    */
   async sendResponse(requestId: number, response: HttpResponse) {
-    await this.common.io.sendResponse(this.serverId, requestId, response);
+    await this.common.io.sendResponse(this.serverId, requestId, response)
   }
 
   /**
@@ -235,18 +232,18 @@ export class HttpServerInstance extends DriverInstanceBase<HttpServerDriverInsta
   onRequest(
     cb: (requestId: number, request: HttpRequest) => void | Promise<void>
   ): number {
-    return this.events.addListener(HttpServerEvent.request, cb);
+    return this.events.addListener(HttpServerEvent.request, cb)
   }
 
   onServerError(cb: (err: string) => void | Promise<void>): number {
-    return this.events.addListener(HttpServerEvent.serverError, cb);
+    return this.events.addListener(HttpServerEvent.serverError, cb)
   }
 
   off(handlerIndex: number) {
-    this.events.removeListener(handlerIndex);
+    this.events.removeListener(handlerIndex)
   }
 
   $handleDriverEvent(eventName: HttpServerEvent, ...p: any[]) {
-    this.events.emit(eventName, ...p);
+    this.events.emit(eventName, ...p)
   }
 }

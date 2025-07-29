@@ -30,7 +30,8 @@ export class HelloWorldModel extends Observable {
 
   private updateMessage() {
     if (this._counter <= 0) {
-      this.message = 'Hoorraaay! You unlocked the NativeScript clicker achievement!'
+      this.message =
+        'Hoorraaay! You unlocked the NativeScript clicker achievement!'
     } else {
       this.message = `${this._counter} taps left`
     }

@@ -1,8 +1,7 @@
-import {IndexedEvents, makeUniqId} from 'squidlet-lib'
-import type {ServiceIndex, SubprogramError} from '../../types/types.js'
-import type {ServiceContext} from '../../system/context/ServiceContext.js'
-import {ServiceBase} from '../../base/ServiceBase.js'
-import type {ServiceProps} from '../../types/ServiceProps.js'
+import { IndexedEvents, makeUniqId } from 'squidlet-lib'
+
+import { ServiceBase } from '../../base/ServiceBase.js'
+import type { ServiceContext } from '../../system/context/ServiceContext.js'
 import type {
   NetworkIncomeRequest,
   NetworkIncomeResponse,
@@ -10,29 +9,36 @@ import type {
   NetworkSendRequest,
   NetworkSendResponse,
 } from '../../types/Network.js'
-import {Connections} from './Connections.js'
-import type {ConnectionsIncomeMsgHandler} from './Connections.js'
-import {NETWORK_CODES, REQUEST_ID_LENGTH} from '../../types/constants.js'
-
+import type { ServiceProps } from '../../types/ServiceProps.js'
+import { NETWORK_CODES, REQUEST_ID_LENGTH } from '../../types/constants.js'
+import type { ServiceIndex, SubprogramError } from '../../types/types.js'
+import { Connections } from './Connections.js'
+import type { ConnectionsIncomeMsgHandler } from './Connections.js'
 
 export interface NetworkServiceApi {
-  sendRequest<T = any>(request: NetworkSendRequest): Promise<NetworkIncomeResponse<T>>
+  sendRequest<T = any>(
+    request: NetworkSendRequest
+  ): Promise<NetworkIncomeResponse<T>>
   sendResponse(response: NetworkSendResponse): Promise<NetworkResponseStatus>
-  listenRequests(category: string, handler: CategoryHandler, token?: string): void
+  listenRequests(
+    category: string,
+    handler: CategoryHandler,
+    token?: string
+  ): void
   removeRequestListener(category: string, token?: string): void
 }
 
 export type CategoryHandler = (request: NetworkIncomeRequest) => void
 
-export const NetworkServiceIndex: ServiceIndex = (ctx: ServiceContext): ServiceBase => {
+export const NetworkServiceIndex: ServiceIndex = (
+  ctx: ServiceContext
+): ServiceBase => {
   return new NetworkService(ctx)
 }
 
-export interface NetworkServiceCfg {
-}
+export interface NetworkServiceCfg {}
 
-export const DEFAULT_NETWORK_SERVICE_CFG = {
-}
+export const DEFAULT_NETWORK_SERVICE_CFG = {}
 
 export class NetworkService extends ServiceBase {
   private cfg!: NetworkServiceCfg
@@ -57,11 +63,13 @@ export class NetworkService extends ServiceBase {
     }
   }
 
-
-  async init(onFall: (err: SubprogramError) => void, loadedCfg?: NetworkServiceCfg) {
+  async init(
+    onFall: (err: SubprogramError) => void,
+    loadedCfg?: NetworkServiceCfg
+  ) {
     await super.init(onFall)
 
-    this.cfg = (loadedCfg) ? loadedCfg : DEFAULT_NETWORK_SERVICE_CFG
+    this.cfg = loadedCfg ? loadedCfg : DEFAULT_NETWORK_SERVICE_CFG
   }
 
   async destroy() {
@@ -78,7 +86,6 @@ export class NetworkService extends ServiceBase {
     await this.connections.stop()
   }
 
-
   /**
    * Send message to remote host, wait and receive a response from it
    * request is:
@@ -87,7 +94,9 @@ export class NetworkService extends ServiceBase {
    * * msg - message object with only allowed types of nodes
    * @param request
    */
-  async sendRequest<T = any>(request: NetworkSendRequest): Promise<NetworkIncomeResponse<T>> {
+  async sendRequest<T = any>(
+    request: NetworkSendRequest
+  ): Promise<NetworkIncomeResponse<T>> {
     const requestId = makeUniqId(REQUEST_ID_LENGTH)
 
     // TODO: validate message - only supported types
@@ -98,11 +107,10 @@ export class NetworkService extends ServiceBase {
     })
 
     return new Promise((resolve, reject) => {
-
       // TODO: timeout of waiting
 
-      const handlerIndex = this.incomeMessages
-        .addListener((incomeMsg: NetworkIncomeRequest | NetworkIncomeResponse) => {
+      const handlerIndex = this.incomeMessages.addListener(
+        (incomeMsg: NetworkIncomeRequest | NetworkIncomeResponse) => {
           if (incomeMsg.requestId !== requestId) return
 
           this.incomeMessages.removeListener(handlerIndex)
@@ -115,11 +123,14 @@ export class NetworkService extends ServiceBase {
           //   code: NETWORK_CODES.success
           // })
           //   .catch((e) => this.ctx.log.error(String(e)))
-        })
+        }
+      )
     })
   }
 
-  async sendResponse(response: NetworkSendResponse): Promise<NetworkResponseStatus> {
+  async sendResponse(
+    response: NetworkSendResponse
+  ): Promise<NetworkResponseStatus> {
     // TODO: проверить что указан requestId
     // TODO: сделать ещё один requetId или responseId
     // TODO: отправить в connections
@@ -140,7 +151,9 @@ export class NetworkService extends ServiceBase {
    */
   listenRequests(category: string, handler: CategoryHandler, token?: string) {
     if (this.categoriesHandlers[category]) {
-      throw new Error(`Category "${category}" has already registered. Can't replace it.`)
+      throw new Error(
+        `Category "${category}" has already registered. Can't replace it.`
+      )
     }
 
     // TODO: check token. категория common - общая, любые запрос разрешены
@@ -149,14 +162,14 @@ export class NetworkService extends ServiceBase {
   }
 
   removeRequestListener(category: string, token?: string) {
-
     // TODO: check token
 
     delete this.categoriesHandlers[category]
   }
 
-
-  private incomeConnectionMsgHandler = (incomeMsg: NetworkIncomeRequest | NetworkIncomeResponse) => {
+  private incomeConnectionMsgHandler = (
+    incomeMsg: NetworkIncomeRequest | NetworkIncomeResponse
+  ) => {
     if (this.categoriesHandlers[incomeMsg.category]) {
       return this.incomeMessages.emit(incomeMsg)
     }
@@ -167,8 +180,6 @@ export class NetworkService extends ServiceBase {
       requestId: incomeMsg.requestId,
       code: NETWORK_CODES.noCategory,
       error: `Host "${incomeMsg.toHostId}" doesn't have a category "${incomeMsg.category}" handler`,
-    })
-      .catch((e) => this.ctx.log.error(String(e)))
+    }).catch((e) => this.ctx.log.error(String(e)))
   }
-
 }

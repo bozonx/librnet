@@ -1,4 +1,4 @@
-import { IoBase } from '../../../system/base/IoBase.js';
+import { IoBase } from '../../../system/base/IoBase.js'
 
 export class SystemTimeIo extends IoBase {
   // async init(): Promise<void> {

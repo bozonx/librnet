@@ -1,13 +1,13 @@
-import { AppBase } from '../../../system/base/AppBase.js';
+import { AppBase } from '../../../system/base/AppBase.js'
 
 export class Fileman extends AppBase {
-  myName = 'Fileman';
+  myName = 'Fileman'
 
   async start() {
-    console.log('Fileman init');
+    console.log('Fileman init')
   }
 
   async stop() {
-    console.log('Fileman stop');
+    console.log('Fileman stop')
   }
 }

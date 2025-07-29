@@ -1,22 +1,23 @@
-import type { IoBase } from '../system/base/IoBase.js';
-import type { ServiceContext } from '../system/context/ServiceContext.js';
-import type { AppContext } from '../system/context/AppContext.js';
-import type { System } from '../system/System.js';
-import type { DriverFactoryBase } from '../system/base/DriverFactoryBase.js';
-import type { DriverManifest } from './Manifests.js';
-import type { Logger, LogLevels } from 'squidlet-lib';
+import type { LogLevels, Logger } from 'squidlet-lib'
+
+import type { System } from '../system/System.js'
+import type { DriverFactoryBase } from '../system/base/DriverFactoryBase.js'
+import type { IoBase } from '../system/base/IoBase.js'
+import type { AppContext } from '../system/context/AppContext.js'
+import type { ServiceContext } from '../system/context/ServiceContext.js'
+import type { DriverManifest } from './Manifests.js'
 
 export interface IoContext {
-  log: Logger;
+  log: Logger
 }
 
-export type IoIndex = (ctx: IoContext) => IoBase;
+export type IoIndex = (ctx: IoContext) => IoBase
 export type DriverIndex = (
   manifest: DriverManifest,
   system: System
-) => DriverFactoryBase;
-export type ServiceOnInit = (ctx: ServiceContext) => Promise<void>;
-export type AppOnInit = (ctx: AppContext) => Promise<void>;
+) => DriverFactoryBase
+export type ServiceOnInit = (ctx: ServiceContext) => Promise<void>
+export type AppOnInit = (ctx: AppContext) => Promise<void>
 
 export type BinTypes =
   | Int8Array
@@ -29,7 +30,7 @@ export type BinTypes =
   | Float32Array
   | Float64Array
   | BigInt64Array
-  | BigUint64Array;
+  | BigUint64Array
 
 export type BinTypesNames =
   | 'Int8Array'
@@ -42,24 +43,24 @@ export type BinTypesNames =
   | 'Float32Array'
   | 'Float64Array'
   | 'BigInt64Array'
-  | 'BigUint64Array';
+  | 'BigUint64Array'
 
 export interface MountPointDefinition {
-  type: MountPointTypes;
-  path: string;
+  type: MountPointTypes
+  path: string
 }
 
 export interface MountPoint {
-  src: MountPointDefinition;
-  dest: MountPointDefinition;
+  src: MountPointDefinition
+  dest: MountPointDefinition
 }
 
 export interface SystemEnv {
-  ROOT_DIR: string;
-  FILES_UID: number;
-  FILES_GID: number;
-  ENV_MODE: EnvModes;
-  DEFAULT_LOG_LEVEL?: LogLevels;
+  ROOT_DIR: string
+  FILES_UID: number
+  FILES_GID: number
+  ENV_MODE: EnvModes
+  DEFAULT_LOG_LEVEL?: LogLevels
 }
 
 export enum EnvModes {
@@ -131,7 +132,6 @@ export enum MountPointTypes {
   archive = 'archive',
 }
 
-
 //export const SERVER_STARTING_TIMEOUT_SEC = 60
 
 // TODO: review, move to network service
@@ -157,7 +157,6 @@ export enum MountPointTypes {
 //   | ServiceManifest
 //   | DriverManifest
 //   | IoManifest;
-
 
 // export interface IoSetEnv {
 //   ENV_MODE?: EnvModes;

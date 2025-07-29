@@ -1,18 +1,18 @@
-import type { ServiceIndex } from '@/types/types.js';
-import type { ServiceContext } from '@/system/context/ServiceContext.js';
-import { ServiceBase } from '@/system/base/ServiceBase.js';
+import { ServiceBase } from '@/system/base/ServiceBase.js'
+import type { ServiceContext } from '@/system/context/ServiceContext.js'
+import type { ServiceIndex } from '@/types/types.js'
 
 // TODO: может это драйвер потому что он имеет доступ к системе
 
 export const UiApiServiceIndex: ServiceIndex = (
   ctx: ServiceContext
 ): ServiceBase => {
-  return new UiApiService(ctx);
-};
+  return new UiApiService(ctx)
+}
 
 export class UiApiService extends ServiceBase {
   constructor(ctx: ServiceContext) {
-    super(ctx);
+    super(ctx)
   }
 
   async start() {}
@@ -24,18 +24,18 @@ export class UiApiService extends ServiceBase {
     funcPath: string,
     args: any[]
   ) {
-    const service = this.ctx.getServiceApi(serviceName);
+    const service = this.ctx.getServiceApi(serviceName)
     if (!service) {
-      throw new Error(`Service ${serviceName} not found`);
+      throw new Error(`Service ${serviceName} not found`)
     }
-    return service.callFunction(funcPath, args);
+    return service.callFunction(funcPath, args)
   }
 
   async callAppFunction(appName: string, funcPath: string, args: any[]) {
-    const app = this.ctx.system.apps.getApp(appName);
+    const app = this.ctx.system.apps.getApp(appName)
     if (!app) {
-      throw new Error(`App ${appName} not found`);
+      throw new Error(`App ${appName} not found`)
     }
-    return app.callFunction(funcPath, args);
+    return app.callFunction(funcPath, args)
   }
 }

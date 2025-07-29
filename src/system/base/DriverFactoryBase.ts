@@ -1,7 +1,7 @@
-import type { System } from '../System.js';
-import type DriverInstanceBase from './DriverInstanceBase.js';
-import type { DriverInstanceClass } from './DriverInstanceBase.js';
-import type { DriverManifest } from '../../types/Manifests.js';
+import type { DriverManifest } from '../../types/Manifests.js'
+import type { System } from '../System.js'
+import type DriverInstanceBase from './DriverInstanceBase.js'
+import type { DriverInstanceClass } from './DriverInstanceBase.js'
 
 /**
  * This factory creates instances of sub drivers and keeps them in the memory.
@@ -17,32 +17,32 @@ export abstract class DriverFactoryBase<
     any,
     any
   >,
-  Props extends Record<string, any> = Record<string, any>
+  Props extends Record<string, any> = Record<string, any>,
 > {
-  abstract readonly requireIo: string[];
+  abstract readonly requireIo: string[]
 
-  protected instances: Instance[] = [];
+  protected instances: Instance[] = []
   // Specify your sub driver class
-  protected abstract SubDriverClass: DriverInstanceClass<Instance, Props>;
+  protected abstract SubDriverClass: DriverInstanceClass<Instance, Props>
   // Put here common functions and properties for all instances
-  protected common: Record<string, any> = {};
-  private _localCfg: Record<string, any> = {};
-  private _syncedCfg: Record<string, any> = {};
+  protected common: Record<string, any> = {}
+  private _localCfg: Record<string, any> = {}
+  private _syncedCfg: Record<string, any> = {}
 
   get localCfg(): Record<string, any> {
-    return structuredClone(this._localCfg);
+    return structuredClone(this._localCfg)
   }
 
   get syncedCfg(): Record<string, any> {
-    return structuredClone(this._syncedCfg);
+    return structuredClone(this._syncedCfg)
   }
 
   get manifest(): DriverManifest {
-    return this._manifest;
+    return this._manifest
   }
 
   get name(): string {
-    return this._manifest.name;
+    return this._manifest.name
   }
 
   constructor(
@@ -54,42 +54,42 @@ export abstract class DriverFactoryBase<
     localCfg: Record<string, any> = {},
     syncedCfg: Record<string, any> = {}
   ) {
-    this._localCfg = localCfg;
-    this._syncedCfg = syncedCfg;
+    this._localCfg = localCfg
+    this._syncedCfg = syncedCfg
   }
 
   async destroy(destroyReason: string) {
     for (const instance of this.instances) {
       // It will call destroyCb to remove instance from this.instances
-      await instance.destroy(destroyReason);
+      await instance.destroy(destroyReason)
     }
   }
 
   async makeInstance(instanceProps: Props = {} as Props): Promise<Instance> {
-    await this.validateInstanceProps(instanceProps);
+    await this.validateInstanceProps(instanceProps)
 
-    const matchString = this.makeMatchString(instanceProps);
+    const matchString = this.makeMatchString(instanceProps)
     const theSameInstance = this.instances.find(
       (instance) => this.makeMatchString(instance.props) === matchString
-    );
+    )
 
     if (theSameInstance) {
-      throw new Error(`Instance with props "${matchString}" already exists`);
+      throw new Error(`Instance with props "${matchString}" already exists`)
     }
 
-    const instanceId = this.instances.length;
+    const instanceId = this.instances.length
     const instance = new this.SubDriverClass(
       this.system,
       this,
       structuredClone(await this.makeInstanceProps(instanceProps)),
       this.common,
       this.destroyCb.bind(this, instanceId)
-    );
+    )
 
-    this.instances.push(instance);
-    await instance.init?.();
+    this.instances.push(instance)
+    await instance.init?.()
 
-    return instance;
+    return instance
   }
 
   /**
@@ -98,7 +98,7 @@ export abstract class DriverFactoryBase<
    * @returns
    */
   protected makeMatchString(instanceProps: Props): string {
-    return JSON.stringify(instanceProps);
+    return JSON.stringify(instanceProps)
   }
 
   /**
@@ -107,7 +107,7 @@ export abstract class DriverFactoryBase<
    * @returns
    */
   protected async makeInstanceProps(instanceProps: Props): Promise<Props> {
-    return instanceProps;
+    return instanceProps
   }
 
   /**
@@ -115,7 +115,7 @@ export abstract class DriverFactoryBase<
    * @param instanceId
    */
   protected async destroyCb(instanceId: number): Promise<void> {
-    this.instances.splice(instanceId, 1);
+    this.instances.splice(instanceId, 1)
   }
 
   /**

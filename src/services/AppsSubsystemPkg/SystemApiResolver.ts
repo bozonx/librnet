@@ -1,4 +1,4 @@
-import type { RequestCatcherContext } from './RequestCatcher';
+import type { RequestCatcherContext } from './RequestCatcher'
 
 export class SystemApiResolver {
   constructor(ctx: RequestCatcherContext) {}

@@ -1,48 +1,49 @@
-import { IndexedEventEmitter, pathJoin } from 'squidlet-lib';
+import { IndexedEventEmitter, pathJoin } from 'squidlet-lib'
+import type { Logger } from 'squidlet-lib'
+
 import {
+  type EntityStatus,
   LOCAL_DATA_SUB_DIRS,
   ROOT_DIRS,
   SYNCED_DATA_SUB_DIRS,
   SYSTEM_API_SERVICE_NAME,
-  type EntityStatus,
-} from '../../types/constants.js';
-import type { Logger } from 'squidlet-lib';
-import type { System } from '../System';
-import type { EntityManifest, EntityType } from '@/types/types.js';
-import { EntityConfig } from '../driversLogic/EntityConfig.js';
-import { EntityLogFile } from '../driversLogic/EntityLogFile.js';
-import { permissionWrapper } from '../helpers/permissionWrapper.js';
-import type DriverInstanceBase from '../base/DriverInstanceBase.js';
-import { DirTrapLogic } from '../driversLogic/DirTrapLogic.js';
+} from '../../types/constants.js'
+import type { System } from '../System'
+import type DriverInstanceBase from '../base/DriverInstanceBase.js'
+import { DirTrapLogic } from '../driversLogic/DirTrapLogic.js'
+import { EntityConfig } from '../driversLogic/EntityConfig.js'
+import { EntityLogFile } from '../driversLogic/EntityLogFile.js'
+import { permissionWrapper } from '../helpers/permissionWrapper.js'
+import type { EntityManifest, EntityType } from '@/types/types.js'
 
 export abstract class EntityBaseContext {
-  abstract readonly type: Extract<EntityType, 'app' | 'service'>;
+  abstract readonly type: Extract<EntityType, 'app' | 'service'>
   // Server side context
   // save here custom runtime data eg driver instances
-  readonly context: Record<string, any> = {};
+  readonly context: Record<string, any> = {}
   readonly _hooks = {
     onDestroy: async () => {},
     onStart: async () => {},
     onStop: async () => {},
-  };
+  }
 
   // Events bus only for server
-  readonly serverSideBus = new IndexedEventEmitter();
+  readonly serverSideBus = new IndexedEventEmitter()
   // Events bus for sending events to client
-  readonly toClientBus = new IndexedEventEmitter();
+  readonly toClientBus = new IndexedEventEmitter()
 
   // local user's config files of this app
   readonly localConfig = new EntityConfig(
     this.system,
     this.entityManifest,
     false
-  );
+  )
   // synced user's config files of this app
   readonly syncedConfig = new EntityConfig(
     this.system,
     this.entityManifest,
     true
-  );
+  )
 
   readonly consoleLog: Logger = {
     debug: (msg: string) =>
@@ -55,19 +56,11 @@ export abstract class EntityBaseContext {
       this.system.log.error(`[${this.entityManifest.name}]: ${msg}`),
     log: (msg: string) =>
       this.system.log.log(`[${this.entityManifest.name}]: ${msg}`),
-  };
+  }
   // local files log of this app
-  readonly localLog = new EntityLogFile(
-    this.system,
-    this.entityManifest,
-    false
-  );
+  readonly localLog = new EntityLogFile(this.system, this.entityManifest, false)
   // synced files log of this app
-  readonly syncedLog = new EntityLogFile(
-    this.system,
-    this.entityManifest,
-    true
-  );
+  readonly syncedLog = new EntityLogFile(this.system, this.entityManifest, true)
 
   // local data of this app. Only for local machine
   readonly localData = new DirTrapLogic(
@@ -79,7 +72,7 @@ export abstract class EntityBaseContext {
     ),
     false,
     this.system
-  );
+  )
   // syncronized data of this app between all the hosts
   readonly syncedData = new DirTrapLogic(
     pathJoin(
@@ -90,7 +83,7 @@ export abstract class EntityBaseContext {
     ),
     false,
     this.system
-  );
+  )
   // temporary files of this app
   readonly tmp = new DirTrapLogic(
     pathJoin(
@@ -101,7 +94,7 @@ export abstract class EntityBaseContext {
     ),
     false,
     this.system
-  );
+  )
   // readonly program and assets files of this app
   readonly myFiles = new DirTrapLogic(
     pathJoin(
@@ -112,10 +105,10 @@ export abstract class EntityBaseContext {
     ),
     true,
     this.system
-  );
+  )
 
   get status(): EntityStatus {
-    return this.system[this.type].getStatus(this.entityManifest.name);
+    return this.system[this.type].getStatus(this.entityManifest.name)
   }
 
   // TODO: use db key-value storage for cache
@@ -130,8 +123,8 @@ export abstract class EntityBaseContext {
   ) {}
 
   async init() {
-    this.localConfig.init();
-    this.syncedConfig.init();
+    this.localConfig.init()
+    this.syncedConfig.init()
   }
 
   async destroy() {
@@ -139,16 +132,16 @@ export abstract class EntityBaseContext {
   }
 
   $getHooks() {
-    return this._hooks;
+    return this._hooks
   }
 
   async makeDriverInstance<T extends DriverInstanceBase<any>>(
     driverName: string,
     props: Record<string, any>
   ): Promise<T> {
-    const driver = this.system.drivers.getDriver(driverName);
+    const driver = this.system.drivers.getDriver(driverName)
 
-    return (await driver.makeInstance(props)) as T;
+    return (await driver.makeInstance(props)) as T
   }
 
   /**
@@ -162,42 +155,42 @@ export abstract class EntityBaseContext {
         this.entityManifest.name,
         serviceName,
         this.system.systemApi
-      );
+      )
     }
 
-    const serviceApi = this.system.api.getServiceApi(serviceName);
+    const serviceApi = this.system.api.getServiceApi(serviceName)
 
     return permissionWrapper(
       this.system,
       this.entityManifest.name,
       serviceName,
       serviceApi
-    );
+    )
   }
 
   /**
    * Access to api of apps that registered their api in the system
    */
   appApi(appName: string) {
-    const appApi = this.system.api.getAppApi(appName);
+    const appApi = this.system.api.getAppApi(appName)
 
     return permissionWrapper(
       this.system,
       this.entityManifest.name,
       appName,
       appApi
-    );
+    )
   }
 
   onDestroy(hook: () => Promise<void>) {
-    this._hooks.onDestroy = hook;
+    this._hooks.onDestroy = hook
   }
 
   onStart(hook: () => Promise<void>) {
-    this._hooks.onStart = hook;
+    this._hooks.onStart = hook
   }
 
   onStop(hook: () => Promise<void>) {
-    this._hooks.onStop = hook;
+    this._hooks.onStop = hook
   }
 }

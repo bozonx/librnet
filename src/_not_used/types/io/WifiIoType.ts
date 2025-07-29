@@ -3,7 +3,6 @@ export interface WifiParams {
   password?: string
 }
 
-
 export default interface WifiIoType {
   setConnection(params: WifiParams): Promise<void>
 }

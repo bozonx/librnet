@@ -1,4 +1,4 @@
-import type { DefaultHandler, IndexedEvents } from 'squidlet-lib';
+import type { DefaultHandler, IndexedEvents } from 'squidlet-lib'
 
 // TODO: serialize/deserialize object
 // TODO: status, error, request marker
@@ -11,7 +11,7 @@ export class Channel {
   ) {}
 
   async destroy() {
-    await this.doDestroy();
+    await this.doDestroy()
   }
 
   /**
@@ -33,14 +33,14 @@ export class Channel {
   }
 
   onMessage(cb: (...p: any[]) => void): number {
-    return this.events.addListener(cb);
+    return this.events.addListener(cb)
   }
 
   onRequest(cb: (...p: any[]) => Promise<any[]>): number {
-    return this.events.addListener(cb);
+    return this.events.addListener(cb)
   }
 
   off(handlerIndex: number) {
-    this.events.removeListener(handlerIndex);
+    this.events.removeListener(handlerIndex)
   }
 }

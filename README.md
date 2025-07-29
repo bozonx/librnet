@@ -1,8 +1,44 @@
-# Librnet
+# Librnet OS
 
 Personal decentralised OS based on overlay network.
 
 ## Development
+
+### Code Formatting
+
+Проект использует Prettier с плагином `@trivago/prettier-plugin-sort-imports` для автоматической сортировки импортов.
+
+#### Настройка сортировки импортов
+
+Импорты автоматически сортируются в следующем порядке:
+
+1. **Внешние импорты** из `node_modules` (например, `squidlet-lib`, `ws`, `yaml`)
+2. **Локальные импорты** (относительные пути `../`, `./` и алиасы `@/`)
+
+Между группами импортов добавляется пустая строка для лучшей читаемости.
+
+#### Команды форматирования
+
+```bash
+# Форматировать все файлы в src/
+pnpm format
+
+# Проверить форматирование без изменений
+pnpm format:check
+```
+
+#### Пример сортировки импортов
+
+```typescript
+// Внешние импорты из node_modules
+import { ConsoleLogger, LogLevels } from 'squidlet-lib'
+import { WebSocket } from 'ws'
+
+// Локальные импорты (относительные пути и алиасы)
+import { System } from '../system/System.js'
+import { IoSetClient } from '@/ioSets/IoSetClient'
+import { startSystemDev } from './startSystemDev'
+```
 
 Run in dev mode
 

@@ -1,6 +1,6 @@
 // open sidebar on plugin button click
 browser.browserAction.onClicked.addListener(() => {
-  browser.sidebarAction.open();
+  browser.sidebarAction.open()
 
   // browser.runtime.sendMessage({
   //   to: 'sidebar',
@@ -13,11 +13,8 @@ browser.browserAction.onClicked.addListener(() => {
   //   title: 'test title',
   //   message: 'content',
   // });
-
 })
-
 
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.to !== 'background') return
-
 })

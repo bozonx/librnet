@@ -1,18 +1,24 @@
 import {
+  HTTP_CONTENT_TYPES,
+  HTTP_FILE_EXT_CONTENT_TYPE,
+  getExt,
   parseUrl,
   pathJoin,
-  getExt,
   trimCharStart,
-  HTTP_CONTENT_TYPES,
-  HTTP_FILE_EXT_CONTENT_TYPE
 } from 'squidlet-lib'
-import type {ServiceIndex, SubprogramError} from '../../types/types.js'
-import type {ServiceContext} from '../../system/context/ServiceContext.js'
-import {ServiceBase} from '../../base/ServiceBase.js'
+
+import { ServiceBase } from '../../base/ServiceBase.js'
+import type { FilesDriver } from '../../packages/SystemCommonPkg/FilesDriver/FilesDriver.js'
 import type {
   HttpServerDriver,
   HttpServerInstance,
-} from '../../packages/SystemCommonPkg/HttpServerDriver/HttpServerDriver.js';
+} from '../../packages/SystemCommonPkg/HttpServerDriver/HttpServerDriver.js'
+import type {
+  HttpDriverRequest,
+  HttpDriverResponse,
+} from '../../packages/SystemCommonPkg/HttpServerDriver/HttpServerDriverLogic.js'
+import type { ServiceContext } from '../../system/context/ServiceContext.js'
+import type { ServiceProps } from '../../types/ServiceProps.js'
 import {
   APP_FILES_PUBLIC_DIR,
   DEFAULT_UI_HTTP_PORT,
@@ -20,36 +26,28 @@ import {
   LOCAL_HOST,
   ROOT_DIRS,
 } from '../../types/constants.js'
-import type {HttpServerProps} from '../../types/io/HttpServerIoType.js'
-import type {ServiceProps} from '../../types/ServiceProps.js'
-import type {
-  HttpDriverRequest,
-  HttpDriverResponse,
-} from '../../packages/SystemCommonPkg/HttpServerDriver/HttpServerDriverLogic.js';
-import {uiHtml} from './uiHtmlTmpl.js'
-import type { FilesDriver } from '../../packages/SystemCommonPkg/FilesDriver/FilesDriver.js';
-
+import type { HttpServerProps } from '../../types/io/HttpServerIoType.js'
+import type { ServiceIndex, SubprogramError } from '../../types/types.js'
+import { uiHtml } from './uiHtmlTmpl.js'
 
 // TODO: можно добавить специальный кукис сессии чтобы проверять откуда сделан запрос
 
-
-export const UiHttpServiceIndex: ServiceIndex = (ctx: ServiceContext): ServiceBase => {
+export const UiHttpServiceIndex: ServiceIndex = (
+  ctx: ServiceContext
+): ServiceBase => {
   return new UiHttpService(ctx)
 }
 
-export interface UiHttpServiceCfg extends HttpServerProps {
-}
+export interface UiHttpServiceCfg extends HttpServerProps {}
 
 export const DEFAULT_UI_HTTP_SERVICE_CFG = {
   host: LOCAL_HOST,
   port: DEFAULT_UI_HTTP_PORT,
 }
 
-
 export class UiHttpService extends ServiceBase {
   private httpServer!: HttpServerInstance
   private cfg!: UiHttpServiceCfg
-
 
   props: ServiceProps = {
     requireDriver: [DRIVER_NAMES.HttpServerDriver],
@@ -62,11 +60,13 @@ export class UiHttpService extends ServiceBase {
     return this.ctx.drivers.getDriver(DRIVER_NAMES.FilesDriver)
   }
 
-
-  async init(onFall: (err: SubprogramError) => void, loadedCfg?: UiHttpServiceCfg) {
+  async init(
+    onFall: (err: SubprogramError) => void,
+    loadedCfg?: UiHttpServiceCfg
+  ) {
     await super.init(onFall)
 
-    this.cfg = (loadedCfg) ? loadedCfg : DEFAULT_UI_HTTP_SERVICE_CFG
+    this.cfg = loadedCfg ? loadedCfg : DEFAULT_UI_HTTP_SERVICE_CFG
 
     // TODO: если конфина нет то по умолчанию
 
@@ -77,16 +77,14 @@ export class UiHttpService extends ServiceBase {
         port: this.cfg.port,
       } as HttpServerProps)
 
-    this.httpServer.onRequest(
-      (request: HttpDriverRequest) => this.handleRequest(request)
+    this.httpServer.onRequest((request: HttpDriverRequest) =>
+      this.handleRequest(request)
     )
   }
 
-  async destroy() {
-  }
+  async destroy() {}
 
   async start() {
-
     // TODO: WTF ???!!!
 
     await this.httpServer.start()
@@ -96,14 +94,14 @@ export class UiHttpService extends ServiceBase {
     await this.httpServer.stop(force)
   }
 
-
-  private async handleRequest(request: HttpDriverRequest): Promise<HttpDriverResponse> {
+  private async handleRequest(
+    request: HttpDriverRequest
+  ): Promise<HttpDriverResponse> {
     if (request.method !== 'get') {
       return {
-        status: 405
+        status: 405,
       }
-    }
-    else if (request.url === '/assets/squidletUi.js') {
+    } else if (request.url === '/assets/squidletUi.js') {
       return {
         status: 200,
         headers: {
@@ -119,7 +117,7 @@ export class UiHttpService extends ServiceBase {
     if (!appName) {
       return {
         status: 404,
-        body: `Application hasn't set`
+        body: `Application hasn't set`,
       }
     }
 
@@ -131,7 +129,10 @@ export class UiHttpService extends ServiceBase {
     return this.makeMainHtmlResp(appName)
   }
 
-  private async makeStaticFileResponse(appName: string, reqPath: string): Promise<HttpDriverResponse> {
+  private async makeStaticFileResponse(
+    appName: string,
+    reqPath: string
+  ): Promise<HttpDriverResponse> {
     const staticFiles = this.ctx.getAppUiStaticFiles(appName) || []
     const found = staticFiles.find((item) => reqPath)
 
@@ -142,12 +143,13 @@ export class UiHttpService extends ServiceBase {
     }
 
     const ext = getExt(reqPath)
-    const contentType = HTTP_FILE_EXT_CONTENT_TYPE[ext as keyof typeof HTTP_FILE_EXT_CONTENT_TYPE]
+    const contentType =
+      HTTP_FILE_EXT_CONTENT_TYPE[ext as keyof typeof HTTP_FILE_EXT_CONTENT_TYPE]
 
     if (!contentType) {
       return {
         // unsupported media type
-        status: 415
+        status: 415,
       }
     }
 
@@ -162,8 +164,7 @@ export class UiHttpService extends ServiceBase {
 
     try {
       fileContent = await this.fileDriver.readTextFile(filePath)
-    }
-    catch (e) {
+    } catch (e) {
       return {
         status: 404,
       }
@@ -175,7 +176,7 @@ export class UiHttpService extends ServiceBase {
         'content-type': contentType,
       },
       // TODO: add content type
-      body: fileContent
+      body: fileContent,
     }
   }
 
@@ -203,8 +204,7 @@ export class UiHttpService extends ServiceBase {
       headers: {
         'content-type': 'text/html; charset=utf-8',
       } as any,
-      body
+      body,
     }
   }
-
 }

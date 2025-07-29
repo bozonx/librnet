@@ -1,21 +1,22 @@
-import { createServer, IncomingMessage, Server, ServerResponse } from 'http';
-import { IndexedEvents, makeUniqNumber, callPromised } from 'squidlet-lib';
-import type { HttpMethods, HttpRequest, HttpResponse } from 'squidlet-lib';
-import { HttpServerEvent } from '../../types/io/HttpServerIoType.js';
+import { IncomingMessage, Server, ServerResponse, createServer } from 'http'
+import { IndexedEvents, callPromised, makeUniqNumber } from 'squidlet-lib'
+import type { HttpMethods, HttpRequest, HttpResponse } from 'squidlet-lib'
+
+import { ServerIoBase } from '../../system/base/ServerIoBase.js'
+import { DEFAULT_ENCODE } from '../../types/constants.js'
+import { HttpServerEvent } from '../../types/io/HttpServerIoType.js'
 import type {
   HttpServerIoType,
   HttpServerProps,
-} from '../../types/io/HttpServerIoType.js';
-import { ServerIoBase } from '../../system/base/ServerIoBase.js';
-import type { IoIndex, IoContext } from '../../types/types.js';
-import { DEFAULT_ENCODE } from '../../types/constants.js';
+} from '../../types/io/HttpServerIoType.js'
+import type { IoContext, IoIndex } from '../../types/types.js'
 
 type ServerItem = [
   // Http server instance
   Server,
   // is server listening.
-  boolean
-];
+  boolean,
+]
 
 enum ITEM_POSITION {
   server,
@@ -23,7 +24,7 @@ enum ITEM_POSITION {
 }
 
 export interface HttpServerIoConfig {
-  requestTimeoutSec: number;
+  requestTimeoutSec: number
 }
 // TODO: это можно передавать в параметрах а не в конфиге
 // const HTTP_SERVER_IO_CONFIG_DEFAULTS = {
@@ -31,12 +32,12 @@ export interface HttpServerIoConfig {
 // };
 
 export const HttpServerIoIndex: IoIndex = (ctx: IoContext) => {
-  return new HttpServerIo(ctx);
-};
+  return new HttpServerIo(ctx)
+}
 
 export function makeRequestObject(req: IncomingMessage): HttpRequest {
-  const bodyBuff: Buffer | null = req.read();
-  const body: string | undefined = bodyBuff?.toString(DEFAULT_ENCODE);
+  const bodyBuff: Buffer | null = req.read()
+  const body: string | undefined = bodyBuff?.toString(DEFAULT_ENCODE)
 
   // TODO: если content type бинарный то преобразовать body в Uint8
 
@@ -55,7 +56,7 @@ export function makeRequestObject(req: IncomingMessage): HttpRequest {
     destroyed: req.destroyed,
     closed: req.closed,
     errored: req.errored,
-  };
+  }
 }
 
 /**
@@ -69,12 +70,12 @@ export class HttpServerIo
 {
   private responseEvent = new IndexedEvents<
     (requestId: number, response: HttpResponse) => void
-  >();
+  >()
 
   async isServerListening(serverId: string): Promise<boolean> {
-    const serverItem = this.servers[serverId];
+    const serverItem = this.servers[serverId]
 
-    return serverItem?.[ITEM_POSITION.listeningState] ?? false;
+    return serverItem?.[ITEM_POSITION.listeningState] ?? false
   }
 
   /**
@@ -82,33 +83,33 @@ export class HttpServerIo
    * send response back to client of it request and close request.
    */
   async sendResponse(requestId: number, response: HttpResponse): Promise<void> {
-    return this.responseEvent.emit(requestId, response);
+    return this.responseEvent.emit(requestId, response)
   }
 
   protected startServer(serverId: string, props: HttpServerProps): ServerItem {
     const server: Server = createServer({
       // timeout of entire request in ms
       requestTimeout: this.cfg.requestTimeoutSec * 1000,
-    });
+    })
 
     server.on('error', (err: Error) =>
       this.events.emit(HttpServerEvent.serverError, serverId, String(err))
-    );
+    )
     server.on('close', () =>
       this.events.emit(HttpServerEvent.serverClosed, serverId)
-    );
-    server.on('listening', () => this.handleServerStartListening(serverId));
+    )
+    server.on('listening', () => this.handleServerStartListening(serverId))
     server.on('request', (req: IncomingMessage, res: ServerResponse) =>
       this.handleIncomeRequest(serverId, req, res)
-    );
+    )
     // start server
-    server.listen(props.port, props.host);
+    server.listen(props.port, props.host)
 
     return [
       server,
       // not listening at the moment. Wait listen event
       false,
-    ];
+    ]
   }
 
   protected async destroyServer(serverItem: ServerItem) {
@@ -117,20 +118,20 @@ export class HttpServerIo
       serverItem[ITEM_POSITION.server].close.bind(
         serverItem[ITEM_POSITION.server]
       )
-    );
+    )
   }
 
   protected makeServerId(props: HttpServerProps): string {
-    return `${props.host}:${props.port}`;
+    return `${props.host}:${props.port}`
   }
 
   private handleServerStartListening = (serverId: string) => {
-    const serverItem = this.getServerItem(serverId);
+    const serverItem = this.getServerItem(serverId)
 
-    serverItem[ITEM_POSITION.listeningState] = true;
+    serverItem[ITEM_POSITION.listeningState] = true
 
-    this.events.emit(HttpServerEvent.listening, serverId);
-  };
+    this.events.emit(HttpServerEvent.listening, serverId)
+  }
 
   /**
    * When income request is came then it wait for a response from driver
@@ -145,22 +146,22 @@ export class HttpServerIo
     req: IncomingMessage,
     res: ServerResponse
   ) {
-    if (!this.servers[serverId]) return;
+    if (!this.servers[serverId]) return
 
-    const requestId: number = makeUniqNumber();
-    const httpRequest: HttpRequest = makeRequestObject(req);
+    const requestId: number = makeUniqNumber()
+    const httpRequest: HttpRequest = makeRequestObject(req)
 
     const responsePromised = this.responseEvent
       .wait(([reqId]) => reqId === requestId, this.cfg.requestTimeoutSec * 1000)
       .then(([, response]) => {
-        this.setupResponse(response, res);
+        this.setupResponse(response, res)
       })
       .rejected((e) => {
         this.setupErrorResponse(
           500,
           `HttpServerIo: Error while waiting for response: ${String(e)}`,
           res
-        );
+        )
       })
       .onExceeded(() => {
         this.setupErrorResponse(
@@ -168,8 +169,8 @@ export class HttpServerIo
           'HttpServerIo: Timeout has been exceeded, ' +
             `Server ${serverId}. ${req.method} ${req.url}`,
           res
-        );
-      });
+        )
+      })
 
     // emit request event which driver has to responce
     try {
@@ -178,9 +179,9 @@ export class HttpServerIo
         serverId,
         requestId,
         httpRequest
-      );
+      )
     } catch (e) {
-      responsePromised.reject(e as Error);
+      responsePromised.reject(e as Error)
     }
   }
 
@@ -189,10 +190,10 @@ export class HttpServerIo
       response.statusCode,
       response.statusMessage,
       response.headers as Record<string, any>
-    );
+    )
 
     if (typeof response.body === 'string') {
-      httpRes.end(response.body);
+      httpRes.end(response.body)
     } else {
       // TODO: support of Buffer - convert from Uint8Arr to Buffer
     }
@@ -203,21 +204,21 @@ export class HttpServerIo
     errorMsg: string,
     res: ServerResponse
   ) {
-    let statusMessage;
+    let statusMessage
 
     switch (statusCode) {
       case 408:
-        statusMessage = 'Request Timeout';
-        break;
+        statusMessage = 'Request Timeout'
+        break
       case 500:
-        statusMessage = 'Internal Server Error';
-        break;
+        statusMessage = 'Internal Server Error'
+        break
     }
 
     res.writeHead(statusCode, statusMessage, {
       'Content-Type': 'text/json',
-    });
+    })
 
-    res.end(JSON.stringify({ errorMsg }));
+    res.end(JSON.stringify({ errorMsg }))
   }
 }

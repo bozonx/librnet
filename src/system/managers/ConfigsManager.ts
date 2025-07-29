@@ -1,24 +1,25 @@
-import { pathJoin, mergeDeepObjects } from 'squidlet-lib';
-import type { System } from '../System.js';
-import {
-  type SystemLocalCfg,
-  type SystemSyncedCfg,
-  type SystemCfg,
-} from '../../types/SystemCfg.js';
-import { CFG_FILE_EXT } from '../../types/constants.js';
+import { mergeDeepObjects, pathJoin } from 'squidlet-lib'
+
 import {
   LocalDataSubDirs,
   RootDirs,
   SyncedDataSubDirs,
-} from '../../types/Dirs.js';
+} from '../../types/Dirs.js'
+import {
+  type SystemCfg,
+  type SystemLocalCfg,
+  type SystemSyncedCfg,
+} from '../../types/SystemCfg.js'
+import { CFG_FILE_EXT } from '../../types/constants.js'
+import type { System } from '../System.js'
 
-const SYSTEM_MAIN_CFG_NAME = 'system.main';
+const SYSTEM_MAIN_CFG_NAME = 'system.main'
 
 export class ConfigsManager {
-  private _systemCfg!: SystemCfg;
+  private _systemCfg!: SystemCfg
 
   get systemCfg(): SystemCfg {
-    return structuredClone(this._systemCfg);
+    return structuredClone(this._systemCfg)
   }
 
   constructor(private readonly system: System) {}
@@ -33,7 +34,7 @@ export class ConfigsManager {
         SYSTEM_MAIN_CFG_NAME,
         true
       ),
-    } as SystemCfg;
+    } as SystemCfg
   }
 
   async loadEntityConfig<Config extends Record<string, any>>(
@@ -45,15 +46,15 @@ export class ConfigsManager {
       isSynced ? RootDirs.synced : RootDirs.local,
       isSynced ? SyncedDataSubDirs.configs : LocalDataSubDirs.configs,
       `${entityName}.${CFG_FILE_EXT}`
-    );
+    )
 
     if (await this.system.localFiles.exists(cfgPath)) {
       return JSON.parse(
         await this.system.localFiles.readTextFile(cfgPath)
-      ) as Config;
+      ) as Config
     }
 
-    return {} as Config;
+    return {} as Config
   }
 
   async saveEntityConfig(
@@ -71,7 +72,7 @@ export class ConfigsManager {
         `${entityName}.${CFG_FILE_EXT}`
       ),
       JSON.stringify(newConfig, null, 2)
-    );
+    )
   }
 
   // async deleteEntityConfig(entityName: string, isSynced: boolean) {

@@ -1,8 +1,8 @@
-import { System } from '../System.js';
-import type { EntityManifest } from '@/types/types.js';
+import { System } from '../System.js'
+import type { EntityManifest } from '@/types/types.js'
 
 export class EntityConfig<Config extends Record<string, any>> {
-  private cfg: Config = {} as Config;
+  private cfg: Config = {} as Config
 
   constructor(
     private readonly system: System,
@@ -15,21 +15,21 @@ export class EntityConfig<Config extends Record<string, any>> {
     this.cfg = await this.system.configs.loadEntityConfig<Config>(
       this.manifest.name,
       this.isSynced
-    );
+    )
   }
 
   async getConfig() {
-    return this.cfg;
+    return this.cfg
   }
 
   async saveConfig(config: Config) {
-    this.cfg = config;
+    this.cfg = config
 
     await this.system.configs.saveEntityConfig(
       this.manifest.name,
       this.cfg,
       this.isSynced
-    );
+    )
   }
 
   /**
@@ -37,21 +37,21 @@ export class EntityConfig<Config extends Record<string, any>> {
    * @param partial - partial config
    */
   async savePartialConfig(partial: Partial<Config>) {
-    this.cfg = { ...this.cfg, ...partial };
+    this.cfg = { ...this.cfg, ...partial }
 
     await this.system.configs.saveEntityConfig(
       this.manifest.name,
       this.cfg,
       this.isSynced
-    );
+    )
   }
 
   async deleteConfig() {
     await this.system.configs.deleteEntityConfig(
       this.manifest.name,
       this.isSynced
-    );
+    )
 
-    this.cfg = {} as Config;
+    this.cfg = {} as Config
   }
 }

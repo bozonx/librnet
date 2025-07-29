@@ -1,54 +1,55 @@
 import {
-  Promised,
-  IndexedEventEmitter,
   type HttpRequest,
   type HttpResponse,
-} from 'squidlet-lib';
-import type { DriverIndex, DriverManifest } from '../../../types/types.js';
-import { IO_NAMES, SystemEvents } from '../../../types/constants.js';
-import { WsServerEvent } from '../../../types/io/WsServerIoType.js';
+  IndexedEventEmitter,
+  Promised,
+} from 'squidlet-lib'
+
+import type { System } from '../../../system/System.js'
+import { DriverFactoryBase } from '../../../system/base/DriverFactoryBase.js'
+import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js'
+import { IO_NAMES, SystemEvents } from '../../../types/constants.js'
+import { LOCAL_HOST } from '../../../types/constants.js'
+import { WsServerEvent } from '../../../types/io/WsServerIoType.js'
 import type {
   WsServerIoFullType,
   WsServerProps,
-} from '../../../types/io/WsServerIoType.js';
-import DriverInstanceBase from '../../../system/base/DriverInstanceBase.js';
-import type { System } from '../../../system/System.js';
-import { DriverFactoryBase } from '../../../system/base/DriverFactoryBase.js';
-import { LOCAL_HOST } from '../../../types/constants.js';
+} from '../../../types/io/WsServerIoType.js'
+import type { DriverIndex, DriverManifest } from '../../../types/types.js'
 
 // TODO: можно ли установить cookie? стандартным способом?
 // TODO: а если сервер сам неожиданно отвалился?
 
 export interface WsServerDriverProps extends WsServerProps {
-  entityWhoAsk: string;
+  entityWhoAsk: string
 }
 
 export interface WsServerDriverInstanceProps extends WsServerDriverProps {
-  serverId: string;
+  serverId: string
 }
 
 export const WsServerDriverIndex: DriverIndex = (
   manifest: DriverManifest,
   system: System
 ) => {
-  return new WsServerDriver(system, manifest);
-};
+  return new WsServerDriver(system, manifest)
+}
 
 export class WsServerDriver extends DriverFactoryBase<
   WsServerInstance,
   WsServerDriverProps
 > {
-  readonly requireIo = [IO_NAMES.WsServerIo];
-  protected SubDriverClass = WsServerInstance;
+  readonly requireIo = [IO_NAMES.WsServerIo]
+  protected SubDriverClass = WsServerInstance
 
   protected common = {
     io: this.system.io.getIo<WsServerIoFullType>(IO_NAMES.WsServerIo),
-  };
+  }
 
-  private handlerIndex: number = -1;
+  private handlerIndex: number = -1
 
   async init(...p: any[]) {
-    await super.init(...p);
+    await super.init(...p)
 
     this.handlerIndex = await this.common.io.on(
       (eventName: WsServerEvent, serverId: string, ...p: any[]) => {
@@ -59,14 +60,14 @@ export class WsServerDriver extends DriverFactoryBase<
           eventName,
           serverId,
           ...p
-        );
+        )
 
         const instance = this.instances.find(
           (instance) => instance.serverId === serverId
-        );
+        )
 
         if (instance) {
-          this.logToConsole(instance, eventName, ...p);
+          this.logToConsole(instance, eventName, ...p)
         }
 
         // skip listening and serverClosed events because
@@ -75,65 +76,65 @@ export class WsServerDriver extends DriverFactoryBase<
           eventName === WsServerEvent.listening ||
           eventName === WsServerEvent.serverClosed
         )
-          return;
+          return
 
         if (instance) {
-          instance.$handleDriverEvent(eventName, ...p);
+          instance.$handleDriverEvent(eventName, ...p)
         } else {
           this.system.log.warn(
             `WsServerDriver: Can't find instance of Ws server "${serverId}"`
-          );
+          )
         }
       }
-    );
+    )
   }
 
   async destroy(destroyReason: string) {
-    await super.destroy(destroyReason);
-    await this.common.io.off(this.handlerIndex);
+    await super.destroy(destroyReason)
+    await this.common.io.off(this.handlerIndex)
   }
 
   protected makeMatchString(instanceProps: WsServerDriverProps): string {
-    return `${instanceProps.host}:${instanceProps.port}`;
+    return `${instanceProps.host}:${instanceProps.port}`
   }
 
   protected async makeInstanceProps(
     instanceProps: WsServerDriverProps
   ): Promise<WsServerDriverInstanceProps> {
-    const { entityWhoAsk, ...rest } = instanceProps;
-    const serverId = await this.common.io.newServer(rest);
-    const startedPromised = new Promised<void>();
+    const { entityWhoAsk, ...rest } = instanceProps
+    const serverId = await this.common.io.newServer(rest)
+    const startedPromised = new Promised<void>()
 
     // TODO: use timeout
 
     const handlerIndex = await this.common.io.on(
       (eventName: WsServerEvent, serverId: string, ...p: any[]) => {
         if (eventName === WsServerEvent.listening) {
-          startedPromised.resolve();
+          startedPromised.resolve()
 
-          this.common.io.off(handlerIndex);
+          this.common.io.off(handlerIndex)
         }
       }
-    );
+    )
 
-    await startedPromised;
+    await startedPromised
 
     return {
       ...instanceProps,
       serverId,
-    };
+    }
   }
 
   protected async destroyCb(instanceId: number): Promise<void> {
-    await super.destroyCb(instanceId);
-    await this.common.io.stopServer(this.instances[instanceId].serverId);
+    await super.destroyCb(instanceId)
+    await this.common.io.stopServer(this.instances[instanceId].serverId)
     // TODO: ожидать событие останоки сервера
   }
 
   protected async validateInstanceProps(
     instanceProps: WsServerDriverProps
   ): Promise<void> {
-    await super.validateInstanceProps(instanceProps);
+    await super.validateInstanceProps(instanceProps)
 
     if (
       instanceProps.host === LOCAL_HOST ||
@@ -143,25 +144,25 @@ export class WsServerDriver extends DriverFactoryBase<
         instanceProps.entityWhoAsk,
         this.name,
         LOCAL_HOST
-      );
+      )
 
       if (!isPermitted) {
-        throw new Error('Permission for localhost denied');
+        throw new Error('Permission for localhost denied')
       }
     } else {
       const isPermitted = await this.system.permissions.checkPermissions(
         instanceProps.entityWhoAsk,
         this.name,
         '0.0.0.0'
-      );
+      )
 
       if (!isPermitted) {
-        throw new Error('Permission for 0.0.0.0 denied');
+        throw new Error('Permission for 0.0.0.0 denied')
       }
     }
 
     if (await this.system.ports.isTcpPortFree(instanceProps.port)) {
-      throw new Error(`TCP port ${instanceProps.port} is already in use`);
+      throw new Error(`TCP port ${instanceProps.port} is already in use`)
     }
   }
 
@@ -174,20 +175,20 @@ export class WsServerDriver extends DriverFactoryBase<
       case WsServerEvent.listening:
         this.system.log.info(
           `WsServerDriver: Starting ws server: ${instance.props.host}:${instance.props.port}`
-        );
-        break;
+        )
+        break
       case WsServerEvent.serverClosed:
         this.system.log.info(
           `WsServerDriver: destroying websocket server: ${instance.props.host}:${instance.props.port}`
-        );
-        break;
+        )
+        break
       case WsServerEvent.newConnection:
         this.system.log.debug(
           `WsServerDriver: new connection on ws server ${instance.props.host}:${
             instance.props.port
           }, connection id ${p[0]}, ${JSON.stringify(p[1])}`
-        );
-        break;
+        )
+        break
       case WsServerEvent.connectionClose:
         this.system.log.debug(
           `WsServerDriver: connection ${p[0]} has been closed on server ${
@@ -195,13 +196,13 @@ export class WsServerDriver extends DriverFactoryBase<
           }:${instance.props.port} has been closed. Code ${p[1]}. Reason: ${
             p[2] || ''
           }`
-        );
-        break;
+        )
+        break
       case WsServerEvent.connectionMessage:
         this.system.log.debug(
           `WsServerDriver: income message on connection ${p[0]} on server ${instance.props.host}:${instance.props.port}, data length ${p[1].length}`
-        );
-        break;
+        )
+        break
       case WsServerEvent.connectionUnexpectedResponse:
         this.system.log.error(
           `WsServerDriver: unexpected response on connection ${
@@ -209,37 +210,37 @@ export class WsServerDriver extends DriverFactoryBase<
           } on ws server ${instance.props.host}:${
             instance.props.port
           }. ${JSON.stringify(p[1])}`
-        );
-        break;
+        )
+        break
       case WsServerEvent.connectionError:
         this.system.log.error(
           `WsServerDriver: error of connection ${p[0]} on ws server ${instance.props.host}:${instance.props.port}. ${p[1]}`
-        );
-        break;
+        )
+        break
       case WsServerEvent.serverError:
         this.system.log.error(
           `WsServerDriver: error on ws server ${instance.props.host}:${instance.props.port}. ${p[0]}`
-        );
-        break;
+        )
+        break
       default:
         this.system.log.warn(
           `WsServerDriver: Unrecognized event ${eventName} on server ${instance.props.host}:${instance.props.port}`
-        );
-        break;
+        )
+        break
     }
   }
 }
 
 export class WsServerInstance extends DriverInstanceBase<WsServerDriverInstanceProps> {
-  readonly events = new IndexedEventEmitter<(...args: any[]) => void>();
+  readonly events = new IndexedEventEmitter<(...args: any[]) => void>()
 
   get serverId(): string {
-    return this.props.serverId;
+    return this.props.serverId
   }
 
   async destroy() {
-    await super.destroy();
-    this.events.destroy();
+    await super.destroy()
+    this.events.destroy()
   }
 
   /**
@@ -248,10 +249,10 @@ export class WsServerInstance extends DriverInstanceBase<WsServerDriverInstanceP
   send = (connectionId: string, data: string | Uint8Array): Promise<void> => {
     this.system.log.debug(
       `WsServerInstance.send from ${this.props.host}:${this.props.port} to connection ${connectionId}, data length ${data.length}`
-    );
+    )
 
-    return this.common.io.send(this.serverId, connectionId, data);
-  };
+    return this.common.io.send(this.serverId, connectionId, data)
+  }
 
   /**
    * Explicitly closing a connection.
@@ -267,7 +268,7 @@ export class WsServerInstance extends DriverInstanceBase<WsServerDriverInstanceP
       connectionId,
       code,
       reason
-    );
+    )
   }
 
   /**
@@ -276,7 +277,7 @@ export class WsServerInstance extends DriverInstanceBase<WsServerDriverInstanceP
   onMessage(
     cb: (connectionId: string, data: Uint8Array) => void | Promise<void>
   ): number {
-    return this.events.addListener(WsServerEvent.connectionMessage, cb);
+    return this.events.addListener(WsServerEvent.connectionMessage, cb)
   }
 
   /**
@@ -285,7 +286,7 @@ export class WsServerInstance extends DriverInstanceBase<WsServerDriverInstanceP
   onConnection(
     cb: (connectionId: string, request: HttpRequest) => void | Promise<void>
   ): number {
-    return this.events.addListener(WsServerEvent.newConnection, cb);
+    return this.events.addListener(WsServerEvent.newConnection, cb)
   }
 
   /**
@@ -298,7 +299,7 @@ export class WsServerInstance extends DriverInstanceBase<WsServerDriverInstanceP
       reason?: string
     ) => void | Promise<void>
   ): number {
-    return this.events.addListener(WsServerEvent.connectionClose, cb);
+    return this.events.addListener(WsServerEvent.connectionClose, cb)
   }
 
   onConnectionError(
@@ -308,15 +309,15 @@ export class WsServerInstance extends DriverInstanceBase<WsServerDriverInstanceP
       response?: HttpResponse
     ) => void | Promise<void>
   ): number {
-    return this.events.addListener(WsServerEvent.connectionError, cb);
+    return this.events.addListener(WsServerEvent.connectionError, cb)
   }
 
   onServerError(cb: (err: string) => void | Promise<void>): number {
-    return this.events.addListener(WsServerEvent.serverError, cb);
+    return this.events.addListener(WsServerEvent.serverError, cb)
   }
 
   off(handlerIndex: number) {
-    this.events.removeListener(handlerIndex);
+    this.events.removeListener(handlerIndex)
   }
 
   $handleDriverEvent(eventName: WsServerEvent, ...p: any[]) {
@@ -325,10 +326,10 @@ export class WsServerInstance extends DriverInstanceBase<WsServerDriverInstanceP
         WsServerEvent.connectionError,
         'Unexpected response',
         ...p
-      );
+      )
     } else {
       // all other events
-      this.events.emit(eventName, ...p);
+      this.events.emit(eventName, ...p)
     }
   }
 }

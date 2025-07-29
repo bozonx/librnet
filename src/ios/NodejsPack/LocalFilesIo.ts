@@ -1,35 +1,36 @@
-import fs from 'node:fs/promises';
-import { open } from 'node:fs/promises';
-import type { GlobOptions, Stats } from 'node:fs';
-import { pathIsAbsolute } from 'squidlet-lib';
-import { AccessMode, type FilesIoType } from '../../types/io/FilesIoType.js';
+import type { GlobOptions, Stats } from 'node:fs'
+import fs from 'node:fs/promises'
+import { open } from 'node:fs/promises'
+import { pathIsAbsolute } from 'squidlet-lib'
+
+import { IoBase } from '../../system/base/IoBase.js'
+import {
+  DEFAULT_ENCODE,
+  IS_TEXT_FILE_UTF8_SAMPLE_SIZE,
+} from '../../types/constants.js'
+import { AccessMode, type FilesIoType } from '../../types/io/FilesIoType.js'
 import type {
   CopyOptions,
-  MkdirOptions,
   LinkOptions,
+  MkdirOptions,
   ReadBinFileOptions,
-  ReaddirOptions,
   ReadTextFileOptions,
+  ReaddirOptions,
   RmOptions,
   StatsSimplified,
   UtimesOptions,
   WriteFileOptions,
-} from '../../types/io/FilesIoType.js';
-import { IoBase } from '../../system/base/IoBase.js';
+} from '../../types/io/FilesIoType.js'
 import type {
   BinTypes,
-  IoIndex,
-  IoContext,
   BinTypesNames,
-} from '../../types/types.js';
-import {
-  DEFAULT_ENCODE,
-  IS_TEXT_FILE_UTF8_SAMPLE_SIZE,
-} from '../../types/constants.js';
+  IoContext,
+  IoIndex,
+} from '../../types/types.js'
 
 export const FilesIoIndex: IoIndex = (ctx: IoContext) => {
-  return new LocalFilesIo(ctx);
-};
+  return new LocalFilesIo(ctx)
+}
 
 export class LocalFilesIo extends IoBase implements FilesIoType {
   ////// READING //////
@@ -41,56 +42,56 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     if (!options.size) {
       return fs.readFile(pathTo, {
         encoding: options?.encoding || DEFAULT_ENCODE,
-      });
+      })
     }
 
-    const buffer = await this.readFileBuffer(pathTo, options);
+    const buffer = await this.readFileBuffer(pathTo, options)
 
-    return buffer.toString(options?.encoding || DEFAULT_ENCODE);
+    return buffer.toString(options?.encoding || DEFAULT_ENCODE)
   }
 
   async readBinFile(
     pathTo: string,
     options: ReadBinFileOptions = { returnType: 'Uint8Array', pos: 0 }
   ): Promise<BinTypes> {
-    const buffer = await this.readFileBuffer(pathTo, options);
+    const buffer = await this.readFileBuffer(pathTo, options)
 
     // Преобразуем в указанный тип
     switch (options.returnType) {
       case 'Int8Array':
-        return new Int8Array(buffer);
+        return new Int8Array(buffer)
       case 'Uint8Array':
-        return new Uint8Array(buffer);
+        return new Uint8Array(buffer)
       case 'Uint8ClampedArray':
-        return new Uint8ClampedArray(buffer);
+        return new Uint8ClampedArray(buffer)
       case 'Int16Array':
-        return new Int16Array(buffer);
+        return new Int16Array(buffer)
       case 'Uint16Array':
-        return new Uint16Array(buffer);
+        return new Uint16Array(buffer)
       case 'Int32Array':
-        return new Int32Array(buffer);
+        return new Int32Array(buffer)
       case 'Uint32Array':
-        return new Uint32Array(buffer);
+        return new Uint32Array(buffer)
       case 'Float32Array':
-        return new Float32Array(buffer);
+        return new Float32Array(buffer)
       case 'Float64Array':
-        return new Float64Array(buffer);
+        return new Float64Array(buffer)
       case 'BigInt64Array':
-        return new BigInt64Array(buffer);
+        return new BigInt64Array(buffer)
       case 'BigUint64Array':
-        return new BigUint64Array(buffer);
+        return new BigUint64Array(buffer)
       default:
-        throw new Error(`Unknown return type: ${options.returnType}`);
+        throw new Error(`Unknown return type: ${options.returnType}`)
     }
   }
 
   async stat(pathTo: string): Promise<StatsSimplified | undefined> {
-    let stat: Stats;
+    let stat: Stats
 
     try {
-      stat = await fs.stat(pathTo);
+      stat = await fs.stat(pathTo)
     } catch (e) {
-      return undefined;
+      return undefined
     }
 
     return {
@@ -110,16 +111,16 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
       rdev: stat.rdev,
       blksize: stat.blksize,
       blocks: stat.blocks,
-    };
+    }
   }
 
   // TODO: test
   async exists(pathTo: string): Promise<boolean> {
     try {
-      await fs.access(pathTo);
-      return true;
+      await fs.access(pathTo)
+      return true
     } catch (e) {
-      return false;
+      return false
     }
   }
 
@@ -127,48 +128,48 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     return fs.readdir(pathTo, {
       ...options,
       encoding: options?.encoding || DEFAULT_ENCODE,
-    });
+    })
   }
 
   readlink(pathTo: string): Promise<string> {
-    return fs.readlink(pathTo);
+    return fs.readlink(pathTo)
   }
 
   async isTextFileUtf8(pathTo: string): Promise<boolean> {
     try {
       // Получаем размер файла
-      const stats = await fs.stat(pathTo);
+      const stats = await fs.stat(pathTo)
 
       // Если файл пустой, считаем его валидным UTF-8
       if (stats.size === 0) {
-        return true;
+        return true
       }
 
       // Читаем только первые 8KB для проверки UTF-8
       // Этого достаточно для определения кодировки большинства текстовых файлов
-      const sampleSize = Math.min(IS_TEXT_FILE_UTF8_SAMPLE_SIZE, stats.size);
+      const sampleSize = Math.min(IS_TEXT_FILE_UTF8_SAMPLE_SIZE, stats.size)
 
       // Открываем файл и читаем только нужную часть
-      const fileHandle = await open(pathTo, 'r');
+      const fileHandle = await open(pathTo, 'r')
       try {
-        const buffer = Buffer.alloc(sampleSize);
-        const { bytesRead } = await fileHandle.read(buffer, 0, sampleSize, 0);
+        const buffer = Buffer.alloc(sampleSize)
+        const { bytesRead } = await fileHandle.read(buffer, 0, sampleSize, 0)
 
         // Используем нативную функцию Buffer.toString() для проверки UTF-8
         // Если файл не является валидным UTF-8, toString() выбросит ошибку
-        buffer.subarray(0, bytesRead).toString('utf8');
+        buffer.subarray(0, bytesRead).toString('utf8')
       } finally {
-        await fileHandle.close();
+        await fileHandle.close()
       }
-      return true;
+      return true
     } catch (error) {
       // Если файл не существует или произошла ошибка чтения/декодирования, возвращаем false
-      return false;
+      return false
     }
   }
 
   async realpath(pathTo: string): Promise<string> {
-    return fs.realpath(pathTo);
+    return fs.realpath(pathTo)
   }
 
   // TODO: test
@@ -176,19 +177,19 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     pattern: string | string[],
     options: GlobOptions = {}
   ): Promise<string[]> {
-    const patterns = Array.isArray(pattern) ? pattern : [pattern];
+    const patterns = Array.isArray(pattern) ? pattern : [pattern]
 
     if (!patterns.every(pathIsAbsolute) && !options?.cwd) {
-      throw new Error('If you use relative path, you have to pass cwd');
+      throw new Error('If you use relative path, you have to pass cwd')
     }
 
-    const result: string[] = [];
+    const result: string[] = []
 
     for await (const item of fs.glob(pattern, options)) {
-      result.push(item.toString());
+      result.push(item.toString())
     }
 
-    return result;
+    return result
   }
 
   // TODO: test
@@ -197,10 +198,10 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     mode: AccessMode = AccessMode.F_OK
   ): Promise<boolean> {
     try {
-      await fs.access(pathTo, mode);
-      return true;
+      await fs.access(pathTo, mode)
+      return true
     } catch (e) {
-      return false;
+      return false
     }
   }
 
@@ -211,24 +212,24 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     data: string | Uint8Array,
     options?: WriteFileOptions
   ): Promise<void> {
-    let wasExist = true;
+    let wasExist = true
 
     try {
-      await fs.access(pathTo);
+      await fs.access(pathTo)
     } catch (e) {
-      wasExist = false;
+      wasExist = false
     }
 
     if (typeof data === 'string') {
       // if file doesn't exist it will be created
       await fs.appendFile(pathTo, data, {
         encoding: options?.encoding || DEFAULT_ENCODE,
-      });
+      })
     } else {
-      await fs.appendFile(pathTo, data, options);
+      await fs.appendFile(pathTo, data, options)
     }
 
-    if (!wasExist) await this.changeOwner(pathTo, options?.uid, options?.gid);
+    if (!wasExist) await this.changeOwner(pathTo, options?.uid, options?.gid)
   }
 
   async writeFile(
@@ -239,12 +240,12 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     if (typeof data === 'string') {
       await fs.writeFile(pathTo, data, {
         encoding: options?.encoding || DEFAULT_ENCODE,
-      });
+      })
     } else {
-      await fs.writeFile(pathTo, data, options);
+      await fs.writeFile(pathTo, data, options)
     }
 
-    await this.changeOwner(pathTo, options?.uid, options?.gid);
+    await this.changeOwner(pathTo, options?.uid, options?.gid)
   }
 
   async rm(paths: string[], options?: RmOptions): Promise<void> {
@@ -260,13 +261,13 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
           .map((result) => ({
             path: result.reason.path || 'unknown',
             error: result.reason.message || 'Unknown error',
-          }));
+          }))
 
         if (errors.length > 0) {
-          throw errors;
+          throw errors
         }
       }
-    );
+    )
   }
 
   async cp(files: [string, string][], options?: CopyOptions): Promise<void> {
@@ -282,19 +283,19 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
         .map((result) => ({
           path: result.reason.path || 'unknown',
           error: result.reason.message || 'Unknown error',
-        }));
+        }))
 
       if (errors.length > 0) {
-        throw errors;
+        throw errors
       }
-    });
+    })
 
     if (options?.uid || options?.gid) {
       await Promise.allSettled(
         files.map((item) =>
           this.changeOwner(item[1], options?.uid, options?.gid)
         )
-      );
+      )
     }
   }
 
@@ -311,17 +312,17 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
         .map((result) => ({
           path: result.reason.path || 'unknown',
           error: result.reason.message || 'Unknown error',
-        }));
+        }))
 
       if (errors.length > 0) {
-        throw errors;
+        throw errors
       }
-    });
+    })
   }
 
   async mkdir(pathTo: string, options?: MkdirOptions): Promise<void> {
-    await fs.mkdir(pathTo, options);
-    await this.changeOwner(pathTo, options?.uid, options?.gid);
+    await fs.mkdir(pathTo, options)
+    await this.changeOwner(pathTo, options?.uid, options?.gid)
   }
 
   // TODO: test
@@ -331,12 +332,12 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     options: LinkOptions = { symlink: true }
   ): Promise<void> {
     if (options.symlink) {
-      await fs.symlink(target, pathTo);
+      await fs.symlink(target, pathTo)
     } else {
-      await fs.link(target, pathTo);
+      await fs.link(target, pathTo)
     }
 
-    await this.changeOwner(pathTo, options?.uid, options?.gid);
+    await this.changeOwner(pathTo, options?.uid, options?.gid)
   }
 
   // TODO: test
@@ -347,38 +348,38 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
     options: UtimesOptions = { followSymlinks: true }
   ): Promise<void> {
     if (options.followSymlinks) {
-      await fs.utimes(pathTo, atime, mtime);
+      await fs.utimes(pathTo, atime, mtime)
     } else {
-      await fs.lutimes(pathTo, atime, mtime);
+      await fs.lutimes(pathTo, atime, mtime)
     }
   }
 
   // TODO: test
   async truncate(pathTo: string, len: number = 0): Promise<void> {
-    await fs.truncate(pathTo, len);
+    await fs.truncate(pathTo, len)
   }
 
   // TODO: test
   async chown(pathTo: string, uid: number, gid: number): Promise<void> {
-    await fs.chown(pathTo, uid, gid);
+    await fs.chown(pathTo, uid, gid)
   }
 
   // TODO: test
   async chmod(pathTo: string, mode: number): Promise<void> {
-    await fs.chmod(pathTo, mode);
+    await fs.chmod(pathTo, mode)
   }
 
   private async changeOwner(pathTo: string, uid?: number, gid?: number) {
     if (!uid && !gid) {
       // if noting to change - just return
-      return;
+      return
     } else if (uid && gid) {
       // uid and gid are specified - set both
-      return await fs.chown(pathTo, uid, gid);
+      return await fs.chown(pathTo, uid, gid)
     }
     // else load stats to resolve lack of params
-    const stat: Stats = await fs.stat(pathTo);
-    await fs.chown(pathTo, uid || stat.uid, gid || stat.gid);
+    const stat: Stats = await fs.stat(pathTo)
+    await fs.chown(pathTo, uid || stat.uid, gid || stat.gid)
   }
 
   /**
@@ -393,36 +394,36 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
   ): Promise<Buffer> {
     // Если размер и позиция не указаны, читаем весь файл
     if (options.size === undefined && options.pos === undefined) {
-      return fs.readFile(pathTo);
+      return fs.readFile(pathTo)
     }
 
     // Читаем часть файла с позиции
-    const fileHandle = await fs.open(pathTo, 'r');
+    const fileHandle = await fs.open(pathTo, 'r')
     try {
       // Получаем размер файла для определения сколько читать
-      const stats = await fileHandle.stat();
-      const pos = options.pos || 0;
-      const size = options.size !== undefined ? options.size : stats.size - pos;
+      const stats = await fileHandle.stat()
+      const pos = options.pos || 0
+      const size = options.size !== undefined ? options.size : stats.size - pos
 
       // Проверяем, что позиция не выходит за пределы файла
       if (pos >= stats.size) {
-        return Buffer.alloc(0);
+        return Buffer.alloc(0)
       }
 
       // Ограничиваем размер чтения размером файла
-      const readSize = Math.min(size, stats.size - pos);
+      const readSize = Math.min(size, stats.size - pos)
 
       if (readSize <= 0) {
-        return Buffer.alloc(0);
+        return Buffer.alloc(0)
       }
 
-      const buffer = Buffer.alloc(readSize);
-      const result = await fileHandle.read(buffer, 0, readSize, pos);
+      const buffer = Buffer.alloc(readSize)
+      const result = await fileHandle.read(buffer, 0, readSize, pos)
 
       // Возвращаем только прочитанные байты
-      return buffer.subarray(0, result.bytesRead);
+      return buffer.subarray(0, result.bytesRead)
     } finally {
-      await fileHandle.close();
+      await fileHandle.close()
     }
   }
 }

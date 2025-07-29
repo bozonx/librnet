@@ -1,8 +1,9 @@
-import { arraysDifference } from 'squidlet-lib';
-import type { System } from '../System';
-import type { EntityStatus } from '../../types/constants.js';
-import type { EntityManifest, EntityType } from '../../types/types.js';
-import type { EntityBaseContext } from '../context/EntityBaseContext.js';
+import { arraysDifference } from 'squidlet-lib'
+
+import type { EntityStatus } from '../../types/constants.js'
+import type { EntityManifest, EntityType } from '../../types/types.js'
+import type { System } from '../System'
+import type { EntityBaseContext } from '../context/EntityBaseContext.js'
 
 // TODO: use status fallen
 
@@ -14,25 +15,25 @@ enum ENTITY_POSITIONS {
 }
 
 export abstract class EntityManagerBase<Context extends EntityBaseContext> {
-  abstract readonly type: Extract<EntityType, 'app' | 'service'>;
+  abstract readonly type: Extract<EntityType, 'app' | 'service'>
 
   private entities: Record<
     string,
     [EntityManifest, (ctx: Context) => Promise<void>, Context, EntityStatus]
-  > = {};
+  > = {}
 
   constructor(protected readonly system: System) {}
 
   getNames(): string[] {
-    return Object.keys(this.entities);
+    return Object.keys(this.entities)
   }
 
   getContext(entityName: string): Context | undefined {
-    return this.entities[entityName][ENTITY_POSITIONS.context];
+    return this.entities[entityName][ENTITY_POSITIONS.context]
   }
 
   getStatus(entityName: string): EntityStatus {
-    return this.entities[entityName][ENTITY_POSITIONS.status];
+    return this.entities[entityName][ENTITY_POSITIONS.status]
   }
 
   /**
@@ -46,7 +47,7 @@ export abstract class EntityManagerBase<Context extends EntityBaseContext> {
     }
 
     for (const entityName of Object.keys(this.entities)) {
-      await this.initEntity(entityName);
+      await this.initEntity(entityName)
     }
   }
 
@@ -56,13 +57,13 @@ export abstract class EntityManagerBase<Context extends EntityBaseContext> {
   async destroy() {
     // TODO: use Promise.allSettled([
     for (const entityName of Object.keys(this.entities)) {
-      await this.destroyEntity(entityName);
+      await this.destroyEntity(entityName)
     }
   }
 
   async startAll() {
     for (const entityName of Object.keys(this.entities)) {
-      await this.startEntity(entityName);
+      await this.startEntity(entityName)
     }
   }
 
@@ -73,59 +74,59 @@ export abstract class EntityManagerBase<Context extends EntityBaseContext> {
     if (this.getStatus(entityName) !== 'loaded') {
       this.system.log.warn(
         `EntityManager: entity "${entityName}" has been already initialized`
-      );
-      return;
+      )
+      return
     } else if (!this.entities[entityName]) {
       this.system.log.warn(
         `EntityManager: entity "${entityName}" has not been registered`
-      );
-      return;
+      )
+      return
     }
 
     try {
-      this.checkDependencies(entityName);
+      this.checkDependencies(entityName)
     } catch (e) {
       this.system.log.error(
         `EntityManager: "${entityName}" no meet dependencies on init: ${e}`
-      );
-      return this.setStatus(entityName, 'initError', String(e));
+      )
+      return this.setStatus(entityName, 'initError', String(e))
     }
 
-    const [, entityIndex, context] = this.entities[entityName];
+    const [, entityIndex, context] = this.entities[entityName]
 
-    this.system.log.debug(`EntityManager: initializing entity "${entityName}"`);
-    this.setStatus(entityName, 'initializing');
+    this.system.log.debug(`EntityManager: initializing entity "${entityName}"`)
+    this.setStatus(entityName, 'initializing')
 
     try {
-      await context.init();
-      await entityIndex(context);
+      await context.init()
+      await entityIndex(context)
     } catch (e) {
       this.system.log.error(
         `EntityManager: entity "${entityName}" initialization error: ${e}`
-      );
-      this.setStatus(entityName, 'initError', String(e));
-      return;
+      )
+      this.setStatus(entityName, 'initError', String(e))
+      return
     }
 
-    this.setStatus(entityName, 'initialized');
+    this.setStatus(entityName, 'initialized')
   }
 
   /**
    * Destroy entity on system destroy or uninstall
    */
   async destroyEntity(entityName: string) {
-    const [, , context] = this.entities[entityName];
+    const [, , context] = this.entities[entityName]
 
-    this.system.log.debug(`EntityManager: destroying "${entityName}"`);
-    this.setStatus(entityName, 'destroying');
+    this.system.log.debug(`EntityManager: destroying "${entityName}"`)
+    this.setStatus(entityName, 'destroying')
     // TODO: добавить таймаут дестроя
     try {
-      await context.$getHooks().onDestroy();
-      await context.destroy();
+      await context.$getHooks().onDestroy()
+      await context.destroy()
 
-      delete this.entities[entityName];
+      delete this.entities[entityName]
     } catch (e) {
-      this.system.log.error(`${entityName} destroyed with error: ${e}`);
+      this.system.log.error(`${entityName} destroyed with error: ${e}`)
     }
   }
 
@@ -133,73 +134,73 @@ export abstract class EntityManagerBase<Context extends EntityBaseContext> {
     if (this.getStatus(entityName) === 'starting') {
       return this.system.log.warn(
         `EntityManager: entity "${entityName}" is already starting`
-      );
+      )
     } else if (this.getStatus(entityName) === 'running') {
       return this.system.log.warn(
         `EntityManager: entity "${entityName}" has been already started`
-      );
+      )
     }
 
     try {
-      this.checkDependencies(entityName);
+      this.checkDependencies(entityName)
     } catch (e) {
       this.system.log.error(
         `EntityManager: "${entityName}" no meet dependencies on start: ${e}`
-      );
-      return this.setStatus(entityName, 'startError', String(e));
+      )
+      return this.setStatus(entityName, 'startError', String(e))
     }
 
-    this.system.log.debug(`EntityManager: starting entity "${entityName}"`);
-    this.setStatus(entityName, 'starting');
+    this.system.log.debug(`EntityManager: starting entity "${entityName}"`)
+    this.setStatus(entityName, 'starting')
 
     // TODO: add timeout
 
-    const [, , context] = this.entities[entityName];
+    const [, , context] = this.entities[entityName]
     try {
-      await context.$getHooks().onStart();
+      await context.$getHooks().onStart()
     } catch (e) {
       this.system.log.error(
         `EntityManager: entity "${entityName}" start error: ${e}`
-      );
-      this.setStatus(entityName, 'startError', String(e));
+      )
+      this.setStatus(entityName, 'startError', String(e))
 
-      return;
+      return
     }
 
-    this.setStatus(entityName, 'running');
+    this.setStatus(entityName, 'running')
   }
 
   async stopEntity(entityName: string) {
     if (this.getStatus(entityName) === 'stopping') {
       return this.system.log.warn(
         `EntityManager: entity "${entityName}" is already stopping`
-      );
+      )
     } else if (this.getStatus(entityName) === 'stopped') {
       return this.system.log.warn(
         `EntityManager: entity "${entityName}" has been already stopped`
-      );
+      )
     }
 
-    this.system.log.debug(`EntityManager: stopping entity "${entityName}"`);
-    this.setStatus(entityName, 'stopping');
+    this.system.log.debug(`EntityManager: stopping entity "${entityName}"`)
+    this.setStatus(entityName, 'stopping')
 
     // TODO: add timeout
 
-    const [, , context] = this.entities[entityName];
+    const [, , context] = this.entities[entityName]
 
     try {
-      await context.$getHooks().onStop();
+      await context.$getHooks().onStop()
     } catch (e) {
       this.system.log.error(
         `EntityManager: entity "${entityName}" stop error: ${e}`
-      );
+      )
 
-      this.setStatus(entityName, 'stopError', String(e));
+      this.setStatus(entityName, 'stopError', String(e))
 
-      return;
+      return
     }
 
-    this.setStatus(entityName, 'stopped');
+    this.setStatus(entityName, 'stopped')
   }
 
   /**
@@ -215,19 +216,19 @@ export abstract class EntityManagerBase<Context extends EntityBaseContext> {
     if (this.entities[manifest.name]) {
       return this.system.log.warn(
         `EntityManager: entity "${manifest.name}" has been already loaded`
-      );
+      )
     }
 
-    this.entities[manifest.name] = [manifest, entityIndex, context, 'loaded'];
+    this.entities[manifest.name] = [manifest, entityIndex, context, 'loaded']
   }
 
   protected checkDependencies(entityName: string) {
-    const [manifest] = this.entities[entityName];
+    const [manifest] = this.entities[entityName]
 
     if (manifest.requireDriver) {
       const found: string[] = this.system.drivers.getNames().filter((el) => {
-        if (manifest.requireDriver?.includes(el)) return true;
-      });
+        if (manifest.requireDriver?.includes(el)) return true
+      })
 
       if (found.length !== manifest.requireDriver.length) {
         throw new Error(
@@ -235,14 +236,14 @@ export abstract class EntityManagerBase<Context extends EntityBaseContext> {
             found,
             manifest.requireDriver
           ).join()}`
-        );
+        )
       }
     }
 
     if (manifest.requireService) {
       const found: string[] = this.getNames().filter((el) => {
-        if (manifest.requireService?.includes(el)) return true;
-      });
+        if (manifest.requireService?.includes(el)) return true
+      })
 
       if (found.length !== manifest.requireService.length) {
         throw new Error(
@@ -250,7 +251,7 @@ export abstract class EntityManagerBase<Context extends EntityBaseContext> {
             found,
             manifest.requireService
           ).join()}`
-        );
+        )
       }
     }
   }
@@ -260,7 +261,7 @@ export abstract class EntityManagerBase<Context extends EntityBaseContext> {
     newStatus: EntityStatus,
     details?: any
   ) {
-    this.entities[entityName][ENTITY_POSITIONS.status] = newStatus;
-    this.system.events.emit(this.type, entityName, newStatus, details);
+    this.entities[entityName][ENTITY_POSITIONS.status] = newStatus
+    this.system.events.emit(this.type, entityName, newStatus, details)
   }
 }

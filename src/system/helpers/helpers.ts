@@ -1,23 +1,24 @@
 import {
+  Promised,
   clearRelPath,
   makeUniqId,
-  trimCharStart,
   pathJoin,
-  Promised,
-} from 'squidlet-lib';
-import type { MountPoint } from '../../types/types';
-import { REQUEST_ID_LENGTH } from '../../types/constants';
+  trimCharStart,
+} from 'squidlet-lib'
+
+import { REQUEST_ID_LENGTH } from '../../types/constants'
+import type { MountPoint } from '../../types/types'
 
 export interface RequestError {
-  code: number;
-  message: string;
+  code: number
+  message: string
 }
 
 export function requestError(code: number, message: string): RequestError {
   return {
     code,
     message,
-  };
+  }
 }
 
 /**
@@ -25,7 +26,7 @@ export function requestError(code: number, message: string): RequestError {
  * Used by WsAppApi service
  */
 export function makeRequestId(): string {
-  return makeUniqId(REQUEST_ID_LENGTH);
+  return makeUniqId(REQUEST_ID_LENGTH)
 }
 
 export function resolveRealPath(
@@ -35,12 +36,12 @@ export function resolveRealPath(
 ): string {
   // TODO: resolve real path using mount points
 
-  return pathJoin(rootDir, path);
+  return pathJoin(rootDir, path)
 }
 
 // TODO: do it. remove urls and relative paths
 export function clearAbsolutePath(pathTo: string): string {
-  return trimCharStart(clearRelPath(pathTo), '/');
+  return trimCharStart(clearRelPath(pathTo), '/')
 }
 
 export async function allSettledWithTimeout(
@@ -49,17 +50,17 @@ export async function allSettledWithTimeout(
   errorMessage: string
 ): Promise<void> {
   for (const item of promises) {
-    const promised = new Promised();
+    const promised = new Promised()
 
-    promises.push(promised.start(item, timeout));
+    promises.push(promised.start(item, timeout))
   }
 
-  const result = await Promise.allSettled(promises);
+  const result = await Promise.allSettled(promises)
   let errors = result
     .filter((item) => item.status === 'rejected')
-    .map((item) => item.reason);
+    .map((item) => item.reason)
 
   if (errors.length > 0) {
-    throw new Error(`${errorMessage}:\n${errors.join('\n')}`);
+    throw new Error(`${errorMessage}:\n${errors.join('\n')}`)
   }
 }

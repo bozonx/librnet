@@ -1,44 +1,44 @@
-import { EntityTypes } from './types.js';
+import { EntityTypes } from './types.js'
 
 // Manifest of a service or app
 export interface EntityManifest {
-  type: EntityTypes;
+  type: EntityTypes
   // Unique name
-  name: string;
+  name: string
   // If not set, it will be the same as the package version
-  version: string;
+  version: string
   // Path to the package
-  distDir: string;
+  distDir: string
   // name in different languages
-  nameLocale?: Record<string, string>;
+  nameLocale?: Record<string, string>
   // description in different languages
-  description?: Record<string, string>;
+  description?: Record<string, string>
   // If not set, it will be the same as the package author
-  author?: string;
+  author?: string
   // If not set, it will be the same as the package license
-  license?: string;
+  license?: string
   // homepage of the entity
-  homepage?: string;
+  homepage?: string
   // repository of the entity
-  repository?: string;
+  repository?: string
   // bugs of the entity
-  bugs?: string;
-  requireDriver?: string[];
-  requireService?: string[];
+  bugs?: string
+  requireDriver?: string[]
+  requireService?: string[]
 }
 
 export interface AppManifest extends EntityManifest {
-  type: EntityTypes.app;
+  type: EntityTypes.app
 }
 
 export interface ServiceManifest extends EntityManifest {
-  type: EntityTypes.service;
+  type: EntityTypes.service
 }
 
 export interface DriverManifest extends EntityManifest {
-  type: EntityTypes.driver;
+  type: EntityTypes.driver
 }
 
 export interface IoManifest extends EntityManifest {
-  type: EntityTypes.io;
+  type: EntityTypes.io
 }

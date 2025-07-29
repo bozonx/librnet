@@ -1,21 +1,16 @@
-import type {ChannelInstanceType, ChannelType} from './ChannelType.js'
-import type {WebSocketClientProps} from '../../types/io/WsClientIoType.js'
-
+import type { WebSocketClientProps } from '../../types/io/WsClientIoType.js'
+import type { ChannelInstanceType, ChannelType } from './ChannelType.js'
 
 export class WsClientChannel implements ChannelType {
   private props: WebSocketClientProps
-
 
   constructor(props: WebSocketClientProps) {
     this.props = props
   }
 
-  async init() {
-  }
+  async init() {}
 
-  async destroy() {
-
-  }
+  async destroy() {}
 
   makeConnectionId(): string {
     return this.props.url
@@ -24,5 +19,4 @@ export class WsClientChannel implements ChannelType {
   registerChannel(connectionId: string, channel: number): ChannelInstanceType {
     return {} as any
   }
-
 }

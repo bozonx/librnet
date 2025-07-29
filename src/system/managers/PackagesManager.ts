@@ -1,16 +1,17 @@
-import { pathJoin, trimChar } from 'squidlet-lib';
-import type { System } from '../System.js';
-import type { AnyEntityManifest } from '@/types/types.js';
+import semver from 'semver'
+import { pathJoin, trimChar } from 'squidlet-lib'
+import yaml from 'yaml'
+
+import type { System } from '../System.js'
+import type { ArchiveDriver } from '@/system/drivers/ArchiveDriver/ArchiveDriver.js'
 import {
   DRIVER_NAMES,
   ENTITY_MANIFEST_FILE_NAME,
   LOCAL_DATA_SUB_DIRS,
   ROOT_DIRS,
   SYSTEM_ENTITY,
-} from '@/types/constants.js';
-import type { ArchiveDriver } from '@/system/drivers/ArchiveDriver/ArchiveDriver.js';
-import yaml from 'yaml';
-import semver from 'semver';
+} from '@/types/constants.js'
+import type { AnyEntityManifest } from '@/types/types.js'
 
 export class PackagesManager {
   constructor(private readonly system: System) {}
@@ -25,37 +26,37 @@ export class PackagesManager {
 
     const archiveDriver = this.system.drivers.getDriver<ArchiveDriver>(
       DRIVER_NAMES.ArchiveDriver
-    );
+    )
     const archiveFiles = await archiveDriver.makeInstance({
       entityWhoAsk: SYSTEM_ENTITY,
       archivePath: pathToPkg,
-    });
+    })
     const manifestContent = await archiveFiles.readTextFile(
       '/' + ENTITY_MANIFEST_FILE_NAME
-    );
-    const manifest = yaml.parse(manifestContent);
+    )
+    const manifest = yaml.parse(manifestContent)
 
-    let installedManifest;
+    let installedManifest
 
     try {
-      installedManifest = await this.getInstalledEntityManifest(manifest.name);
+      installedManifest = await this.getInstalledEntityManifest(manifest.name)
     } catch (e) {
       // remove installed entity
-      await this.uninstall(manifest.name);
+      await this.uninstall(manifest.name)
     }
 
     if (installedManifest) {
       if (force) {
-        await this.uninstall(manifest.name);
+        await this.uninstall(manifest.name)
       } else {
         if (semver.gt(manifest.version, installedManifest.version)) {
-          await this.uninstall(manifest.name);
+          await this.uninstall(manifest.name)
         } else if (semver.eq(manifest.version, installedManifest.version)) {
-          throw new Error(`Entity "${manifest.name}" already installed`);
+          throw new Error(`Entity "${manifest.name}" already installed`)
         } else {
           throw new Error(
             `Entity "${manifest.name}" version is older than installed`
-          );
+          )
         }
       }
     }
@@ -67,7 +68,7 @@ export class PackagesManager {
         LOCAL_DATA_SUB_DIRS.programs,
         manifest.name
       )
-    );
+    )
 
     await archiveFiles.extractToDest(
       '/' + trimChar(manifest.distDir, '/'),
@@ -78,13 +79,13 @@ export class PackagesManager {
         manifest.name
       ),
       pathToPkg
-    );
+    )
   }
 
   async uninstall(entityName: string) {
     await this.system.localFiles.rmRf(
       pathJoin('/', ROOT_DIRS.local, LOCAL_DATA_SUB_DIRS.programs, entityName)
-    );
+    )
   }
 
   private async getInstalledEntityManifest(
@@ -92,10 +93,10 @@ export class PackagesManager {
   ): Promise<AnyEntityManifest | undefined> {
     const programFilesDirItems = await this.system.localFiles.readdir(
       pathJoin('/', ROOT_DIRS.local, LOCAL_DATA_SUB_DIRS.programs)
-    );
+    )
 
     if (!programFilesDirItems.find((item) => item === entytyName)) {
-      return;
+      return
     }
 
     const manifestContent = await this.system.localFiles.readTextFile(
@@ -105,8 +106,8 @@ export class PackagesManager {
         entytyName,
         ENTITY_MANIFEST_FILE_NAME
       )
-    );
+    )
 
-    return yaml.parse(manifestContent);
+    return yaml.parse(manifestContent)
   }
 }
