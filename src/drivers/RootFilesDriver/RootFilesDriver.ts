@@ -1,9 +1,9 @@
 import type { System } from '@/system/System.js'
 import { DriverFactoryBase } from '@/system/base/DriverFactoryBase.js'
 import DriverInstanceBase from '@/system/base/DriverInstanceBase.js'
-import { RootDirDriverLogic } from '@/system/driversLogic/RootDirDriverLogic.js'
 import { checkPermissions } from '@/system/helpers/CheckPathPermission.js'
 import { clearAbsolutePath } from '@/system/helpers/helpers.js'
+import { RootDirDriverLogic } from '@/system/managers/RootDirAccess.js'
 import { FILE_ACTION, IO_NAMES } from '@/types/constants.js'
 import type {
   CopyOptions,

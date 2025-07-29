@@ -14,7 +14,6 @@ import {
   type SystemEnv,
   SystemEvents,
 } from '../types/types.js'
-import { RootDirDriverLogic } from './driversLogic/RootDirDriverLogic.js'
 import { AppsManager } from './managers/AppsManager.js'
 import { ConfigsManager } from './managers/ConfigsManager.js'
 import { DriversManager } from './managers/DriversManager.js'
@@ -25,6 +24,7 @@ import { MountPointsManager } from './managers/MountPointsManager.js'
 import { PackagesManager } from './managers/PackagesManager.js'
 import { PermissionsManager } from './managers/PermissionsManager.js'
 import { PortsManager } from './managers/PortsManager.js'
+import { RootDirAccess } from './managers/RootDirAccess.js'
 import { ServicesManager } from './managers/ServicesManager.js'
 import { SystemApiManager } from './managers/SystemApiManager.js'
 
@@ -36,7 +36,7 @@ export class System {
 
   // this is access to local files only for system purposes
   // It doesn't check permissions but rises events
-  readonly localFiles = new RootDirDriverLogic(this, this.env.ROOT_DIR)
+  readonly localFiles = new RootDirAccess(this, this.env.ROOT_DIR)
   // managers
   readonly mountPoints = new MountPointsManager(this, this.env.ROOT_DIR)
   readonly fileLogs = new FileLogsManager(this)

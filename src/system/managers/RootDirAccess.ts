@@ -1,4 +1,4 @@
-import { FilesDriverLogic } from './FilesDriverLogic.js'
+import { FilesDriverLogic } from '../driversLogic/FilesDriverLogic.js'
 import { System } from '@/system/System.js'
 import type { IoBase } from '@/system/base/IoBase.js'
 import { resolveRealPath } from '@/system/helpers/helpers.js'
@@ -7,7 +7,7 @@ import type { FilesEventData } from '@/types/EventsData.js'
 import type { FilesIoType } from '@/types/io/FilesIoType.js'
 import { SystemEvents } from '@/types/types.js'
 
-export class RootDirDriverLogic extends FilesDriverLogic {
+export class RootDirAccess extends FilesDriverLogic {
   constructor(
     protected readonly system: System,
     protected readonly rootDir: string

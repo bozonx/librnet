@@ -12,8 +12,11 @@ import type {
   StatsSimplified,
   WriteFileOptions,
 } from '@/types/io/FilesIoType.js'
-import type { MkdirOptions } from '@/types/io/FilesIoType.js'
-import type { BinTypes, BinTypesNames } from '@/types/types.js'
+import {
+  type BinTypes,
+  type BinTypesNames,
+  FileActions,
+} from '@/types/types.js'
 
 /**
  * Logic of the files driver which:
@@ -40,7 +43,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
     this.riseEvent({
       path: pathTo,
-      action: FILE_ACTION.read,
+      action: FileActions.read,
       method: 'readTextFile',
       timestamp: Date.now(),
       size: result.length,
@@ -60,7 +63,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
     this.riseEvent({
       path: pathTo,
-      action: FILE_ACTION.read,
+      action: FileActions.read,
       method: 'readBinFile',
       timestamp: Date.now(),
       size: result.byteLength,
@@ -74,7 +77,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
     this.riseEvent({
       path: pathTo,
-      action: FILE_ACTION.read,
+      action: FileActions.read,
       method: 'stat',
       timestamp: Date.now(),
       // do not calculate size because it is very difficult to do
@@ -89,7 +92,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
     this.riseEvent({
       path: pathTo,
-      action: FILE_ACTION.read,
+      action: FileActions.read,
       method: 'exists',
       timestamp: Date.now(),
     })
@@ -102,7 +105,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
     this.riseEvent({
       path: pathTo,
-      action: FILE_ACTION.read,
+      action: FileActions.read,
       method: 'readdir',
       timestamp: Date.now(),
       size: result.reduce((acc, item) => acc + item.length, 0),
@@ -117,7 +120,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
     this.riseEvent({
       path: pathTo,
-      action: FILE_ACTION.read,
+      action: FileActions.read,
       method: 'readlink',
       timestamp: Date.now(),
       // TODO: известно ли сколько байт считывается?
@@ -131,7 +134,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
     this.riseEvent({
       path: pathTo,
-      action: FILE_ACTION.read,
+      action: FileActions.read,
       method: 'isTextFileUtf8',
       timestamp: Date.now(),
       size: IS_TEXT_FILE_UTF8_SAMPLE_SIZE,
@@ -148,7 +151,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
     this.riseEvent({
       path: pathToDir,
-      action: FILE_ACTION.read,
+      action: FileActions.read,
       method: 'isDir',
       timestamp: Date.now(),
       // do not calculate size
@@ -162,7 +165,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
     this.riseEvent({
       path: pathToFile,
-      action: FILE_ACTION.read,
+      action: FileActions.read,
       method: 'isFile',
       timestamp: Date.now(),
       // do not calculate size
@@ -178,7 +181,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
     this.riseEvent({
       path: pathToSymLink,
-      action: FILE_ACTION.read,
+      action: FileActions.read,
       method: 'isSymLink',
       timestamp: Date.now(),
       // do not calculate size
@@ -202,7 +205,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
     this.riseEvent({
       path: pathTo,
-      action: FILE_ACTION.write,
+      action: FileActions.write,
       method: 'appendFile',
       timestamp: Date.now(),
       size: data.length,
@@ -218,7 +221,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
     this.riseEvent({
       path: pathTo,
-      action: FILE_ACTION.write,
+      action: FileActions.write,
       method: 'writeFile',
       timestamp: Date.now(),
       size: data instanceof Uint8Array ? data.byteLength : data.length,
@@ -234,7 +237,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     for (const path of paths) {
       this.riseEvent({
         path,
-        action: FILE_ACTION.write,
+        action: FileActions.write,
         method: 'rm',
         timestamp: Date.now(),
         // Do not calculate size because it is very difficult to do
@@ -256,7 +259,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
       // TODO: Делает 2 операциияя - считываение и запись
       this.riseEvent({
         path: dest,
-        action: FILE_ACTION.write,
+        action: FileActions.write,
         method: 'cp',
         timestamp: Date.now(),
         details: { src, recursive: options?.recursive ?? false },
@@ -276,7 +279,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     for (const [src, dest] of files) {
       this.riseEvent({
         path: dest,
-        action: FILE_ACTION.write,
+        action: FileActions.write,
         method: 'rename',
         timestamp: Date.now(),
         details: { src },
@@ -292,7 +295,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
     this.riseEvent({
       path: pathTo,
-      action: FILE_ACTION.write,
+      action: FileActions.write,
       method: 'mkdir',
       timestamp: Date.now(),
       details: { recursive: options?.recursive ?? false },
@@ -308,7 +311,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
     this.riseEvent({
       path: pathTo,
-      action: FILE_ACTION.write,
+      action: FileActions.write,
       method: 'symlink',
       timestamp: Date.now(),
       // TODO: известно ли сколько байт занимает операция?
@@ -340,7 +343,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
       this.riseEvent({
         // TODO: revew
         path: dest,
-        action: FILE_ACTION.write,
+        action: FileActions.write,
         method: 'copyToDest',
         timestamp: Date.now(),
         details: { src },
@@ -370,7 +373,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     ])) {
       this.riseEvent({
         path: dest,
-        action: FILE_ACTION.write,
+        action: FileActions.write,
         method: 'moveToDest',
         timestamp: Date.now(),
         details: { src },
@@ -388,7 +391,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
     this.riseEvent({
       path: newPath,
-      action: FILE_ACTION.write,
+      action: FileActions.write,
       method: 'renameFile',
       timestamp: Date.now(),
       details: { oldPath: file },
@@ -404,7 +407,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
     this.riseEvent({
       path: pathToFileOrDir,
-      action: FILE_ACTION.write,
+      action: FileActions.write,
       method: 'rmRf',
       timestamp: Date.now(),
       // do not calculate size because it is very difficult to do
@@ -416,7 +419,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
     this.riseEvent({
       path: pathToDir,
-      action: FILE_ACTION.write,
+      action: FileActions.write,
       method: 'mkDirP',
       timestamp: Date.now(),
       // TODO: известно ли сколько байт занимает операция?
