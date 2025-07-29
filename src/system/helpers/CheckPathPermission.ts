@@ -37,9 +37,10 @@ export async function checkPermissions(
 
 /**
  * Проверяет права на указанный путь и его родительские директории
- * @param path - путь для проверки
- * @param action - действие (read/write)
- * @returns true если есть права на путь или любой из родительских путей
+ *
+ * @param path - Путь для проверки
+ * @param action - Действие (read/write)
+ * @returns True если есть права на путь или любой из родительских путей
  */
 async function checkPathAndParentPermissions(
   checkPermCb: CheckPermCb,
@@ -82,9 +83,10 @@ async function checkPathAndParentPermissions(
 
 /**
  * Проверяет права на конкретный путь (включая fallback для чтения)
- * @param path - путь для проверки
- * @param action - действие (read/write)
- * @returns true если есть права на указанный путь
+ *
+ * @param path - Путь для проверки
+ * @param action - Действие (read/write)
+ * @returns True если есть права на указанный путь
  */
 async function checkPathPermissions(
   checkPermCb: CheckPermCb,
@@ -125,9 +127,10 @@ async function checkPathPermissions(
 
 /**
  * Проверяет наличие конкретного права на путь
- * @param path - путь для проверки
- * @param action - действие (read/write)
- * @returns true если право есть
+ *
+ * @param path - Путь для проверки
+ * @param action - Действие (read/write)
+ * @returns True если право есть
  */
 async function hasPermission(
   checkPermCb: CheckPermCb,
@@ -145,8 +148,9 @@ async function hasPermission(
 
 /**
  * Генерирует список родительских путей от указанного пути до корня
- * @param path - исходный путь
- * @returns массив родительских путей в порядке от ближайшего к корню
+ *
+ * @param path - Исходный путь
+ * @returns Массив родительских путей в порядке от ближайшего к корню
  */
 function getParentPaths(path: string): string[] {
   const parentPaths: string[] = []

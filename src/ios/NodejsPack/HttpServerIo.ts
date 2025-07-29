@@ -60,9 +60,9 @@ export function makeRequestObject(req: IncomingMessage): HttpRequest {
 }
 
 /**
- * HttpServerIo is a server that listens for incoming HTTP requests
- * and sends responses back to the client.
- * ‼️ to handle errors in handlers you have to make them async
+ * HttpServerIo is a server that listens for incoming HTTP requests and sends
+ * responses back to the client. ‼️ to handle errors in handlers you have to
+ * make them async
  */
 export class HttpServerIo
   extends ServerIoBase<ServerItem, HttpServerProps>
@@ -79,8 +79,8 @@ export class HttpServerIo
   }
 
   /**
-   * Receive response to request and after that
-   * send response back to client of it request and close request.
+   * Receive response to request and after that send response back to client of
+   * it request and close request.
    */
   async sendResponse(requestId: number, response: HttpResponse): Promise<void> {
     return this.responseEvent.emit(requestId, response)
@@ -134,12 +134,13 @@ export class HttpServerIo
   }
 
   /**
-   * When income request is came then it wait for a response from driver
-   * while it call sendResponse(). And after that it return the response.
+   * When income request is came then it wait for a response from driver while
+   * it call sendResponse(). And after that it return the response.
+   *
+   * @private
    * @param serverId
    * @param req
    * @param res
-   * @private
    */
   private async handleIncomeRequest(
     serverId: string,

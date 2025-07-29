@@ -19,7 +19,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*"],
   "exclude": [
     "src/_not_used",
     "distr",
@@ -28,5 +27,6 @@
     "build",
     "_testData",
     "node_modules"
-  ]
+  ],
+  "include": ["src/**/*"]
 }

@@ -7,9 +7,7 @@ export class IoSetClient {
   // current requests
   readonly requests = new Map<string, (error: string, result: any) => void>()
 
-  /**
-   * @param send - The function to send a message to the server
-   */
+  /** @param send - The function to send a message to the server */
   constructor(
     readonly send: (msg: string) => void,
     readonly requestTimeoutSec: number = 60
@@ -21,6 +19,7 @@ export class IoSetClient {
 
   /**
    * Call this method when you receive a message from the server
+   *
    * @param msg - The message to handle
    */
   incomeMessage(msg: string) {

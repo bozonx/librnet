@@ -67,8 +67,10 @@ export class MountPointsManager {
   }
 
   /**
-   * Проверяет, не создает ли новая точка монтирования цикл с существующими точками
-   * @param newPoint - новая точка монтирования для проверки
+   * Проверяет, не создает ли новая точка монтирования цикл с существующими
+   * точками
+   *
+   * @param newPoint - Новая точка монтирования для проверки
    * @throws Error если обнаружен цикл
    */
   private checkForCircularMountPoints(newPoint: MountPoint): void {
@@ -113,11 +115,12 @@ export class MountPointsManager {
 
   /**
    * Рекурсивно проверяет наличие циклов в графе с помощью DFS
-   * @param node - текущий узел для проверки
-   * @param graph - граф зависимостей
-   * @param visited - множество посещенных узлов
-   * @param recursionStack - стек рекурсии для обнаружения циклов
-   * @returns true если найден цикл, false иначе
+   *
+   * @param node - Текущий узел для проверки
+   * @param graph - Граф зависимостей
+   * @param visited - Множество посещенных узлов
+   * @param recursionStack - Стек рекурсии для обнаружения циклов
+   * @returns True если найден цикл, false иначе
    */
   private hasCycleDFS(
     node: string,
@@ -155,7 +158,8 @@ export class MountPointsManager {
 
   /**
    * Проверяет существующие точки монтирования на наличие циклов
-   * @returns true если найден цикл, false иначе
+   *
+   * @returns True если найден цикл, false иначе
    */
   public hasCircularMountPoints(): boolean {
     if (this.mountPoints.length === 0) {

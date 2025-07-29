@@ -36,9 +36,7 @@ export abstract class EntityManagerBase<Context extends EntityBaseContext> {
     return this.entities[entityName][ENTITY_POSITIONS.status]
   }
 
-  /**
-   * On system init
-   */
+  /** On system init */
   async init() {
     // TODO: use Promise.allSettled([
     // TODO: add timeout for each item
@@ -51,9 +49,7 @@ export abstract class EntityManagerBase<Context extends EntityBaseContext> {
     }
   }
 
-  /**
-   * On system destroy
-   */
+  /** On system destroy */
   async destroy() {
     // TODO: use Promise.allSettled([
     for (const entityName of Object.keys(this.entities)) {
@@ -67,9 +63,7 @@ export abstract class EntityManagerBase<Context extends EntityBaseContext> {
     }
   }
 
-  /**
-   * On system init or install
-   */
+  /** On system init or install */
   async initEntity(entityName: string) {
     if (this.getStatus(entityName) !== 'loaded') {
       this.system.log.warn(
@@ -111,9 +105,7 @@ export abstract class EntityManagerBase<Context extends EntityBaseContext> {
     this.setStatus(entityName, 'initialized')
   }
 
-  /**
-   * Destroy entity on system destroy or uninstall
-   */
+  /** Destroy entity on system destroy or uninstall */
   async destroyEntity(entityName: string) {
     const [, , context] = this.entities[entityName]
 
@@ -205,8 +197,9 @@ export abstract class EntityManagerBase<Context extends EntityBaseContext> {
 
   /**
    * Register entity in the system in development mode.
-   * @param manifest - entity manifest.
-   * @param entityIndex - entity index function.
+   *
+   * @param manifest - Entity manifest.
+   * @param entityIndex - Entity index function.
    */
   useEntity(
     manifest: EntityManifest,

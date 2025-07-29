@@ -15,9 +15,10 @@ export class Channel {
   }
 
   /**
-   * Send message to channel
-   * It waits while message is sent but do not wait for response
-   * @param message - message to send
+   * Send message to channel It waits while message is sent but do not wait for
+   * response
+   *
+   * @param message - Message to send
    */
   async send(...p: any[]) {
     //
@@ -25,8 +26,9 @@ export class Channel {
 
   /**
    * Send message to channel and wait for response
-   * @param message - message to send
-   * @returns response message
+   *
+   * @param message - Message to send
+   * @returns Response message
    */
   async request(...p: any[]): Promise<any[]> {
     // TODO: use timeout

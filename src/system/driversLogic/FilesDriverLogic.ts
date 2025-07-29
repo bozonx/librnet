@@ -24,10 +24,11 @@ import type { IoBase } from '../base/IoBase.js'
 
 /**
  * Logic of the files driver which
- * - adds more methods
+ *
+ * - Adds more methods
  * - ️️‼️❓resolves glob patterns
- * - emits events
- * - uses preparePath which you should implement in your driver
+ * - Emits events
+ * - Uses preparePath which you should implement in your driver
  */
 export abstract class FilesDriverLogic implements FilesDriverType {
   constructor(

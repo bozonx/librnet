@@ -18,8 +18,9 @@ export class PackagesManager {
 
   /**
    * Install or update package from file.
-   * @param pathToPkg - path to package.
-   * @param force - force install package.
+   *
+   * @param pathToPkg - Path to package.
+   * @param force - Force install package.
    */
   async installFromFile(pathToPkg: string, force: boolean = false) {
     // TODO: check required, see EntityManger base

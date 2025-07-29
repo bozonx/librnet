@@ -20,23 +20,17 @@ export interface HttpServerProps {
 }
 
 export interface HttpServerIoType {
-  /**
-   * when server starts listening
-   */
+  /** When server starts listening */
   on(
     cb: (eventName: HttpServerEvent.listening, serverId: string) => void
   ): Promise<number>
 
-  /**
-   * on server close. Depend on http server close
-   */
+  /** On server close. Depend on http server close */
   on(
     cb: (eventName: HttpServerEvent.serverClosed, serverId: string) => void
   ): Promise<number>
 
-  /**
-   * Emits on server error
-   */
+  /** Emits on server error */
   on(
     cb: (
       eventName: HttpServerEvent.serverError,
@@ -46,8 +40,8 @@ export interface HttpServerIoType {
   ): Promise<number>
 
   /**
-   * Handle new request.
-   * Please call the sendResponse with a received `requestId` to make a response to client.
+   * Handle new request. Please call the sendResponse with a received
+   * `requestId` to make a response to client.
    */
   on(
     cb: (
@@ -58,25 +52,16 @@ export interface HttpServerIoType {
     ) => void
   ): Promise<number>
 
-  /**
-   * Remove one of server listeners
-   */
+  /** Remove one of server listeners */
   off(handlerIndex: number): Promise<void>
 
-  /**
-   * make new server and return serverId
-   */
+  /** Make new server and return serverId */
   newServer(props: HttpServerProps): Promise<string>
 
-  /**
-   * Shut down a server which has been previously created
-   */
+  /** Shut down a server which has been previously created */
   stopServer(serverId: string): Promise<void>
 
-  /**
-   * Send a response to client.
-   * Call it only when you are handled a request.
-   */
+  /** Send a response to client. Call it only when you are handled a request. */
   sendResponse(requestId: number, response: HttpResponse): Promise<void>
 }
 

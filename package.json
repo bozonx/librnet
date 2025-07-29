@@ -1,40 +1,30 @@
 {
   "name": "k-os",
   "version": "0.0.2",
+  "private": false,
   "description": "Personal decentralised OS based on overlay network.",
-  "author": "Ivan Kozyrin <ipkozyrin@gmail.com>",
   "repository": "git@github.com:bozonx/librnet.git",
   "license": "MIT",
-  "private": false,
+  "author": "Ivan Kozyrin <ipkozyrin@gmail.com>",
   "type": "module",
-  "types": "src/index.ts",
-  "engines": {
-    "node": ">=24.0.0",
-    "pnpm": ">=9.15.0"
-  },
   "exports": {
     ".": "./src/index.ts",
     "./SquidletAppApiConnection.js": "./distr/src/uiApi/SquidletAppApiConnection.js"
   },
-  "publishConfig": {
-    "exports": {
-      ".": "./distr/src/index.js"
-    },
-    "types": "distr/types/index.d.ts"
-  },
-  "scripts": {
-    "dev": "ROOT_DIR=./_testData tsx ./src/starters/devLocal/devIndex.example.ts",
-    "build": "tsc",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:verbose": "jest --verbose",
-    "dev:compositor": "serve ./src/compositor",
-    "format": "prettier --write --plugin=@trivago/prettier-plugin-sort-imports \"src/**/*.{ts,js}\"",
-    "format:check": "prettier --check --plugin=@trivago/prettier-plugin-sort-imports \"src/**/*.{ts,js}\""
-  },
+  "types": "src/index.ts",
   "directories": {
     "src": "./src"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ROOT_DIR=./_testData tsx ./src/starters/devLocal/devIndex.example.ts",
+    "dev:compositor": "serve ./src/compositor",
+    "format": "prettier --write \"src/**/*.{ts,js}\" \"*.{json,md,yaml,yml}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,js}\" \"*.{json,md,yaml,yml}\"",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:verbose": "jest --verbose",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "semver": "^7.7.2",
@@ -49,9 +39,22 @@
     "@types/semver": "^7.7.0",
     "@types/ws": "^8.18.1",
     "jest": "^30.0.5",
+    "prettier-plugin-jsdoc": "^1.3.3",
+    "prettier-plugin-packagejson": "^2.5.19",
+    "prettier-plugin-sort-json": "^4.1.1",
     "serve": "^14.2.4",
     "ts-jest": "^29.1.2",
     "tsc": "^2.0.4",
     "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=9.15.0"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./distr/src/index.js"
+    },
+    "types": "distr/types/index.d.ts"
   }
 }

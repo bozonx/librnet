@@ -51,8 +51,8 @@ export class WsClientIo extends IoBase implements WsClientIoType {
   }
 
   /**
-   * Make new connection to server.
-   * It returns a connection id to use with other methods
+   * Make new connection to server. It returns a connection id to use with other
+   * methods
    */
   async newConnection(props: WebSocketClientProps): Promise<string> {
     const connectionId = String(this.connections.length)
@@ -63,8 +63,8 @@ export class WsClientIo extends IoBase implements WsClientIoType {
   }
 
   /**
-   * It is used to reconnect on connections lost.
-   * It closes previous connection and makes new one with the same id.
+   * It is used to reconnect on connections lost. It closes previous connection
+   * and makes new one with the same id.
    */
   async reConnect(connectionId: string) {
     const oldConnectionProps =

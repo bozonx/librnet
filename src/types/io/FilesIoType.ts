@@ -136,7 +136,8 @@ export interface LinkOptions {
 
 /**
  * FilesIo works with absolute paths like /envSet/..., /varData/... and /tmp/...
- * But actually it joins these paths with workDir and result will be like /workdir/envSet/...
+ * But actually it joins these paths with workDir and result will be like
+ * /workdir/envSet/...
  */
 export interface FilesIoType {
   // TODO: add access
@@ -145,6 +146,7 @@ export interface FilesIoType {
 
   /**
    * Read text file and return it as string
+   *
    * @param pathTo
    * @param options
    * @returns
@@ -153,6 +155,7 @@ export interface FilesIoType {
 
   /**
    * Read binary file and return it as specified type
+   *
    * @param pathTo
    * @param options - Default returnType is Uint8Array
    * @returns
@@ -160,8 +163,9 @@ export interface FilesIoType {
   readBinFile(pathTo: string, options?: ReadBinFileOptions): Promise<BinTypes>
 
   /**
-   * Get file or directory stats.
-   * If file or directory doesn't exist, it will return undefined.
+   * Get file or directory stats. If file or directory doesn't exist, it will
+   * return undefined.
+   *
    * @param pathTo
    * @returns
    */
@@ -169,13 +173,15 @@ export interface FilesIoType {
 
   /**
    * Check if file or directory exists
+   *
    * @param pathTo
-   * @returns true if file or directory exists, false otherwise
+   * @returns True if file or directory exists, false otherwise
    */
   exists(pathTo: string): Promise<boolean>
 
   /**
    * Read directory
+   *
    * @param pathTo
    * @param options - Default encoding is UTF-8
    * @returns
@@ -183,31 +189,33 @@ export interface FilesIoType {
   readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]>
 
   /**
-   * You should pass only symlink. Resolve it by using stat().
-   * It returns an absolute path to target file.
-   * Encoding is UTF-8
+   * You should pass only symlink. Resolve it by using stat(). It returns an
+   * absolute path to target file. Encoding is UTF-8
+   *
    * @param pathTo
-   * @returns path to target file which is set in symlink (can be relative)
+   * @returns Path to target file which is set in symlink (can be relative)
    */
   readlink(pathTo: string): Promise<string>
 
   /**
    * Check if file is a valid UTF-8 text file
-   * @param pathTo - path to file to check
-   * @returns true if file is valid UTF-8 text, false otherwise
+   *
+   * @param pathTo - Path to file to check
+   * @returns True if file is valid UTF-8 text, false otherwise
    */
   isTextFileUtf8(pathTo: string): Promise<boolean>
 
   /**
-   * Resolve path to real path through symlinks
-   * Encoding is UTF-8
+   * Resolve path to real path through symlinks Encoding is UTF-8
+   *
    * @param pathTo
-   * @returns absolute path to deeply linked target file
+   * @returns Absolute path to deeply linked target file
    */
   realpath(pathTo: string): Promise<string>
 
   /**
    * Get all files by pattern
+   *
    * @param pattern
    * @param options
    * @returns
@@ -216,8 +224,9 @@ export interface FilesIoType {
 
   /**
    * Check if file or directory exists and has access to it
+   *
    * @param pathTo
-   * @param mode - default is AccessMode.F_OK
+   * @param mode - Default is AccessMode.F_OK
    * @returns
    */
   access(pathTo: string, mode?: AccessMode): Promise<boolean>
@@ -226,6 +235,7 @@ export interface FilesIoType {
 
   /**
    * Append data to file even if it doesn't exist
+   *
    * @param pathTo
    * @param data
    * @param options - If data is string then default encoding is UTF-8
@@ -241,6 +251,7 @@ export interface FilesIoType {
 
   /**
    * Write or overwrite file
+   *
    * @param pathTo
    * @param data
    * @param options - If data is string then default encoding is UTF-8
@@ -252,9 +263,9 @@ export interface FilesIoType {
   ): Promise<void>
 
   /**
-   * Try to remove all the files.
-   * If has errors it will wait for all the files to be removed
-   * and return the array of errors like {path, error}
+   * Try to remove all the files. If has errors it will wait for all the files
+   * to be removed and return the array of errors like {path, error}
+   *
    * @param paths
    * @param options
    * @returns
@@ -262,10 +273,10 @@ export interface FilesIoType {
   rm(paths: string[], options?: RmOptions): Promise<void>
 
   /**
-   * Copy specified files. Use full path
-   * files is ["~/1/old.txt", "~/2/new.txt"][]
-   * If has errors it will wait for all the files to be copied
+   * Copy specified files. Use full path files is ["~/1/old.txt",
+   * "~/2/new.txt"][] If has errors it will wait for all the files to be copied
    * and return the array of errors like {path, error}
+   *
    * @param files
    * @param options
    * @returns
@@ -273,11 +284,11 @@ export interface FilesIoType {
   cp(files: [string, string][], options?: CopyOptions): Promise<void>
 
   /**
-   * Rename or move files and dirs. Use full path
-   * files is ["~/1/old.txt", "~/2/new.txt"][]
-   * The destination path or directory should`t exist.
-   * If has errors it will wait for all the files to be renamed
-   * and return the array of errors like {path, error}
+   * Rename or move files and dirs. Use full path files is ["~/1/old.txt",
+   * "~/2/new.txt"][] The destination path or directory should`t exist. If has
+   * errors it will wait for all the files to be renamed and return the array of
+   * errors like {path, error}
+   *
    * @param files
    * @param options
    * @returns
@@ -285,10 +296,11 @@ export interface FilesIoType {
   rename(files: [string, string][]): Promise<void>
 
   /**
-   * Create directory
-   * If recursive is true, it will create parent directories recursively
-   *   and if destination directory already exists, it will NOT throw an error
-   * But if recursive is false, it will throw an error if destination directory already exists
+   * Create directory If recursive is true, it will create parent directories
+   * recursively and if destination directory already exists, it will NOT throw
+   * an error But if recursive is false, it will throw an error if destination
+   * directory already exists
+   *
    * @param pathTo
    * @param options
    * @returns
@@ -296,16 +308,17 @@ export interface FilesIoType {
   mkdir(pathTo: string, options?: MkdirOptions): Promise<void>
 
   /**
-   * Create a link.
-   * On windows type file or dir are automatically detected
-   * @param target - target path (source file)
-   * @param pathTo - path to place link
+   * Create a link. On windows type file or dir are automatically detected
+   *
+   * @param target - Target path (source file)
+   * @param pathTo - Path to place link
    * @returns
    */
   link(target: string, pathTo: string, options?: LinkOptions): Promise<void>
 
   /**
    * Set access and modification times of a file
+   *
    * @param pathTo
    * @param atime
    * @param mtime
@@ -320,14 +333,16 @@ export interface FilesIoType {
 
   /**
    * Truncate file to specified length
+   *
    * @param pathTo
-   * @param len default is 0
+   * @param len Default is 0
    * @returns
    */
   truncate(pathTo: string, len: number): Promise<void>
 
   /**
    * Change file or directory owner
+   *
    * @param pathTo
    * @param uid
    * @param gid
@@ -337,6 +352,7 @@ export interface FilesIoType {
 
   /**
    * Change file or directory permissions
+   *
    * @param pathTo
    * @param mode
    * @returns

@@ -34,7 +34,8 @@ export class EntityConfig<Config extends Record<string, any>> {
 
   /**
    * Save partial config. It does not deep merge.
-   * @param partial - partial config
+   *
+   * @param partial - Partial config
    */
   async savePartialConfig(partial: Partial<Config>) {
     this.cfg = { ...this.cfg, ...partial }

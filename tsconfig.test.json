@@ -1,5 +1,4 @@
 {
-  "extends": "./tsconfig.json",
   "compilerOptions": {
     "rootDir": ".",
     "types": ["jest", "node"],
@@ -8,7 +7,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "test/**/*"],
   "exclude": [
     "src/_not_used",
     "distr",
@@ -17,5 +15,7 @@
     "build",
     "_testData",
     "node_modules"
-  ]
+  ],
+  "extends": "./tsconfig.json",
+  "include": ["src/**/*", "test/**/*"]
 }

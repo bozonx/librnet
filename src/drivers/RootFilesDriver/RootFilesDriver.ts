@@ -44,12 +44,13 @@ export interface RootFilesDriverProps {
 
 /**
  * Acces to the root files of the system
- *  - /programFiles
- *  - /localData
- *  - /syncedData
- *  - /home
- *  - /mnt - this is a virtual dir where some external virtual dirs are mounted
- * It does:
+ *
+ * - /programFiles
+ * - /localData
+ * - /syncedData
+ * - /home
+ * - /mnt - this is a virtual dir where some external virtual dirs are mounted It
+ *   does:
  * - Add more methods
  * - Check permissions
  * - Emits events
@@ -235,6 +236,7 @@ export class RootFilesDriverInstance extends DriverInstanceBase<
 
   /**
    * Target and dest have to have write permissions
+   *
    * @param target
    * @param pathTo
    * @returns

@@ -63,9 +63,7 @@ export interface WsServerIoType {
     ) => void
   ): Promise<number>
 
-  /**
-   * When new client is connected
-   */
+  /** When new client is connected */
   on(
     cb: (
       eventName: WsServerEvent.newConnection,
@@ -113,27 +111,25 @@ export interface WsServerIoType {
   off(handlerIndex: number): Promise<void>
 
   // TODO: почему не поднимается событие ??
-  /**
-   * Destroy all the servers and don't rise a close event.
-   */
+  /** Destroy all the servers and don't rise a close event. */
   destroy: () => Promise<void>
 
   /**
-   * make new server and return serverId
-   * If server has been ran then it just returns it serverId and doesn't create
-   * a new server with the same host:port
+   * Make new server and return serverId If server has been ran then it just
+   * returns it serverId and doesn't create a new server with the same
+   * host:port
    */
   newServer(props: WsServerProps): Promise<string>
 
   /**
-   * Shut down a server which has been previously created.
-   * After that a close event will be risen.
+   * Shut down a server which has been previously created. After that a close
+   * event will be risen.
    */
   stopServer(serverId: string): Promise<void>
 
   /**
-   * Send message from server to the client.
-   * It waits while message has been sent but it doesn't wait for response.
+   * Send message from server to the client. It waits while message has been
+   * sent but it doesn't wait for response.
    */
   send(
     serverId: string,
@@ -150,9 +146,7 @@ export interface WsServerIoType {
 
   // TODO: почему бы не указать параметр silent?
   // TODO: замем?
-  /**
-   * Destroy the connection and not rise an close event
-   */
+  /** Destroy the connection and not rise an close event */
   destroyConnection(serverId: string, connectionId: string): Promise<void>
 }
 

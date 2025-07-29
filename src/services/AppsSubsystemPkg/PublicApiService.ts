@@ -155,9 +155,10 @@ export class PublicApiService extends ServiceBase {
 
   /**
    * Register new node
-   * @param nodePath - deep path to node
-   * @param item - item which can be functions of objects with functions
-   * @param accessToken - put token if you register a node in restricted area
+   *
+   * @param nodePath - Deep path to node
+   * @param item - Item which can be functions of objects with functions
+   * @param accessToken - Put token if you register a node in restricted area
    */
   registerNode(
     nodePath: string,

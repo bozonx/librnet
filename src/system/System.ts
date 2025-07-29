@@ -119,8 +119,9 @@ export class System {
 
   /**
    * Register a package in development mode
-   * @param manifest - manifest of the package
-   * @param index - index of the package
+   *
+   * @param manifest - Manifest of the package
+   * @param index - Index of the package
    */
   use(
     manifest: AppManifest | ServiceManifest | DriverManifest,

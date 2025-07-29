@@ -79,8 +79,8 @@ class ArchiveDriverLogic extends FilesDriverLogic {
 }
 
 /**
- * Acces to files in archive
- * It does:
+ * Acces to files in archive It does:
+ *
  * - Add more methods
  * - Check permissions
  * - Emits events
@@ -263,6 +263,7 @@ export class ArchiveDriverInstance extends DriverInstanceBase<
 
   /**
    * Target and dest have to have write permissions
+   *
    * @param target
    * @param pathTo
    * @returns

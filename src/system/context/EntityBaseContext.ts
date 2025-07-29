@@ -144,9 +144,7 @@ export abstract class EntityBaseContext {
     return (await driver.makeInstance(props)) as T
   }
 
-  /**
-   * Access to api of services that registered their api in the system
-   */
+  /** Access to api of services that registered their api in the system */
   serviceApi(serviceName: string) {
     if (serviceName === SYSTEM_API_SERVICE_NAME) {
       // Emitate system api service
@@ -168,9 +166,7 @@ export abstract class EntityBaseContext {
     )
   }
 
-  /**
-   * Access to api of apps that registered their api in the system
-   */
+  /** Access to api of apps that registered their api in the system */
   appApi(appName: string) {
     const appApi = this.system.api.getAppApi(appName)
 

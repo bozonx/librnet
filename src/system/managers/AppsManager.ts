@@ -7,7 +7,8 @@ export class AppsManager extends EntityManagerBase<AppContext> {
 
   /**
    * Register app in the system in development mode.
-   * @param appOnInit - app on init function.
+   *
+   * @param appOnInit - App on init function.
    */
   use(manifest: AppManifest, appOnInit: AppOnInit) {
     if (!this.system.isDevMode)

@@ -243,9 +243,7 @@ export class WsServerInstance extends DriverInstanceBase<WsServerDriverInstanceP
     this.events.destroy()
   }
 
-  /**
-   * Send message to client
-   */
+  /** Send message to client */
   send = (connectionId: string, data: string | Uint8Array): Promise<void> => {
     this.system.log.debug(
       `WsServerInstance.send from ${this.props.host}:${this.props.port} to connection ${connectionId}, data length ${data.length}`
@@ -254,10 +252,7 @@ export class WsServerInstance extends DriverInstanceBase<WsServerDriverInstanceP
     return this.common.io.send(this.serverId, connectionId, data)
   }
 
-  /**
-   * Explicitly closing a connection.
-   * Close event will be risen
-   */
+  /** Explicitly closing a connection. Close event will be risen */
   closeConnection(
     connectionId: string,
     code: number,
@@ -271,27 +266,21 @@ export class WsServerInstance extends DriverInstanceBase<WsServerDriverInstanceP
     )
   }
 
-  /**
-   * Listen income messages
-   */
+  /** Listen income messages */
   onMessage(
     cb: (connectionId: string, data: Uint8Array) => void | Promise<void>
   ): number {
     return this.events.addListener(WsServerEvent.connectionMessage, cb)
   }
 
-  /**
-   * It rises when new connection is come.
-   */
+  /** It rises when new connection is come. */
   onConnection(
     cb: (connectionId: string, request: HttpRequest) => void | Promise<void>
   ): number {
     return this.events.addListener(WsServerEvent.newConnection, cb)
   }
 
-  /**
-   * Listen any connection close
-   */
+  /** Listen any connection close */
   onConnectionClose(
     cb: (
       connectionId: string,

@@ -87,11 +87,13 @@ export class NetworkService extends ServiceBase {
   }
 
   /**
-   * Send message to remote host, wait and receive a response from it
-   * request is:
-   * * toHostId - remote host id or id of local host
-   * * category - unique category name which is use to resolve requests
-   * * msg - message object with only allowed types of nodes
+   * Send message to remote host, wait and receive a response from it request
+   * is:
+   *
+   * - ToHostId - remote host id or id of local host
+   * - Category - unique category name which is use to resolve requests
+   * - Msg - message object with only allowed types of nodes
+   *
    * @param request
    */
   async sendRequest<T = any>(
@@ -144,10 +146,11 @@ export class NetworkService extends ServiceBase {
 
   /**
    * Set handler to handle a request for this handler
-   * @param category - name of unique category to handle requests
-   * @param handler - handle income request here and call sendResponse(resp) after
-   *   processing a request.
-   * @param token - access token to ocupate special categories
+   *
+   * @param category - Name of unique category to handle requests
+   * @param handler - Handle income request here and call sendResponse(resp)
+   *   after processing a request.
+   * @param token - Access token to ocupate special categories
    */
   listenRequests(category: string, handler: CategoryHandler, token?: string) {
     if (this.categoriesHandlers[category]) {

@@ -132,29 +132,29 @@ Jest настроен для сбора покрытия кода с следу�
 ### Базовый тест
 
 ```typescript
-import { describe, it, expect, beforeEach } from '@jest/globals';
-import { YourClass } from '../src/YourClass';
+import { YourClass } from '../src/YourClass'
+import { beforeEach, describe, expect, it } from '@jest/globals'
 
 describe('YourClass', () => {
-  let instance: YourClass;
+  let instance: YourClass
 
   beforeEach(() => {
-    instance = new YourClass();
-  });
+    instance = new YourClass()
+  })
 
   it('should work correctly', () => {
-    expect(instance.someMethod()).toBe(expectedValue);
-  });
-});
+    expect(instance.someMethod()).toBe(expectedValue)
+  })
+})
 ```
 
 ### Тест с асинхронными операциями
 
 ```typescript
 it('should handle async operations', async () => {
-  const result = await instance.asyncMethod();
-  expect(result).toBe(expectedValue);
-});
+  const result = await instance.asyncMethod()
+  expect(result).toBe(expectedValue)
+})
 ```
 
 ### Тест с моками
@@ -163,15 +163,15 @@ it('should handle async operations', async () => {
 jest.mock('fs', () => ({
   ...jest.requireActual('fs'),
   readFile: jest.fn(),
-}));
+}))
 
 it('should read file', async () => {
-  const mockReadFile = require('fs').readFile;
-  mockReadFile.mockResolvedValue('file content');
+  const mockReadFile = require('fs').readFile
+  mockReadFile.mockResolvedValue('file content')
 
-  const result = await instance.readFile('test.txt');
-  expect(result).toBe('file content');
-});
+  const result = await instance.readFile('test.txt')
+  expect(result).toBe('file content')
+})
 ```
 
 ## Решение проблем

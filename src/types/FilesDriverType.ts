@@ -46,8 +46,9 @@ export interface WriteFilesDriverType {
 
   /**
    * Copy files to destination directory recursively
-   * @param src - source path or array of paths. Glob is supported.
-   * @param destDir - destination directory
+   *
+   * @param src - Source path or array of paths. Glob is supported.
+   * @param destDir - Destination directory
    * @returns
    */
   copyToDest(
@@ -57,10 +58,11 @@ export interface WriteFilesDriverType {
   ): Promise<void>
 
   /**
-   * Move files to destination directory recursively.
-   * First it copies files and after thar removes src
-   * @param src - source path or array of paths. Glob is supported.
-   * @param destDir - destination directory
+   * Move files to destination directory recursively. First it copies files and
+   * after thar removes src
+   *
+   * @param src - Source path or array of paths. Glob is supported.
+   * @param destDir - Destination directory
    * @returns
    */
   moveToDest(
@@ -71,22 +73,25 @@ export interface WriteFilesDriverType {
 
   /**
    * Rename file
-   * @param file - file path
-   * @param newName - new name (not path)
+   *
+   * @param file - File path
+   * @param newName - New name (not path)
    * @returns
    */
   renameFile(file: string, newName: string): Promise<void>
 
   /**
    * Remove file or directory recursively
-   * @param pathToFileOrDir - file or directory path
+   *
+   * @param pathToFileOrDir - File or directory path
    * @returns
    */
   rmRf(pathToFileOrDir: string): Promise<void>
 
   /**
    * Create directory recursively
-   * @param pathToDir - directory path
+   *
+   * @param pathToDir - Directory path
    * @returns
    */
   mkDirP(pathToDir: string): Promise<void>

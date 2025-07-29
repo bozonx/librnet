@@ -384,8 +384,9 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
 
   /**
    * Приватный метод для чтения файла в буфер с поддержкой позиции и размера
-   * @param pathTo - путь к файлу
-   * @param options - опции чтения (pos, size)
+   *
+   * @param pathTo - Путь к файлу
+   * @param options - Опции чтения (pos, size)
    * @returns Promise<Buffer> - прочитанный буфер
    */
   private async readFileBuffer(

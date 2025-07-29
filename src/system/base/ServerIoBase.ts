@@ -17,9 +17,7 @@ export abstract class ServerIoBase<ServerItem, Props> extends IoBase {
     this.events.destroy()
   }
 
-  /**
-   * Listen all the events of all the servers and connections
-   */
+  /** Listen all the events of all the servers and connections */
   async on(cb: (...p: any[]) => void): Promise<number> {
     return this.events.addListener(cb)
   }

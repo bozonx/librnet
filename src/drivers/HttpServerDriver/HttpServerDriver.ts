@@ -216,18 +216,20 @@ export class HttpServerInstance extends DriverInstanceBase<HttpServerDriverInsta
 
   /**
    * Send response to client after you have handled a request.
-   * @param requestId - request id
-   * @param response - response
+   *
+   * @param requestId - Request id
+   * @param response - Response
    */
   async sendResponse(requestId: number, response: HttpResponse) {
     await this.common.io.sendResponse(this.serverId, requestId, response)
   }
 
   /**
-   * Listen new request.
-   * You have to call sendResponse after you have handled a request.
-   * @param cb - callback
-   * @returns handler index
+   * Listen new request. You have to call sendResponse after you have handled a
+   * request.
+   *
+   * @param cb - Callback
+   * @returns Handler index
    */
   onRequest(
     cb: (requestId: number, request: HttpRequest) => void | Promise<void>

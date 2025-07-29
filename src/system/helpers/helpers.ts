@@ -21,10 +21,7 @@ export function requestError(code: number, message: string): RequestError {
   }
 }
 
-/**
- * Common request id.
- * Used by WsAppApi service
- */
+/** Common request id. Used by WsAppApi service */
 export function makeRequestId(): string {
   return makeUniqId(REQUEST_ID_LENGTH)
 }

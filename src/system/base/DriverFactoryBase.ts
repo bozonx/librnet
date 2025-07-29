@@ -5,11 +5,10 @@ import type { DriverInstanceClass } from './DriverInstanceBase.js'
 
 /**
  * This factory creates instances of sub drivers and keeps them in the memory.
- * The instances are owned by service or appp which uses them.
- * By default, the instances are matched by props,
- * if you need more precise match, overload makeMatchString method.
- * Do not add public methods to the factory because they
- *   will be available not only for the instances.
+ * The instances are owned by service or appp which uses them. By default, the
+ * instances are matched by props, if you need more precise match, overload
+ * makeMatchString method. Do not add public methods to the factory because they
+ * will be available not only for the instances.
  */
 export abstract class DriverFactoryBase<
   Instance extends DriverInstanceBase<any, any, any> = DriverInstanceBase<
@@ -94,6 +93,7 @@ export abstract class DriverFactoryBase<
 
   /**
    * Overload this method to make more precise match instance by props
+   *
    * @param instanceProps
    * @returns
    */
@@ -103,6 +103,7 @@ export abstract class DriverFactoryBase<
 
   /**
    * Overload this method to add some props
+   *
    * @param instanceProps
    * @returns
    */
@@ -112,6 +113,7 @@ export abstract class DriverFactoryBase<
 
   /**
    * Just remove instance from this.instances
+   *
    * @param instanceId
    */
   protected async destroyCb(instanceId: number): Promise<void> {
@@ -120,6 +122,7 @@ export abstract class DriverFactoryBase<
 
   /**
    * Overload this method to validate instance props
+   *
    * @param instanceProps
    */
   protected async validateInstanceProps(instanceProps: Props): Promise<void> {

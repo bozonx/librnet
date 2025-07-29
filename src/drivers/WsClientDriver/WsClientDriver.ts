@@ -187,7 +187,8 @@ export class WsClientInstance extends DriverInstanceBase<WsClientDriverInstanceP
 
   /**
    * Send data to server
-   * @param data - data to send
+   *
+   * @param data - Data to send
    */
   send(data: string | Uint8Array) {
     this.system.log.debug(
@@ -199,8 +200,9 @@ export class WsClientInstance extends DriverInstanceBase<WsClientDriverInstanceP
 
   /**
    * Listen income messages from server
-   * @param cb - callback
-   * @returns handler index
+   *
+   * @param cb - Callback
+   * @returns Handler index
    */
   onMessage(cb: (data: string | Uint8Array) => void | Promise<void>): number {
     return this.events.addListener(WsClientEvent.message, cb)

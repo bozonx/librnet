@@ -39,8 +39,9 @@ export class Connections {
   }
 
   /**
-   * Send request but not wait for response
-   * Promise will be fulfilled when IO send data
+   * Send request but not wait for response Promise will be fulfilled when IO
+   * send data
+   *
    * @param request
    */
   async send(

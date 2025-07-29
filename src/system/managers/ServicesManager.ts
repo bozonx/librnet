@@ -7,7 +7,8 @@ export class ServicesManager extends EntityManagerBase<ServiceContext> {
 
   /**
    * Register service in the system in development mode.
-   * @param serviceOnInit - service on init function.
+   *
+   * @param serviceOnInit - Service on init function.
    */
   use(manifest: ServiceManifest, serviceOnInit: ServiceOnInit) {
     if (!this.system.isDevMode)
