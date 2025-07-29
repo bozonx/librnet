@@ -4,9 +4,12 @@ import type { FilesEventData } from '@/types/EventsData.js'
 import type { FilesDriverType } from '@/types/FilesDriverType.js'
 import { IS_TEXT_FILE_UTF8_SAMPLE_SIZE } from '@/types/constants.js'
 import type {
+  AccessMode,
   CopyOptions,
   FullFilesIoType,
+  GlobOptions,
   MkdirOptions,
+  ReadBinFileOptions,
   ReadTextFileOptions,
   ReaddirOptions,
   RmOptions,
@@ -30,7 +33,10 @@ import {
  * - Resolves glob patterns in all the methods which are support it
  */
 export abstract class FilesDriverLogic implements FilesDriverType {
-  constructor(protected readonly filesIo: FullFilesIoType) {}
+  constructor(
+    protected readonly entity: string,
+    protected readonly filesIo: FullFilesIoType
+  ) {}
 
   protected abstract riseEvent(event: FilesEventData): void
   protected abstract preparePath(pathTo: string): string
@@ -44,33 +50,21 @@ export abstract class FilesDriverLogic implements FilesDriverType {
       options
     )
 
-    this.riseEvent({
-      path: pathTo,
-      action: FileActions.read,
-      method: 'readTextFile',
-      timestamp: Date.now(),
-      size: result.length,
-    })
+    this.riseReadEvent(pathTo, 'readTextFile', result.length)
 
     return result
   }
 
   async readBinFile(
     pathTo: string,
-    returnType?: BinTypesNames
+    options?: ReadBinFileOptions
   ): Promise<BinTypes> {
     const result = await this.filesIo.readBinFile(
       this.preparePath(pathTo),
-      returnType
+      options
     )
 
-    this.riseEvent({
-      path: pathTo,
-      action: FileActions.read,
-      method: 'readBinFile',
-      timestamp: Date.now(),
-      size: result.byteLength,
-    })
+    this.riseReadEvent(pathTo, 'readBinFile', result.byteLength)
 
     return result
   }
@@ -78,14 +72,9 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   async stat(pathTo: string): Promise<StatsSimplified | undefined> {
     const result = await this.filesIo.stat(this.preparePath(pathTo))
 
-    this.riseEvent({
-      path: pathTo,
-      action: FileActions.read,
-      method: 'stat',
-      timestamp: Date.now(),
-      // do not calculate size because it is very difficult to do
-      // it depends on the file system, OS and cache
-    })
+    // do not calculate size because it is very difficult to do
+    // it depends on the file system, OS and cache
+    this.riseReadEvent(pathTo, 'stat')
 
     return result
   }
@@ -93,12 +82,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   async exists(pathTo: string): Promise<boolean> {
     const result = await this.filesIo.exists(this.preparePath(pathTo))
 
-    this.riseEvent({
-      path: pathTo,
-      action: FileActions.read,
-      method: 'exists',
-      timestamp: Date.now(),
-    })
+    this.riseReadEvent(pathTo, 'exists')
 
     return result
   }
@@ -106,14 +90,12 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   async readdir(pathTo: string, options?: ReaddirOptions): Promise<string[]> {
     const result = await this.filesIo.readdir(this.preparePath(pathTo), options)
 
-    this.riseEvent({
-      path: pathTo,
-      action: FileActions.read,
-      method: 'readdir',
-      timestamp: Date.now(),
-      size: result.reduce((acc, item) => acc + item.length, 0),
-      details: { recursive: options?.recursive ?? false },
-    })
+    this.riseReadEvent(
+      pathTo,
+      'readdir',
+      result.reduce((acc, item) => acc + item.length, 0),
+      { recursive: options?.recursive ?? false }
+    )
 
     return result
   }
@@ -121,13 +103,9 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   async readlink(pathTo: string): Promise<string> {
     const result = await this.filesIo.readlink(this.preparePath(pathTo))
 
-    this.riseEvent({
-      path: pathTo,
-      action: FileActions.read,
-      method: 'readlink',
-      timestamp: Date.now(),
-      // TODO: известно ли сколько байт считывается?
-    })
+    const size = Buffer.byteLength(result, 'utf8')
+
+    this.riseReadEvent(pathTo, 'readlink', size)
 
     return result
   }
@@ -135,13 +113,45 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   async isTextFileUtf8(pathTo: string): Promise<boolean> {
     const result = await this.filesIo.isTextFileUtf8(this.preparePath(pathTo))
 
-    this.riseEvent({
-      path: pathTo,
-      action: FileActions.read,
-      method: 'isTextFileUtf8',
-      timestamp: Date.now(),
-      size: IS_TEXT_FILE_UTF8_SAMPLE_SIZE,
-    })
+    this.riseReadEvent(pathTo, 'isTextFileUtf8', IS_TEXT_FILE_UTF8_SAMPLE_SIZE)
+
+    return result
+  }
+
+  async glob(
+    pattern: string | string[],
+    options?: GlobOptions
+  ): Promise<string[]> {
+    const result = await this.filesIo.glob(pattern, options)
+
+    for (const item of result) {
+      this.riseReadEvent(item, 'glob', Buffer.byteLength(item, 'utf8'), {
+        options,
+        pattern,
+      })
+    }
+
+    return result
+  }
+
+  /**
+   * Resolve the real path of the file
+   *
+   * @param pathTo - Path to the file
+   * @returns
+   */
+  async realpath(pathTo: string): Promise<string> {
+    const result = await this.filesIo.realpath(this.preparePath(pathTo))
+
+    this.riseReadEvent(pathTo, 'realpath')
+
+    return result
+  }
+
+  async access(pathTo: string, mode?: AccessMode): Promise<boolean> {
+    const result = await this.filesIo.access(this.preparePath(pathTo), mode)
+
+    this.riseReadEvent(pathTo, 'access')
 
     return result
   }
@@ -152,13 +162,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     const result =
       (await this.filesIo.stat(this.preparePath(pathToDir)))?.dir ?? false
 
-    this.riseEvent({
-      path: pathToDir,
-      action: FileActions.read,
-      method: 'isDir',
-      timestamp: Date.now(),
-      // do not calculate size
-    })
+    this.riseReadEvent(pathToDir, 'isDir')
 
     return result
   }
@@ -166,13 +170,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   async isFile(pathToFile: string): Promise<boolean> {
     const result = !(await this.isDir(this.preparePath(pathToFile)))
 
-    this.riseEvent({
-      path: pathToFile,
-      action: FileActions.read,
-      method: 'isFile',
-      timestamp: Date.now(),
-      // do not calculate size
-    })
+    this.riseReadEvent(pathToFile, 'isFile')
 
     return result
   }
@@ -182,19 +180,9 @@ export abstract class FilesDriverLogic implements FilesDriverType {
       (await this.filesIo.stat(this.preparePath(pathToSymLink)))
         ?.symbolicLink ?? false
 
-    this.riseEvent({
-      path: pathToSymLink,
-      action: FileActions.read,
-      method: 'isSymLink',
-      timestamp: Date.now(),
-      // do not calculate size
-    })
+    this.riseReadEvent(pathToSymLink, 'isSymLink')
 
     return result
-  }
-
-  async realpath(pathTo: string): Promise<string> {
-    const result = await this.filesIo.realpath(this.preparePath(pathTo))
   }
 
   ///////// WRITE METHODS
@@ -426,6 +414,40 @@ export abstract class FilesDriverLogic implements FilesDriverType {
       method: 'mkDirP',
       timestamp: Date.now(),
       // TODO: известно ли сколько байт занимает операция?
+    })
+  }
+
+  private riseReadEvent(
+    pathTo: string,
+    method: string,
+    size?: number,
+    details?: Record<string, any>
+  ): void {
+    this.riseEvent({
+      entity: this.entity,
+      path: pathTo,
+      action: FileActions.read,
+      method,
+      timestamp: Date.now(),
+      size,
+      details,
+    })
+  }
+
+  private riseWriteEvent(
+    pathTo: string,
+    method: string,
+    size?: number,
+    details?: Record<string, any>
+  ): void {
+    this.riseEvent({
+      entity: this.entity,
+      path: pathTo,
+      action: FileActions.write,
+      method,
+      timestamp: Date.now(),
+      size,
+      details,
     })
   }
 }

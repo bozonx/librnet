@@ -4,6 +4,7 @@ import type { IoBase } from '@/system/base/IoBase.js'
 import { resolveRealPath } from '@/system/helpers/helpers.js'
 import { IoNames } from '@/types/EntitiesNames.js'
 import type { FilesEventData } from '@/types/EventsData.js'
+import { SYSTEM_ENTITY } from '@/types/constants.js'
 import type { FilesIoType } from '@/types/io/FilesIoType.js'
 import { SystemEvents } from '@/types/types.js'
 
@@ -12,7 +13,10 @@ export class RootDirAccess extends FilesDriverLogic {
     protected readonly system: System,
     protected readonly rootDir: string
   ) {
-    super(system.ios.getIo<FilesIoType & IoBase>(IoNames.LocalFilesIo))
+    super(
+      SYSTEM_ENTITY,
+      system.ios.getIo<FilesIoType & IoBase>(IoNames.LocalFilesIo)
+    )
   }
 
   protected riseEvent(event: FilesEventData): void {

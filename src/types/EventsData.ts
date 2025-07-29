@@ -1,4 +1,6 @@
 export interface FilesEventData {
+  // Entity who do the operation
+  entity: string
   // Timestamp of the operation in milliseconds
   timestamp: number
   path: string

@@ -30,7 +30,6 @@ export interface ReadOnlyFilesDriverType {
   isDir(pathToDir: string): Promise<boolean>
   isFile(pathToFile: string): Promise<boolean>
   isSymLink(pathToSymLink: string): Promise<boolean>
-  isExists(pathToFileOrDir: string): Promise<boolean>
 }
 
 export interface WriteFilesDriverType {
