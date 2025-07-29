@@ -35,7 +35,7 @@ export interface ReadOnlyFilesDriverType {
 export interface WriteFilesDriverType {
   appendFile(
     pathTo: string,
-    data: string | Uint8Array,
+    data: string | BinTypes,
     options?: WriteFileOptions
   ): Promise<void>
   writeFile(

@@ -21,12 +21,7 @@ import type {
   UtimesOptions,
   WriteFileOptions,
 } from '@/types/io/FilesIoType.js'
-import type {
-  BinTypes,
-  BinTypesNames,
-  IoContext,
-  IoIndex,
-} from '@/types/types.js'
+import type { BinTypes, IoContext, IoIndex } from '@/types/types.js'
 
 export const FilesIoIndex: IoIndex = (ctx: IoContext) => {
   return new LocalFilesIo(ctx)
@@ -209,7 +204,7 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
 
   async appendFile(
     pathTo: string,
-    data: string | Uint8Array,
+    data: string | BinTypes,
     options?: WriteFileOptions
   ): Promise<void> {
     let wasExist = true
@@ -226,7 +221,10 @@ export class LocalFilesIo extends IoBase implements FilesIoType {
         encoding: options?.encoding || DEFAULT_ENCODE,
       })
     } else {
-      await fs.appendFile(pathTo, data, options)
+      const preparedData =
+        data instanceof Uint8Array ? data : new Uint8Array(data)
+
+      await fs.appendFile(pathTo, preparedData, options)
     }
 
     if (!wasExist) await this.changeOwner(pathTo, options?.uid, options?.gid)

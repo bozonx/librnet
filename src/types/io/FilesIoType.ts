@@ -246,7 +246,7 @@ export interface FilesIoType {
    */
   appendFile(
     pathTo: string,
-    data: string | Uint8Array,
+    data: string | BinTypes,
     options?: WriteFileOptions
   ): Promise<void>
 

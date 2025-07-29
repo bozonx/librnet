@@ -16,11 +16,7 @@ import type {
   StatsSimplified,
   WriteFileOptions,
 } from '@/types/io/FilesIoType.js'
-import {
-  type BinTypes,
-  type BinTypesNames,
-  FileActions,
-} from '@/types/types.js'
+import { type BinTypes, FileActions } from '@/types/types.js'
 
 // TODO:  resolve glob patterns in all the methods
 
@@ -189,34 +185,34 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
   async appendFile(
     pathTo: string,
-    data: string | Uint8Array,
+    data: string | BinTypes = '',
     options?: WriteFileOptions
   ) {
     await this.filesIo.appendFile(this.preparePath(pathTo), data, options)
 
-    this.riseEvent({
-      path: pathTo,
-      action: FileActions.write,
-      method: 'appendFile',
-      timestamp: Date.now(),
-      size: data.length,
-    })
+    this.riseWriteEvent(
+      pathTo,
+      'appendFile',
+      typeof data === 'string'
+        ? Buffer.byteLength(data, 'utf8')
+        : data.byteLength
+    )
   }
 
   async writeFile(
     pathTo: string,
-    data: string | Uint8Array,
+    data: string | BinTypes = '',
     options?: WriteFileOptions
   ) {
     await this.filesIo.writeFile(this.preparePath(pathTo), data, options)
 
-    this.riseEvent({
-      path: pathTo,
-      action: FileActions.write,
-      method: 'writeFile',
-      timestamp: Date.now(),
-      size: data instanceof Uint8Array ? data.byteLength : data.length,
-    })
+    this.riseWriteEvent(
+      pathTo,
+      'writeFile',
+      typeof data === 'string'
+        ? Buffer.byteLength(data, 'utf8')
+        : data.byteLength
+    )
   }
 
   async rm(paths: string[], options?: RmOptions) {
@@ -226,14 +222,9 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     )
 
     for (const path of paths) {
-      this.riseEvent({
-        path,
-        action: FileActions.write,
-        method: 'rm',
-        timestamp: Date.now(),
-        // Do not calculate size because it is very difficult to do
-        // it depends on the file system, OS journaling and cache
-      })
+      // Do not calculate size because it is very difficult to do
+      // it depends on the file system, OS journaling and cache
+      this.riseWriteEvent(path, 'rm')
     }
   }
 
@@ -268,45 +259,30 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     )
 
     for (const [src, dest] of files) {
-      this.riseEvent({
-        path: dest,
-        action: FileActions.write,
-        method: 'rename',
-        timestamp: Date.now(),
-        details: { src },
-        // TODO: нужно определить находятся ли файлы на разных дисках
-        // и если да, то нужно считать размер файлов
-        // TODO: Делает 2 операциияя - считываение и запись
-      })
+      // TODO: нужно определить находятся ли файлы на разных дисках
+      // и если да, то нужно считать размер файлов
+      // TODO: Делает 2 операциияя - считываение и запись
+      this.riseWriteEvent(dest, 'rename', undefined, { src })
     }
   }
 
   async mkdir(pathTo: string, options?: MkdirOptions) {
     await this.filesIo.mkdir(this.preparePath(pathTo), options)
 
-    this.riseEvent({
-      path: pathTo,
-      action: FileActions.write,
-      method: 'mkdir',
-      timestamp: Date.now(),
-      details: { recursive: options?.recursive ?? false },
-      // TODO: известно ли сколько байт занимает операция?
+    // TODO: известно ли сколько байт занимает операция?
+    this.riseWriteEvent(pathTo, 'mkdir', undefined, {
+      recursive: options?.recursive ?? false,
     })
   }
 
-  async symlink(target: string, pathTo: string): Promise<void> {
+  async link(target: string, pathTo: string): Promise<void> {
     const preparedTarget = this.preparePath(target)
     const preparedPathTo = this.preparePath(pathTo)
 
     await this.filesIo.link(preparedTarget, preparedPathTo)
 
-    this.riseEvent({
-      path: pathTo,
-      action: FileActions.write,
-      method: 'symlink',
-      timestamp: Date.now(),
-      // TODO: известно ли сколько байт занимает операция?
-    })
+    // TODO: известно ли сколько байт занимает операция?
+    this.riseWriteEvent(pathTo, 'symlink')
   }
 
   ////////// ADDITIONAL
