@@ -288,7 +288,8 @@ export interface FilesIoType {
    * Rename or move files and dirs. Use full path files is ["~/1/old.txt",
    * "~/2/new.txt"][] The destination path or directory should`t exist. If has
    * errors it will wait for all the files to be renamed and return the array of
-   * errors like {path, error}
+   * errors like {path, error} ‼️ If file should be moved to another disk, it
+   * will emits and error
    *
    * @param files
    * @param options

@@ -21,13 +21,16 @@ import type {
 } from '@/types/io/FilesIoType.js'
 import { type BinTypes, FileActions } from '@/types/types.js'
 
+// TODO: add uid and gid and to the events
+
 /**
  * Logic of the files driver which:
  *
  * - Adds more methods
  * - Emits events
+ * - Adds uid and gid
  * - Uses preparePath which you should implement in your driver
- * - Resolves glob patterns for move and copy methods
+ * - Resolves glob patterns for copyToDest and moveToDest
  */
 export abstract class FilesDriverLogic implements FilesDriverType {
   constructor(
@@ -232,8 +235,6 @@ export abstract class FilesDriverLogic implements FilesDriverType {
       this.preparePath(dest),
     ])
 
-    // TODO: resove glob patterns
-
     await this.filesIo.cp(preparedFiles, options)
 
     for (const [src, dest] of files) {
@@ -257,7 +258,6 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   }
 
   async rename(files: [string, string][]): Promise<void> {
-    // TODO: resove glob patterns
     const preparedFiles: [string, string][] = files.map(([src, dest]) => [
       this.preparePath(src),
       this.preparePath(dest),
@@ -266,9 +266,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     await this.filesIo.rename(preparedFiles)
 
     for (const [src, dest] of files) {
-      // TODO: нужно определить находятся ли файлы на разных дисках
-      // и если да, то нужно считать размер файлов
-      // TODO: Делает 2 операциияя - считываение и запись
+      // it doesn't copy file to another disk
       this.riseWriteEvent(dest, 'rename', undefined, { src })
     }
   }
@@ -324,8 +322,9 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     destDir: string,
     force?: boolean
   ): Promise<void> {
-    // TODO: resove glob patterns
-    const srcPaths = typeof src === 'string' ? [src] : src
+    const srcPaths = await this.filesIo.glob(src)
+
+    // TODO: review
 
     await this.filesIo.cp(
       srcPaths.map((el) => [
@@ -358,16 +357,24 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     destDir: string,
     force?: boolean
   ): Promise<void> {
-    // TODO: resove glob patterns
-    const srcPaths = typeof src === 'string' ? [src] : src
+    // TODO: review
+
+    const srcPaths = await this.filesIo.glob(src)
     // first copy to dest
-    await this.copyToDest(src, destDir, force)
+    await this.filesIo.cp(
+      srcPaths.map((el) => [
+        el,
+        pathJoin(this.preparePath(destDir), pathBasename(el)),
+      ]),
+      { recursive: true, force }
+    )
+    // TODO: нужно определить находятся ли файлы на разных дисках
+    // и если да, то нужно считать размер файлов
+    // Делает 2 операциияя - считываение и запись
     // then remove src
     await this.rm(
       srcPaths.map((el) => this.preparePath(el), { recursive: true, force })
     )
-
-    // TODO: Делает 2 операциияя - считываение и запись
 
     for (const [src, dest] of srcPaths.map((el) => [
       el,
