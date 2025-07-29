@@ -21,8 +21,6 @@ import type {
 } from '@/types/io/FilesIoType.js'
 import { type BinTypes, FileActions } from '@/types/types.js'
 
-// TODO:  resolve glob patterns in all the methods
-
 /**
  * Logic of the files driver which:
  *
@@ -229,15 +227,14 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   }
 
   async cp(files: [string, string][], options?: CopyOptions): Promise<void> {
+    const preparedFiles: [string, string][] = files.map(([src, dest]) => [
+      this.preparePath(src),
+      this.preparePath(dest),
+    ])
+
     // TODO: resove glob patterns
 
-    await this.filesIo.cp(
-      files.map(([src, dest]) => [
-        this.preparePath(src),
-        this.preparePath(dest),
-      ]),
-      options
-    )
+    await this.filesIo.cp(preparedFiles, options)
 
     for (const [src, dest] of files) {
       const stats = await this.filesIo.stat(this.preparePath(src))
@@ -246,6 +243,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
         continue
       }
 
+      const size = stats?.size ?? 0
       const details = {
         ...options,
         recursive: options?.recursive ?? false,
@@ -253,23 +251,19 @@ export abstract class FilesDriverLogic implements FilesDriverType {
         dest,
       }
 
-      this.riseReadEvent(src, 'cp', stats?.size ?? 0, details)
-
-      const size = (stats?.size ?? 0) + Buffer.byteLength(dest, DEFAULT_ENCODE)
-
+      this.riseReadEvent(src, 'cp', size, details)
       this.riseWriteEvent(dest, 'cp', size, details)
     }
   }
 
   async rename(files: [string, string][]): Promise<void> {
     // TODO: resove glob patterns
+    const preparedFiles: [string, string][] = files.map(([src, dest]) => [
+      this.preparePath(src),
+      this.preparePath(dest),
+    ])
 
-    await this.filesIo.rename(
-      files.map(([src, dest]) => [
-        this.preparePath(src),
-        this.preparePath(dest),
-      ])
-    )
+    await this.filesIo.rename(preparedFiles)
 
     for (const [src, dest] of files) {
       // TODO: нужно определить находятся ли файлы на разных дисках
@@ -318,7 +312,6 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     this.riseWriteEvent(pathTo, 'chown', undefined, { uid, gid })
   }
 
-  // TODO: сделать более читабельный mode
   async chmod(pathTo: string, mode: number): Promise<void> {
     await this.filesIo.chmod(this.preparePath(pathTo), mode)
     this.riseWriteEvent(pathTo, 'chmod', undefined, { mode })
@@ -346,16 +339,17 @@ export abstract class FilesDriverLogic implements FilesDriverType {
       el,
       pathJoin(destDir, pathBasename(el)),
     ])) {
-      // TODO: Делает 2 операциияя - считываение и запись
-      this.riseEvent({
-        // TODO: revew
-        path: dest,
-        action: FileActions.write,
-        method: 'copyToDest',
-        timestamp: Date.now(),
-        details: { src },
-        // TODO: считать размер файлов
-      })
+      const stats = await this.filesIo.stat(this.preparePath(src))
+
+      if (stats?.dir) {
+        continue
+      }
+
+      const size = stats?.size ?? 0
+      const details = { src, dest }
+
+      this.riseReadEvent(src, 'copyToDest', size, details)
+      this.riseWriteEvent(dest, 'copyToDest', size, details)
     }
   }
 
@@ -379,15 +373,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
       el,
       pathJoin(destDir, pathBasename(el)),
     ])) {
-      this.riseEvent({
-        path: dest,
-        action: FileActions.write,
-        method: 'moveToDest',
-        timestamp: Date.now(),
-        details: { src },
-        // TODO: нужно определить находятся ли файлы на разных дисках
-        // и если да, то нужно считать размер файлов
-      })
+      this.riseWriteEvent(dest, 'moveToDest', undefined, { src })
     }
   }
 
