@@ -29,7 +29,7 @@ import { type BinTypes, FileActions } from '@/types/types.js'
  * - Adds more methods
  * - Emits events
  * - Uses preparePath which you should implement in your driver
- * - Resolves glob patterns in all the methods which are support it
+ * - Resolves glob patterns for move and copy methods
  */
 export abstract class FilesDriverLogic implements FilesDriverType {
   constructor(
@@ -262,6 +262,8 @@ export abstract class FilesDriverLogic implements FilesDriverType {
   }
 
   async rename(files: [string, string][]): Promise<void> {
+    // TODO: resove glob patterns
+
     await this.filesIo.rename(
       files.map(([src, dest]) => [
         this.preparePath(src),
@@ -329,6 +331,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     destDir: string,
     force?: boolean
   ): Promise<void> {
+    // TODO: resove glob patterns
     const srcPaths = typeof src === 'string' ? [src] : src
 
     await this.filesIo.cp(
@@ -361,6 +364,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
     destDir: string,
     force?: boolean
   ): Promise<void> {
+    // TODO: resove glob patterns
     const srcPaths = typeof src === 'string' ? [src] : src
     // first copy to dest
     await this.copyToDest(src, destDir, force)
@@ -393,14 +397,7 @@ export abstract class FilesDriverLogic implements FilesDriverType {
 
     await this.filesIo.rename([[preparedOldPath, newPath]])
 
-    this.riseEvent({
-      path: newPath,
-      action: FileActions.write,
-      method: 'renameFile',
-      timestamp: Date.now(),
-      details: { oldPath: file },
-      // do not calculate size because it is very difficult to do
-    })
+    this.riseWriteEvent(newPath, 'renameFile', undefined, { oldPath: file })
   }
 
   async rmRf(pathToFileOrDir: string): Promise<void> {
@@ -409,25 +406,13 @@ export abstract class FilesDriverLogic implements FilesDriverType {
       force: true,
     })
 
-    this.riseEvent({
-      path: pathToFileOrDir,
-      action: FileActions.write,
-      method: 'rmRf',
-      timestamp: Date.now(),
-      // do not calculate size because it is very difficult to do
-    })
+    this.riseWriteEvent(pathToFileOrDir, 'rmRf')
   }
 
   async mkDirP(pathToDir: string): Promise<void> {
     await this.filesIo.mkdir(this.preparePath(pathToDir), { recursive: true })
 
-    this.riseEvent({
-      path: pathToDir,
-      action: FileActions.write,
-      method: 'mkDirP',
-      timestamp: Date.now(),
-      // TODO: известно ли сколько байт занимает операция?
-    })
+    this.riseWriteEvent(pathToDir, 'mkDirP')
   }
 
   private riseReadEvent(
